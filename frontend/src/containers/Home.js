@@ -15,15 +15,18 @@ export default class Home extends Component {
 
 	async componentDidMount() {
 		if (!this.props.isAuthenticated) {
+			console.log('props isnt authenticated')
 			return;
 		}
 
 		try {
-			console.log('cos klika');
+			console.log('componentDidMount() - try start');
 			const testApiCall = await this.testApiCall();
+			console.log('componentDidMount() - try middle');
 			this.setState({ testApiCall });
+			console.log('componentDidMount() - try end');
 		} catch (e) {
-			console.log('cos nie klika');
+			console.log('componentDidMount() - catch');
 			alert(e);
 		}
 
@@ -31,12 +34,13 @@ export default class Home extends Component {
 	}
 
 	testApiCall() {
-		return API.get('dev', '/GetHello');
+		console.log('testApiCall()')
+		return API.get('dev-back-end', '/forms');
 	}
 
 	renderTestAPI(testApiCall) {
+		console.log('renderTestAPI()');
 		console.log(testApiCall);
-		console.log('test');
 		return testApiCall.message;
 	}
 
@@ -52,8 +56,8 @@ export default class Home extends Component {
 	renderTest() {
 		return (
 			<div className="test">
-				<h1>Test API call</h1>
-				<p>{!this.state.isLoading && this.renderTestAPI(this.state.testApiCall)}</p>
+				<PageHeader>Test API call</PageHeader>
+				<ListGroup>{!this.state.isLoading && this.renderTestAPI(this.state.testApiCall)}</ListGroup>
 			</div>
 		);
 	}

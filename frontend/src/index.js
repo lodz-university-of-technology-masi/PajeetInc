@@ -18,7 +18,7 @@ Amplify.configure({
 	API: {
 		endpoints: [
 			{
-				name: 'AwsApi',
+				name: 'dev-back-end',
 				endpoint: config.apiGateway.URL,
 				region: config.apiGateway.REGION
 			}
