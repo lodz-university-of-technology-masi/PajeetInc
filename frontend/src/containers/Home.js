@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
 import { PageHeader, ListGroup } from 'react-bootstrap';
-import { API } from 'aws-amplify';
+//import { API } from 'aws-amplify';
 import './Home.css';
+import config from '../config';
 
 export default class Home extends Component {
 	constructor(props) {
@@ -15,31 +16,22 @@ export default class Home extends Component {
 
 	async componentDidMount() {
 		if (!this.props.isAuthenticated) {
-			console.log('props isnt authenticated')
 			return;
 		}
 
 		try {
-			console.log('componentDidMount() - try start');
-			const testApiCall = await this.testApiCall();
-			console.log('componentDidMount() - try middle');
-			this.setState({ testApiCall });
-			console.log('componentDidMount() - try end');
+			fetch(config.apiGateway.URL + "/forms")
+				  .then(res => res.json())
+				  .then(json => this.setState({ testApiCall: json }));
 		} catch (e) {
-			console.log('componentDidMount() - catch');
+			console.log('fetch exception');
 			alert(e);
 		}
 
 		this.setState({ isLoading: false });
 	}
 
-	testApiCall() {
-		console.log('testApiCall()')
-		return API.get('dev-back-end', '/forms');
-	}
-
 	renderTestAPI(testApiCall) {
-		console.log('renderTestAPI()');
 		console.log(testApiCall);
 		return testApiCall.message;
 	}
@@ -57,7 +49,7 @@ export default class Home extends Component {
 		return (
 			<div className="test">
 				<PageHeader>Test API call</PageHeader>
-				<ListGroup>{!this.state.isLoading && this.renderTestAPI(this.state.testApiCall)}</ListGroup>
+				<p>{!this.state.isLoading && this.renderTestAPI(this.state.testApiCall)}</p>
 			</div>
 		);
 	}
