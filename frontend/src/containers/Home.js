@@ -20,9 +20,9 @@ export default class Home extends Component {
 		}
 
 		try {
-			fetch(config.apiGateway.URL + "/forms")
-				  .then(res => res.json())
-				  .then(json => this.setState({ testApiCall: json }));
+			fetch("/forms")
+				.then(res => res.json())
+				.then(json => this.setState({ testApiCall: json }));
 		} catch (e) {
 			console.log('fetch exception');
 			alert(e);
