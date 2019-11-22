@@ -1,65 +1,101 @@
 package com.amazonaws.lambda.dynamodb_table_writer;
 
-import com.amazonaws.services.lambda.runtime.Context;
-import com.amazonaws.services.lambda.runtime.RequestHandler;
-
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
-import com.amazonaws.services.dynamodbv2.document.DeleteItemOutcome;
 import com.amazonaws.services.dynamodbv2.document.DynamoDB;
 import com.amazonaws.services.dynamodbv2.document.Item;
+import com.amazonaws.services.dynamodbv2.document.PrimaryKey;
 import com.amazonaws.services.dynamodbv2.document.Table;
-import com.amazonaws.services.dynamodbv2.document.UpdateItemOutcome;
-import com.amazonaws.services.dynamodbv2.document.spec.DeleteItemSpec;
-import com.amazonaws.services.dynamodbv2.document.spec.UpdateItemSpec;
-import com.amazonaws.services.dynamodbv2.document.utils.NameMap;
-import com.amazonaws.services.dynamodbv2.document.utils.ValueMap;
-import com.amazonaws.services.dynamodbv2.model.ReturnValue;
+import com.amazonaws.services.lambda.runtime.Context;
+import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
+import java.io.InputStream;
+import java.io.OutputStream;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.JsonNode;
 
-public class DynamoDbWriter implements RequestHandler<Request, String> {
+public class DynamoDbWriter implements RequestStreamHandler {
 
-    @Override
-    public String handleRequest(Request input, Context context) {
+	@Override
+	public void handleRequest(InputStream inputStream, OutputStream outputStream, Context context) throws IOException {
+
+		ObjectMapper objectMapper = new ObjectMapper();
+		JsonNode rootNode = objectMapper.readValue(inputStream, JsonNode.class);
 
 		AmazonDynamoDB client = AmazonDynamoDBClientBuilder.standard().build();
 		DynamoDB dynamoDB = new DynamoDB(client);
-		String tableName = "Questions";
+		String tableName = "Tests";
+		Table tests = dynamoDB.getTable(tableName);
 		
-		Table table = dynamoDB.getTable(tableName);
+		Item test = createTestItem(rootNode);
+		tests.putItem(test);
+	}
+	
+	private Item createTestItem(JsonNode rootNode) {
+		String recruiterId = rootNode.get("recruiterId").asText();
+		String testId = rootNode.get("testId").asText();
+		String testName = rootNode.get("testName").asText();
+		int minPoints = rootNode.get("minPoints").asInt();
+		int maxPoints = rootNode.get("maxPoints").asInt();
+		String questions = getQuestionsAsJson(rootNode);
 		
-		try {
+		PrimaryKey primaryKey = new PrimaryKey("recruiter_id", recruiterId, "test_id", testId);
+		Item test = new Item().withPrimaryKey(primaryKey).withString("test_name", testName)
+				.withInt("min_points", minPoints).withInt("max_points", maxPoints).withJSON("questions", questions);
+		
+		return test;
+	}
+	
+	private String getQuestionsAsJson(JsonNode rootNode) {
+		String questions = new String("[");
+		
+		JsonNode allQuestionsNode = rootNode.get("questions");
+		int allQuestionsNodeSize = allQuestionsNode.size();
+		
+		for (int i = 0; i < allQuestionsNodeSize; i++) {
+			JsonNode singleQuestionNode = allQuestionsNode.get(i);
+			String type = singleQuestionNode.get("type").asText();
+			String content = singleQuestionNode.get("content").asText();
 
-			String question = input.question;
-			Item item = new Item().withPrimaryKey("id", 100).withString("question", question);
-			table.putItem(item);
-			
-//			Item item = new Item().withPrimaryKey("Id", 120).withString("Title", "Book 120 Title")
-//					.withString("ISBN", "120-1111111111")
-//					.withStringSet("Authors", new HashSet<String>(Arrays.asList("Author12", "Author22")))
-//					.withNumber("Price", 20).withString("Dimensions", "8.5x11.0x.75").withNumber("PageCount", 500)
-//					.withBoolean("InPublication", false).withString("ProductCategory", "Book");
-//			table.putItem(item);
-//
-//			item = new Item().withPrimaryKey("Id", 121).withString("Title", "Book 121 Title")
-//					.withString("ISBN", "121-1111111111")
-//					.withStringSet("Authors", new HashSet<String>(Arrays.asList("Author21", "Author 22")))
-//					.withNumber("Price", 20).withString("Dimensions", "8.5x11.0x.75").withNumber("PageCount", 500)
-//					.withBoolean("InPublication", true).withString("ProductCategory", "Book");
-//			table.putItem(item);
+			questions += "{\"question_content\":\"" + content + "\"," + "\"question_type\":\"" + type + "\"";
+			if (!type.contains("O")) {
+				questions += ",";
+			}
 
-		} catch (Exception e) {
-			System.err.println("Create items failed.");
-			System.err.println(e.getMessage());
+			if (type.contains("W")) {
+				JsonNode allAnswersNode = singleQuestionNode.get("answers");
+				int allAnswersNodeSize = allAnswersNode.size();
+
+				questions += "\"answers\": [";
+				for (int j = 0; j < allAnswersNodeSize; j++) {
+					JsonNode singleAnswerNode = allAnswersNode.get(j);
+					String answer = singleAnswerNode.get("answer").asText();
+					Boolean correct = singleAnswerNode.get("correct").asBoolean();
+
+					questions += "{\"answer\":\"" + answer + "\"," + "\"correct\":" + correct + "}";
+					if (j != allAnswersNodeSize - 1) {
+						questions += ",";
+					} else {
+						questions += "]";
+					}
+				}
+			} else if (type.contains("L")) {
+				int correctAnswer = singleQuestionNode.get("correctAnswer").asInt();
+				questions += "\"correct_answer\":" + correctAnswer;
+			} else if (type.contains("O")) {
+
+			} else {
+				// wyjątek
+			}
+			questions += "}";
+			if (i != allQuestionsNodeSize - 1) {
+				questions += ",";
+			}
 		}
-
-		return "Hello from Lambda!";
-    }
-
+		questions += "]";
+		
+		return questions;
+	}
 }
