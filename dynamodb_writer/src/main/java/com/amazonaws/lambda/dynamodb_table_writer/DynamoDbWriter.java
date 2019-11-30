@@ -13,6 +13,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.JsonNode;
 
@@ -35,7 +38,7 @@ public class DynamoDbWriter implements RequestStreamHandler {
 	
 	private Item createTestItem(JsonNode rootNode) {
 		String recruiterId = rootNode.get("recruiterId").asText();
-		String testId = rootNode.get("testId").asText();
+		String testId = "test" + getCurrentDateAndTime();
 		String testName = rootNode.get("testName").asText();
 		int minPoints = rootNode.get("minPoints").asInt();
 		int maxPoints = rootNode.get("maxPoints").asInt();
@@ -97,5 +100,11 @@ public class DynamoDbWriter implements RequestStreamHandler {
 		questions += "]";
 		
 		return questions;
+	}
+	
+	private String getCurrentDateAndTime() {
+        Date date = new Date();
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyMMddhhmmssMs");
+        return simpleDateFormat.format(date);
 	}
 }
