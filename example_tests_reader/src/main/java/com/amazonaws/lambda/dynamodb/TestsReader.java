@@ -41,13 +41,15 @@ public class TestsReader implements RequestStreamHandler {
 		
 		outputStream = new BufferedOutputStream(outputStream);
 		Iterator<Item> iterator = items.iterator();
-        while (iterator.hasNext()) {
+		outputStream.write("[".getBytes());
+		while (iterator.hasNext()) {
             Item item = iterator.next();
             String itemAsString = (iterator.hasNext()) ? item.toJSONPretty()+"," : item.toJSONPretty();
             outputStream.write(itemAsString.getBytes());
 //            itemAsString = itemAsString.replaceAll("\"", Character.toString('"'));
 //            itemAsString = itemAsString.replaceAll("\n", "");
         }
+		outputStream.write("]".getBytes());
         outputStream.flush();
     }
 }
