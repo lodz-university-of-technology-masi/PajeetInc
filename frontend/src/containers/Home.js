@@ -3,6 +3,7 @@ import { PageHeader, ListGroup } from 'react-bootstrap';
 //import { API } from 'aws-amplify';
 import './Home.css';
 import config from '../config';
+import { Auth } from 'aws-amplify';
 
 export default class Home extends Component {
 	constructor(props) {
@@ -10,7 +11,8 @@ export default class Home extends Component {
 
 		this.state = {
 			isLoading: true,
-			testApiCall: []
+			testApiCall: [],
+			currentUser: null
 		};
 	}
 
@@ -20,6 +22,8 @@ export default class Home extends Component {
 		}
 
 		try {
+			this.state.currentUser = await Auth.currentAuthenticatedUser();
+			console.log(this.state.currentUser);
 			fetch("/forms")
 				.then(res => res.json())
 				.then(json => this.setState({ testApiCall: json }));
@@ -32,15 +36,14 @@ export default class Home extends Component {
 	}
 
 	renderTestAPI(testApiCall) {
-		console.log(testApiCall);
 		return testApiCall.message;
 	}
 
 	renderLander() {
 		return (
 			<div className="lander">
-				<h1>Test web app</h1>
-				<p>A simple react test app</p>
+				<h1>HR Recruitment App</h1>
+				<p>Recruit new staff</p>
 			</div>
 		);
 	}
@@ -50,6 +53,7 @@ export default class Home extends Component {
 			<div className="test">
 				<PageHeader>Test API call</PageHeader>
 				<p>{!this.state.isLoading && this.renderTestAPI(this.state.testApiCall)}</p>
+				<p>{this.props.isAuthenticated && !this.state.isLoading && this.state.currentUser.attributes.profile}</p>
 			</div>
 		);
 	}
