@@ -54,6 +54,7 @@ export default class Login extends Component {
 						<ControlLabel>Password</ControlLabel>
 						<FormControl value={this.state.password} onChange={this.handleChange} type="password" />
 					</FormGroup>
+					<a href="/resetpassword">Forgot password?</a>
 					<LoaderButton
 						block
 						bsSize="large"
