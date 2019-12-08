@@ -4,9 +4,6 @@ import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapperConfig;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapperConfig.TableNameOverride;
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBAttribute;
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBHashKey;
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBRangeKey;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTable;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBQueryExpression;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBScanExpression;
@@ -25,7 +22,7 @@ import org.apache.logging.log4j.Logger;
 import com.serverless.dynamodbmodel.DynamoDBAdapter;
 import com.serverless.dynamodbmodel.UserInfoItem;
 
-@DynamoDBTable(tableName = "UserInfo")
+@DynamoDBTable(tableName = "UserInfoTable")
 public class UserInfoTable {
 
     private static DynamoDBAdapter db_adapter;
@@ -43,7 +40,7 @@ public class UserInfoTable {
     }
 
     public Boolean ifTableExists() {
-        return this.client.describeTable("UserInfo").getTable().getTableStatus().equals("ACTIVE");
+        return this.client.describeTable("UserInfoTable").getTable().getTableStatus().equals("ACTIVE");
     }
 
 

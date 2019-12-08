@@ -31,6 +31,7 @@ public class AddUserInfoHandler implements RequestHandler<Map<String, Object>, A
 			UserInfoItem item = new UserInfoItem();
 			item.setId(body.get("id").asText());
 			item.setUsername(body.get("username").asText());
+			item.setProfile(body.get("profile").asText());
 			table.save(item);
 
 			return ApiGatewayResponse.builder()

@@ -28,7 +28,7 @@ provider:
         - dynamodb:UpdateItem
         - dynamodb:DeleteItem
       Resource:
-        - { "Fn::GetAtt": ["UserInfoDynamoDBTable", "Arn" ] }
+        - { "Fn::GetAtt": ["UserInfoTable", "Arn" ] }
 
 package:
   artifact: target/back-end-api-dev.jar
@@ -44,33 +44,37 @@ functions:
           cors: true
   getUserInfo:
     handler: com.serverless.GetUserInfoHandler
-    description: Get user information from UserInfo table
+    description: Get user information with id from UserInfo table
     events:
       - http:
           path: /userInfo/{id}
           method: get
           cors: true
+  getAllUserInfo:
+    handler: com.serverless.GetAllUserInfoHandler
+    description: Get all user information from UserInfo table
+    events:
+      - http:
+          path: /userInfo
+          method: get
+          cors: true
 
 resources:
   Resources:
-    UserInfoDynamoDBTable:
+    UserInfoTable:
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName: UserInfo
+        TableName: UserInfoTable
         AttributeDefinitions:
           - AttributeName: id
             AttributeType: S
           - AttributeName: username
-            AttributeType: S
-          - AttributeName: profile
             AttributeType: S
         KeySchema:
           - AttributeName: id
             KeyType: HASH
           - AttributeName: username
             KeyType: RANGE
-          - AttributeName: profile
-            KeyType: Range
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
