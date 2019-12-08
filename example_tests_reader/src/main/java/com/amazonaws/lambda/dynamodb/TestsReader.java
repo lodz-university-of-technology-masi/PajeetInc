@@ -36,7 +36,7 @@ public class TestsReader implements RequestStreamHandler {
 		Table tests = dynamoDB.getTable(tableName);
 
 		ScanSpec scanSpec = new ScanSpec();
-		scanSpec = scanSpec.withProjectionExpression("recruiter_id, test_id, max_points, min_points, questions");
+		scanSpec = scanSpec.withProjectionExpression("recruiter_id, test_id, max_points, min_points, questions, test_name");
 		ItemCollection<ScanOutcome> items = tests.scan(scanSpec);
 		
 		outputStream = new BufferedOutputStream(outputStream);
