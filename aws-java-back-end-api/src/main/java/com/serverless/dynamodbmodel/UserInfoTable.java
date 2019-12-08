@@ -70,37 +70,9 @@ public class UserInfoTable {
         }
         return item;
     }
-/*
-    public List<String> getForms(String userID ) throws IOException{
-	    	List<Form> allForms = list();
-	    	List<String> resultForms = new ArrayList<String>();
-	    	for(Form form: allForms) {
-	    		if(form.findUser(userID)) {
-	    			resultForms.add(form.getId());
-	    		}
-	    	}
-	    	return resultForms;
-    }
-*/
+
     public void save(UserInfoItem newItem) throws IOException {
         this.mapper.save(newItem);
     }
 
-/*
-  //TODO remake to Form
-    public Boolean delete(String id) throws IOException {
-        Form form = null;
-
-        // get product if exists
-        form = this.get(id);
-        if (form != null) {
-          //logger.info("Products - delete(): " + product.toString());
-          this.mapper.delete(form);
-        } else {
-          //logger.info("Products - delete(): product - does not exist.");
-          return false;
-        }
-        return true;
-    }
-*/
 }
