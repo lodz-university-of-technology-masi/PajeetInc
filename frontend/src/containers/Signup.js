@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { HelpBlock, FormGroup, FormControl, ControlLabel } from 'react-bootstrap';
 import LoaderButton from '../components/LoaderButton';
 import { Auth } from 'aws-amplify';
+import Axios from 'axios';
 
 import './Signup.css';
 
@@ -76,6 +77,10 @@ export default class Signup extends Component {
 
 		try {
 			await Auth.confirmSignUp(this.state.email, this.state.confirmationCode);
+			console.log({
+				["id"]: this.state.username,["username"]: this.state.email, ["profile"]: this.state.profile})
+			Axios.post('https://unyfv0eps9.execute-api.us-east-1.amazonaws.com/dev/userInfo',{
+			["id"]: this.state.email,["username"]: this.state.email, ["profile"]: this.state.profile})
 			await Auth.signIn(this.state.email, this.state.password);
 
 			this.props.userHasAuthenticated(true);
