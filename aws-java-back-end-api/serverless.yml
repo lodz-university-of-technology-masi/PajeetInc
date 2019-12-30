@@ -59,6 +59,49 @@ functions:
           method: get
           cors: true
 
+  readTests:
+    handler: com.serverless.ReadTestsHandler
+    description: Get all tests from Tests table
+    events:
+      - http:
+          path: /tests
+          method: get
+          cors: true
+          integration: lambda
+  readTestsByUsername:
+    handler: com.serverless.ReadTestsByUsernameHandler
+    description: Get all tests assigned to specific candidate
+    events:
+      - http:
+          path: /tests/{username}
+          method: get
+          cors: true
+          integration: lambda
+          request:
+            template:
+              application/json: '{
+                "username": "$input.params("username")"
+              }'
+
+  insertTest:
+    handler: com.serverless.InsertTestHandler
+    description: Insert test into Tests table
+    events:
+      - http:
+          path: /tests
+          method: post
+          cors: true
+          integration: lambda
+          request:
+            template:
+              application/json: '{
+                "recruiterId": $input.json("$.recruiter-id"),
+                "testName": $input.json("$.test-name"),
+                "minPoints": $input.json("$.min-points"),
+                "maxPoints": $input.json("$.max-points"),
+                "questions": $input.json("$.questions")
+              }'
+
 resources:
   Resources:
     UserInfoTable:
@@ -78,3 +121,21 @@ resources:
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
+
+#    Tests:
+#      Type: AWS::DynamoDB::Table
+#      Properties:
+#        TableName: Tests
+#        AttributeDefinitions:
+#          - AttributeName: recruiter_id
+#            AttributeType: S
+#          - AttributeName: test_id
+#            AttributeType: S
+#        KeySchema:
+#          - AttributeName: recruiter_id
+#            KeyType: HASH
+#          - AttributeName: test_id
+#            KeyType: RANGE
+#        ProvisionedThroughput:
+#          ReadCapacityUnits: 1
+#          WriteCapacityUnits: 1
