@@ -9,6 +9,7 @@
     "axios": "^0.19.0",
     "react": "next",
     "react-bootstrap": "^0.32.1",
+    "react-csv-reader": "^2.0.2",
     "react-dom": "next",
     "react-intl": "^3.9.2",
     "react-router-bootstrap": "^0.24.4",
