@@ -38,7 +38,7 @@ public class InsertTestHandler  implements RequestStreamHandler {
         String testName = rootNode.get("testName").asText();
         int minPoints = rootNode.get("minPoints").asInt();
         int maxPoints = rootNode.get("maxPoints").asInt();
-        String questions = getQuestionsAsJson(rootNode);
+        String questions = InputStreamSelector.getQuestionsAsJson(rootNode);
 
         PrimaryKey primaryKey = new PrimaryKey("recruiter_id", recruiterId, "test_id", testId);
         Item test = new Item().withPrimaryKey(primaryKey).withString("test_name", testName)
@@ -46,57 +46,6 @@ public class InsertTestHandler  implements RequestStreamHandler {
                 .withJSON("questions", questions).withList("candidates", new ArrayList<>());
 
         return test;
-    }
-
-    private String getQuestionsAsJson(JsonNode rootNode) {
-        String questions = new String("[");
-
-        JsonNode allQuestionsNode = rootNode.get("questions");
-        int allQuestionsNodeSize = allQuestionsNode.size();
-
-        for (int i = 0; i < allQuestionsNodeSize; i++) {
-            JsonNode singleQuestionNode = allQuestionsNode.get(i);
-            String type = singleQuestionNode.get("type").asText();
-            String content = singleQuestionNode.get("content").asText();
-
-            questions += "{\"question_content\":\"" + content + "\"," + "\"question_type\":\"" + type + "\"";
-            if (!type.contains("O")) {
-                questions += ",";
-            }
-
-            if (type.contains("W")) {
-                JsonNode allAnswersNode = singleQuestionNode.get("answers");
-                int allAnswersNodeSize = allAnswersNode.size();
-
-                questions += "\"answers\": [";
-                for (int j = 0; j < allAnswersNodeSize; j++) {
-                    JsonNode singleAnswerNode = allAnswersNode.get(j);
-                    String answer = singleAnswerNode.get("answer").asText();
-                    Boolean correct = singleAnswerNode.get("correct").asBoolean();
-
-                    questions += "{\"answer\":\"" + answer + "\"," + "\"correct\":" + correct + "}";
-                    if (j != allAnswersNodeSize - 1) {
-                        questions += ",";
-                    } else {
-                        questions += "]";
-                    }
-                }
-            } else if (type.contains("L")) {
-                int correctAnswer = singleQuestionNode.get("correctAnswer").asInt();
-                questions += "\"correct_answer\":" + correctAnswer;
-            } else if (type.contains("O")) {
-
-            } else {
-                // wyjątek
-            }
-            questions += "}";
-            if (i != allQuestionsNodeSize - 1) {
-                questions += ",";
-            }
-        }
-        questions += "]";
-
-        return questions;
     }
 
     private String getCurrentDateAndTime() {

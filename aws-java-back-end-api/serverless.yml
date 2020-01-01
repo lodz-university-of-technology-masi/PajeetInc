@@ -82,7 +82,6 @@ functions:
               application/json: '{
                 "username": "$input.params("username")"
               }'
-
   insertTest:
     handler: com.serverless.InsertTestHandler
     description: Insert test into Tests table
@@ -100,6 +99,24 @@ functions:
                 "minPoints": $input.json("$.min-points"),
                 "maxPoints": $input.json("$.max-points"),
                 "questions": $input.json("$.questions")
+              }'
+  passTest:
+    handler: com.serverless.PassTestHandler
+    description: Updating tests table with candidate answers
+    events:
+      - http:
+          path: /pass-test
+          method: post
+          cors: true
+          integration: lambda
+          request:
+            template:
+              application/json: '{
+                "recruiterId": $input.json("$.recruiter-id"),
+                "testId": $input.json("$.test-id"),
+                "testName": $input.json("$.test-name"),
+                "username": $input.json("$.username"),
+                "answers": $input.json("$.answers")
               }'
 
 resources:
