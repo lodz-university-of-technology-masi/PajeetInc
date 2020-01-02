@@ -34,10 +34,7 @@ public class PassTestHandler implements RequestStreamHandler {
                 .withPrimaryKey(primaryKey);
         Item test = tests.getItem(spec);
 
-        System.out.println(test.toJSONPretty());
-
         String candidates = updateCandidates(rootNode, test);
-        System.out.println(candidates);
 
         UpdateItemSpec updateItemSpec = new UpdateItemSpec().withPrimaryKey(primaryKey)
                 .withUpdateExpression("set candidates=:c")
@@ -51,8 +48,7 @@ public class PassTestHandler implements RequestStreamHandler {
             JsonNode answer = answers.get(i);
             json += "{" +
                     "\"type\": \"" + answer.get("type").asText() + "\"," +
-                    "\"content\": \"" + answer.get("content").asText() + "\"," +
-                    "\"correct\":" + answer.get("correct").asBoolean() +
+                    "\"content\": \"" + answer.get("content").asText() + "\"" +
                     "}";
             json += i != answers.size() - 1 ? "," : "";
         }
@@ -60,26 +56,25 @@ public class PassTestHandler implements RequestStreamHandler {
         return json;
     }
 
-    private int calculateClosedQuestionsPoints(JsonNode answers) {
-        int points = 0;
-        for (JsonNode answer : answers) {
-            String type = answer.get("type").asText();
-            Boolean correct = answer.get("correct").asBoolean();
-            if (type.contains("W") && correct.equals(true)) {
-                points += 1;
-            }
-        }
-        return points;
-    }
+//    private int calculateClosedQuestionsPoints(JsonNode answers) {
+//        int points = 0;
+//        for (JsonNode answer : answers) {
+//            String type = answer.get("type").asText();
+//            Boolean correct = answer.get("correct").asBoolean();
+//            if (type.contains("W") && correct.equals(true)) {
+//                points += 1;
+//            }
+//        }
+//        return points;
+//    }
 
     private String updateCandidates(JsonNode rootNode, Item test) throws IOException {
         String username = rootNode.get("username").asText();
         String answers = getAnswersAsJson(rootNode.get("answers"));
-        int points = calculateClosedQuestionsPoints(rootNode.get("answers"));
-        boolean passed = points >= test.getInt("min_points") ? true : false;
+//        int points = calculateClosedQuestionsPoints(rootNode.get("answers"));
+//        boolean passed = points >= test.getInt("min_points") ? true : false;
 
         String result = "[";
-//        JsonNode candidates = new ObjectMapper().readValue(test.getJSONPretty("candidates"), JsonNode.class);
         Iterator<JsonNode> candidates = new ObjectMapper().readValue(test.getJSONPretty("candidates"), JsonNode.class).iterator();
         while (candidates.hasNext()) {
             JsonNode candidate = candidates.next();
@@ -90,15 +85,15 @@ public class PassTestHandler implements RequestStreamHandler {
                         "\"answers\":" + answersAsText + "," +
                         "\"passed\":" + candidate.get("passed").asBoolean() + "," +
                         "\"finished\":" + candidate.get("finished").asBoolean() + "," +
-                        "\"points\":" + Integer.toString(candidate.get("points").asInt()) +
+                        "\"points\":" + candidate.get("points").asInt() +
                         "}";
             } else {
                 result += "{" +
                         "\"username\":\"" + username + "\"," +
                         "\"answers\":" + answers + "," +
-                        "\"passed\":" + passed + "," +
+                        "\"passed\":" + "false" + "," +
                         "\"finished\":" + "true" + "," +
-                        "\"points\":" + points +
+                        "\"points\":" + "0" +
                         "}";
             }
             result += candidates.hasNext() == true ? "," : "";

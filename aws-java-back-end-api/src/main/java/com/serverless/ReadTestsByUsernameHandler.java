@@ -20,8 +20,21 @@ import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 public class ReadTestsByUsernameHandler implements RequestStreamHandler {
+
+//    JsonNode rootNode = new ObjectMapper().readValue(inputStream, JsonNode.class);
+//        if (rootNode.get("correct-answers").asBoolean()) {
+//        iterator = removeCorrectAttributes(iterator);
+//    } else {
+//
+//    }
+
+//    private Iterator<Item> removeCorrectAttributes(Iterator<Item> iterator) {
+//
+//        return iterator;
+//    }
 
     @Override
     public void handleRequest(InputStream inputStream, OutputStream outputStream, Context context) throws IOException {
@@ -44,7 +57,10 @@ public class ReadTestsByUsernameHandler implements RequestStreamHandler {
                 JsonNode candidate = candidates.get(i);
                 String candidateUsername = candidate.get("username").asText();
                 if (candidateUsername.equals(username)) {
-                    String itemAsString = item.toJSONPretty() + ",";
+                    String itemAsString = item.toJSONPretty();
+                    itemAsString = removeCandidatesFromTest(itemAsString);
+
+                    itemAsString = removeCorrectAnswersFromTest(itemAsString);
                     itemsAsStrings.add(itemAsString);
                     continue;
                 }
@@ -53,17 +69,35 @@ public class ReadTestsByUsernameHandler implements RequestStreamHandler {
         writeItemsToOutputStream(itemsAsStrings, outputStream);
     }
 
+    private String removeCandidatesFromTest(String itemAsString) throws IOException {
+        JsonNode test = new ObjectMapper().readValue(itemAsString, JsonNode.class);
+        ((ObjectNode) test).remove("candidates");
+        return test.toString();
+    }
+
+    private String removeCorrectAnswersFromTest(String itemAsString) throws IOException {
+        JsonNode test = new ObjectMapper().readValue(itemAsString, JsonNode.class);
+        JsonNode questions = test.get("questions");
+        for (int i = 0; i < questions.size(); i++) {
+            JsonNode question = questions.get(i);
+            if (question.get("question_type").asText().contains("W")) {
+                JsonNode answers = question.get("answers");
+                for (int j = 0; j < answers.size(); j++) {
+                    ((ObjectNode) answers.get(j)).remove("correct");
+                }
+            } else if (question.get("question_type").asText().contains("L")) {
+                ((ObjectNode) question).remove("correct_answer");
+            }
+        }
+        return test.toString();
+    }
+
     private void writeItemsToOutputStream(List<String> itemsAsStrings, OutputStream outputStream) throws IOException {
         outputStream = new BufferedOutputStream(outputStream);
         outputStream.write("[".getBytes());
-        if (itemsAsStrings.size() != 0) {
-            for (int i = 0; i < itemsAsStrings.size(); i++) {
-                if (i == itemsAsStrings.size() - 1) {
-                    String element = itemsAsStrings.get(i).substring(0, itemsAsStrings.get(i).length() - 1);
-                    itemsAsStrings.set(i, element);
-                }
-                outputStream.write(itemsAsStrings.get(i).getBytes());
-            }
+        for (int i = 0; i < itemsAsStrings.size(); i++) {
+            String itemAsString = i == itemsAsStrings.size() - 1 ? itemsAsStrings.get(i) : itemsAsStrings.get(i) + ",";
+            outputStream.write(itemAsString.getBytes());
         }
         outputStream.write("]".getBytes());
         outputStream.flush();
