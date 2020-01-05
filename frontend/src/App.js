@@ -5,8 +5,11 @@ import { Link, withRouter } from 'react-router-dom';
 import { Nav, Navbar, NavItem } from 'react-bootstrap';
 import Routes from './Routes';
 import { Auth } from 'aws-amplify';
-
+import { IntlProviderWrapper } from './translations/IntProviderWrapper'
+import { FormattedMessage } from 'react-intl';
+import { LanguageSwitch } from './components/LanguageSwitch'
 import './App.css';
+
 
 class App extends Component {
 	constructor(props) {
@@ -48,33 +51,41 @@ class App extends Component {
 			userHasAuthenticated: this.userHasAuthenticated
 		};
 		return (
-			<div className="App container">
-				<Navbar fluid collapseOnSelect>
-					<Navbar.Header>
-						<Navbar.Brand>
-							<Link to="/">Recruitment App</Link>
-						</Navbar.Brand>
-						<Navbar.Toggle />
-					</Navbar.Header>
-					<Navbar.Collapse>
-						<Nav pullRight>
-							{this.state.isAuthenticated ? (
-								<NavItem onClick={this.handleLogout}>Logout</NavItem>
-							) : (
-								<Fragment>
-									<LinkContainer to="/signup">
-										<NavItem>Signup</NavItem>
-									</LinkContainer>
-									<LinkContainer to="/login">
-										<NavItem>Login</NavItem>
-									</LinkContainer>
-								</Fragment>
-							)}
-						</Nav>
-					</Navbar.Collapse>
-				</Navbar>
-				<Routes childProps={childProps} />
-			</div>
+			<IntlProviderWrapper>
+				<div className="App container">
+					<Navbar fluid collapseOnSelect>
+						<Navbar.Header>
+							<Navbar.Brand>
+								<Link to="/">Test application</Link>
+							</Navbar.Brand>
+							<Navbar.Toggle />
+						</Navbar.Header>
+						<Navbar.Collapse>
+							<Nav>
+							<NavItem>
+								<LanguageSwitch />
+							</NavItem>
+							</Nav>
+							<Nav pullRight>
+								{this.state.isAuthenticated ? (
+									<NavItem onClick={this.handleLogout}>Logout</NavItem>
+								) : (
+									<Fragment>
+										<LinkContainer to="/signup">
+											<NavItem><FormattedMessage id="user.signUp"/></NavItem>
+										</LinkContainer>
+										<LinkContainer to="/login">
+											<NavItem><FormattedMessage id="user.signIn"/></NavItem>
+										</LinkContainer>
+									</Fragment>
+								)}
+							</Nav>
+						</Navbar.Collapse>
+					</Navbar>
+					<Routes childProps={childProps} />
+				</div>
+			</IntlProviderWrapper>
+		
 		);
 	}
 }

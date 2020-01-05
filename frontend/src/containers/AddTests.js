@@ -3,6 +3,7 @@ import { PageHeader, HelpBlock, FormGroup, FormControl, ControlLabel, ListGroup,
 import {Button} from 'react-bootstrap'
 import TestAdded from '../components/TestAdded'
 import Axios from 'axios';
+import CSVReader from 'react-csv-reader'
 
 export default function AddTests({history}) {
   const [questionType, setQuestionType] = useState("O")
@@ -24,6 +25,33 @@ export default function AddTests({history}) {
     }
   }
 
+  const handleForce = data => {
+    data.forEach((q) => {
+      removeEmpty(q)
+      console.log(q)
+      if(q.type == 'L'){
+        setQuestionType(q.type)
+        setQuestionText(q.content)
+        setQuestionAnswere(q.correctAnswer)
+        dispatch({type: "addQuestion", payload: {content:q.content, type: q.type, correctAnswer: q.correctAnswer} })
+      } 
+      if(q.type == 'O'){
+        setQuestionType(q.type)
+        setQuestionText(q.content)
+        dispatch({type: "addQuestion", payload: {content:q.content, type: q.type, correctAnswer: questionAnswere} })
+      } 
+      if(q.type == 'W'){
+        setQuestionType(q.type)
+        setQuestionText(q.content)
+        const answeres = []
+        for(let i = 0; i < Object.keys(q).length - 5; i++) {
+          answeres.push({answer: q[`answers/${i}/answer`], correct:q[`answers/${i}/correct`]});
+        }
+        dispatch({type: "addQuestion", payload: {content:q.content, type: q.type, answers:answeres }});      
+      } 
+    })
+  };
+
   const submitTest = () => {
     console.log({["recruiter-id"]:"rekruter420",["test-name"]:testName, ["min-points"]: minPoints,["max-points"]: maxPoints ,questions})
     Axios.post('https://dxix4h5we1.execute-api.us-east-1.amazonaws.com/dev/tests',{["recruiter-id"]:"rekruter420",["test-name"]:testName, ["min-points"]: minPoints,["max-points"]: maxPoints ,questions})
@@ -32,11 +60,23 @@ export default function AddTests({history}) {
         })
   
   }
+  const removeEmpty = obj => {
+    Object.keys(obj).forEach(key => obj[key] == null && delete obj[key]);
+  };
 
   const [questions, dispatch] = useReducer(reducer, [])
   return (
+
+    
+
     <div>
       <PageHeader>Dodawanie testu</PageHeader>
+      <CSVReader onFileLoaded={handleForce}
+                 label="Importuj plik csv"  
+                 parserOptions={{header: true,
+                 dynamicTyping: true,
+                 skipEmptyLines: true}}
+      />
       <ControlLabel>Nazwa testu</ControlLabel>
       <FormControl as="textarea" rows="3" onChange={(e) => setTestName(e.target.value)} />
       <ControlLabel>Minimalna Liczba Punktów</ControlLabel>
