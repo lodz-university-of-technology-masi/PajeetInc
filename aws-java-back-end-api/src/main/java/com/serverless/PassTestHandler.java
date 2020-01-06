@@ -10,6 +10,7 @@ import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -47,7 +48,8 @@ public class PassTestHandler implements RequestStreamHandler {
     private String updateCandidates(JsonNode rootNode, Item test) throws IOException {
         String username = rootNode.get("username").asText();
         String answers = getAnswersWithClosedAnswersRatedAsJson(rootNode.get("answers"), test);
-        int points;
+        int points = calculatePoints(answers);
+        boolean passed = isPassed(points);
 
         String result = "[";
         Iterator<JsonNode> candidates = new ObjectMapper().readValue(test.getJSONPretty("candidates"), JsonNode.class).iterator();
@@ -66,9 +68,9 @@ public class PassTestHandler implements RequestStreamHandler {
                 result += "{" +
                         "\"username\":\"" + username + "\"," +
                         "\"answers\":" + answers + "," +
-                        "\"passed\":" + "false" + "," +
+                        "\"passed\":" + passed + "," +
                         "\"finished\":" + "true" + "," +
-                        "\"points\":" + "0" +
+                        "\"points\":" + points +
                         "}";
             }
             result += candidates.hasNext() == true ? "," : "";
@@ -116,6 +118,25 @@ public class PassTestHandler implements RequestStreamHandler {
         }
         json += "]";
         return json;
+    }
+
+    private int calculatePoints(String json) throws IOException {
+        int points = 0;
+        List<JsonNode> answers = iteratorToList(new ObjectMapper().readValue(json, JsonNode.class).iterator());
+        for (int i = 0; i < answers.size(); i++) {
+            if (
+                    answers.get(i).get("type").asText().contains("W") &&
+                    answers.get(i).get("correct").asBoolean()
+            ) {
+                points += 1;
+            }
+        }
+        return points;
+    }
+
+    private boolean isPassed(int points, int minPoints) {
+        boolean passed = points >= minPoints ? true : false;
+        return passed;
     }
 
     private List<JsonNode> iteratorToList(Iterator<JsonNode> iterator) {
