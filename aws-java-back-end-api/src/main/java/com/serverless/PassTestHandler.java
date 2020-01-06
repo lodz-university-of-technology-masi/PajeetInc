@@ -42,37 +42,9 @@ public class PassTestHandler implements RequestStreamHandler {
         tests.updateItem(updateItemSpec);
     }
 
-    private String getAnswersAsJson(JsonNode answers) {
-        String json = "[";
-        for (int i = 0; i < answers.size(); i++) {
-            JsonNode answer = answers.get(i);
-            json += "{" +
-                    "\"type\": \"" + answer.get("type").asText() + "\"," +
-                    "\"content\": \"" + answer.get("content").asText() + "\"" +
-                    "}";
-            json += i != answers.size() - 1 ? "," : "";
-        }
-        json += "]";
-        return json;
-    }
-
-//    private int calculateClosedQuestionsPoints(JsonNode answers) {
-//        int points = 0;
-//        for (JsonNode answer : answers) {
-//            String type = answer.get("type").asText();
-//            Boolean correct = answer.get("correct").asBoolean();
-//            if (type.contains("W") && correct.equals(true)) {
-//                points += 1;
-//            }
-//        }
-//        return points;
-//    }
-
     private String updateCandidates(JsonNode rootNode, Item test) throws IOException {
         String username = rootNode.get("username").asText();
         String answers = getAnswersAsJson(rootNode.get("answers"));
-//        int points = calculateClosedQuestionsPoints(rootNode.get("answers"));
-//        boolean passed = points >= test.getInt("min_points") ? true : false;
 
         String result = "[";
         Iterator<JsonNode> candidates = new ObjectMapper().readValue(test.getJSONPretty("candidates"), JsonNode.class).iterator();
@@ -100,5 +72,19 @@ public class PassTestHandler implements RequestStreamHandler {
         }
         result += "]";
         return result;
+    }
+
+    private String getAnswersAsJson(JsonNode answers) {
+        String json = "[";
+        for (int i = 0; i < answers.size(); i++) {
+            JsonNode answer = answers.get(i);
+            json += "{" +
+                    "\"type\": \"" + answer.get("type").asText() + "\"," +
+                    "\"content\": \"" + answer.get("content").asText() + "\"" +
+                    "}";
+            json += i != answers.size() - 1 ? "," : "";
+        }
+        json += "]";
+        return json;
     }
 }

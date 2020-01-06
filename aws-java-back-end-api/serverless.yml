@@ -158,6 +158,23 @@ functions:
                 "username": $input.json("$.username"),
                 "answers": $input.json("$.answers")
               }'
+  assignCandidate:
+    handler: com.serverless.AssignCandidateHandler
+    description: Assigning candidate to test
+    events:
+      - http:
+          path: /assign-candidate
+          method: post
+          cors: true
+          integration: lambda
+          request:
+            template:
+              application/json: '{
+                "recruiterId": $input.json("$.recruiter-id"),
+                "testId": $input.json("$.test-id"),
+                "testName": $input.json("$.test-name"),
+                "username": $input.json("$.username")
+              }'
 
 resources:
   Resources:
@@ -179,20 +196,21 @@ resources:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
 
-    Tests:
-      Type: AWS::DynamoDB::Table
-      Properties:
-        TableName: Tests
-        AttributeDefinitions:
-          - AttributeName: recruiter_id
-            AttributeType: S
-          - AttributeName: test_id
-            AttributeType: S
-        KeySchema:
-          - AttributeName: recruiter_id
-            KeyType: HASH
-          - AttributeName: test_id
-            KeyType: RANGE
-        ProvisionedThroughput:
-          ReadCapacityUnits: 1
-          WriteCapacityUnits: 1
+# TODO: jak jest juz tabela to jest problem https://stackoverflow.com/questions/41620437/how-to-continue-deploy-if-dynamodb-table-already-exists
+#    Tests:
+#      Type: AWS::DynamoDB::Table
+#      Properties:
+#        TableName: Tests
+#        AttributeDefinitions:
+#          - AttributeName: recruiter_id
+#            AttributeType: S
+#          - AttributeName: test_id
+#            AttributeType: S
+#        KeySchema:
+#          - AttributeName: recruiter_id
+#            KeyType: HASH
+#          - AttributeName: test_id
+#            KeyType: RANGE
+#        ProvisionedThroughput:
+#          ReadCapacityUnits: 1
+#          WriteCapacityUnits: 1
