@@ -8,8 +8,7 @@ import Login from './containers/Login';
 import Signup from './containers/Signup';
 import Tests from './containers/Tests'
 import AddTests from './containers/AddTests'
-
-
+import UserTests from './containers/UserTests'
 export default ({ childProps }) => (
 	<Switch>
 		<AppliedRoute path="/" exact component={Home} props={childProps} />
@@ -17,7 +16,7 @@ export default ({ childProps }) => (
 		<AppliedRoute path="/signup" exact component={Signup} props={childProps} />
 		<AppliedRoute path="/tests" exact component={Tests} props={childProps} />
 		<AppliedRoute path="/add_tests" exact component={AddTests} props={childProps} />
-
+		<AppliedRoute path="/my_tests" exact component={UserTests} props={childProps} />
 		{/* Finally, catch all unmatched routes */}
 		<Route component={NotFound} />
 	</Switch>
