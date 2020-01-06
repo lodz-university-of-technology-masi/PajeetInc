@@ -49,7 +49,7 @@ public class PassTestHandler implements RequestStreamHandler {
         String username = rootNode.get("username").asText();
         String answers = getAnswersWithClosedAnswersRatedAsJson(rootNode.get("answers"), test);
         int points = calculatePoints(answers);
-        boolean passed = isPassed(points);
+        boolean passed = isPassed(points, test.getInt("min_points"));
 
         String result = "[";
         Iterator<JsonNode> candidates = new ObjectMapper().readValue(test.getJSONPretty("candidates"), JsonNode.class).iterator();
