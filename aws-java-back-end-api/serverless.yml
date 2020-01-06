@@ -50,12 +50,52 @@ functions:
           path: /userInfo/{id}
           method: get
           cors: true
-  getAllUserInfo:
-    handler: com.serverless.GetAllUserInfoHandler
-    description: Get all user information from UserInfo table
+#  getAllUserInfo:
+#    handler: com.serverless.GetAllUserInfoHandler
+#    description: Get all user information from UserInfo table
+#    events:
+#      - http:
+#          path: /userInfo
+#          method: get
+#          cors: true
+  signUp:
+    handler: com.serverless.cognito.SignUpHandler
+    description: Sign up new user
     events:
       - http:
-          path: /userInfo
+          path: /signUp
+          method: post
+          cors: true
+  confirmSignUp:
+    handler: com.serverless.cognito.ConfirmSignUpHandler
+    description: Confirm user account email
+    events:
+      - http:
+          path: /confirmSignUp
+          method: post
+          cors: true
+  addUserToGroup:
+    handler: com.serverless.cognito.AddUserToGroupHandler
+    description: Add user to group
+    events:
+      - http:
+          path: /addUserToGroup
+          method: post
+          cors: true
+  listUsers:
+    handler: com.serverless.cognito.ListUsersHandler
+    description: List all users
+    events:
+      - http:
+          path: /listUsers
+          method: get
+          cors: true
+  signIn:
+    handler: com.serverless.cognito.SignInHandler
+    description: Sign in user
+    events:
+      - http:
+          path: /signIn
           method: get
           cors: true
 
@@ -122,20 +162,20 @@ resources:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
 
-#    Tests:
-#      Type: AWS::DynamoDB::Table
-#      Properties:
-#        TableName: Tests
-#        AttributeDefinitions:
-#          - AttributeName: recruiter_id
-#            AttributeType: S
-#          - AttributeName: test_id
-#            AttributeType: S
-#        KeySchema:
-#          - AttributeName: recruiter_id
-#            KeyType: HASH
-#          - AttributeName: test_id
-#            KeyType: RANGE
-#        ProvisionedThroughput:
-#          ReadCapacityUnits: 1
-#          WriteCapacityUnits: 1
+    Tests:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: Tests
+        AttributeDefinitions:
+          - AttributeName: recruiter_id
+            AttributeType: S
+          - AttributeName: test_id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: recruiter_id
+            KeyType: HASH
+          - AttributeName: test_id
+            KeyType: RANGE
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
