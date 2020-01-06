@@ -34,28 +34,68 @@ package:
   artifact: target/back-end-api-dev.jar
 
 functions:
-  addUserInfo:
-    handler: com.serverless.AddUserInfoHandler
-    description: Add user information to UserInfo table
+#  addUserInfo:
+#    handler: com.serverless.AddUserInfoHandler
+#    description: Add user information to UserInfo table
+#    events:
+#      - http:
+#          path: /userInfo
+#          method: post
+#          cors: true
+#  getUserInfo:
+#    handler: com.serverless.GetUserInfoHandler
+#    description: Get user information with id from UserInfo table
+#    events:
+#      - http:
+#          path: /userInfo/{id}
+#          method: get
+#          cors: true
+#  getAllUserInfo:
+#    handler: com.serverless.GetAllUserInfoHandler
+#    description: Get all user information from UserInfo table
+#    events:
+#      - http:
+#          path: /userInfo
+#          method: get
+#          cors: true
+  signUp:
+    handler: com.serverless.cognito.SignUpHandler
+    description: Sign up new user
     events:
       - http:
-          path: /userInfo
+          path: /signUp
           method: post
           cors: true
-  getUserInfo:
-    handler: com.serverless.GetUserInfoHandler
-    description: Get user information with id from UserInfo table
+  confirmSignUp:
+    handler: com.serverless.cognito.ConfirmSignUpHandler
+    description: Confirm user account email
     events:
       - http:
-          path: /userInfo/{id}
+          path: /confirmSignUp
+          method: post
+          cors: true
+  addUserToGroup:
+    handler: com.serverless.cognito.AddUserToGroupHandler
+    description: Add user to group
+    events:
+      - http:
+          path: /addUserToGroup
+          method: post
+          cors: true
+  listCandidates:
+    handler: com.serverless.cognito.ListCandidatesHandler
+    description: List all candidates
+    events:
+      - http:
+          path: /listCandidates
           method: get
           cors: true
-  getAllUserInfo:
-    handler: com.serverless.GetAllUserInfoHandler
-    description: Get all user information from UserInfo table
+  signIn:
+    handler: com.serverless.cognito.SignInHandler
+    description: Sign in user
     events:
       - http:
-          path: /userInfo
+          path: /signIn
           method: get
           cors: true
 
@@ -139,20 +179,20 @@ resources:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
 
-#    Tests:
-#      Type: AWS::DynamoDB::Table
-#      Properties:
-#        TableName: Tests
-#        AttributeDefinitions:
-#          - AttributeName: recruiter_id
-#            AttributeType: S
-#          - AttributeName: test_id
-#            AttributeType: S
-#        KeySchema:
-#          - AttributeName: recruiter_id
-#            KeyType: HASH
-#          - AttributeName: test_id
-#            KeyType: RANGE
-#        ProvisionedThroughput:
-#          ReadCapacityUnits: 1
-#          WriteCapacityUnits: 1
+    Tests:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: Tests
+        AttributeDefinitions:
+          - AttributeName: recruiter_id
+            AttributeType: S
+          - AttributeName: test_id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: recruiter_id
+            KeyType: HASH
+          - AttributeName: test_id
+            KeyType: RANGE
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
