@@ -34,22 +34,22 @@ package:
   artifact: target/back-end-api-dev.jar
 
 functions:
-  addUserInfo:
-    handler: com.serverless.AddUserInfoHandler
-    description: Add user information to UserInfo table
-    events:
-      - http:
-          path: /userInfo
-          method: post
-          cors: true
-  getUserInfo:
-    handler: com.serverless.GetUserInfoHandler
-    description: Get user information with id from UserInfo table
-    events:
-      - http:
-          path: /userInfo/{id}
-          method: get
-          cors: true
+#  addUserInfo:
+#    handler: com.serverless.AddUserInfoHandler
+#    description: Add user information to UserInfo table
+#    events:
+#      - http:
+#          path: /userInfo
+#          method: post
+#          cors: true
+#  getUserInfo:
+#    handler: com.serverless.GetUserInfoHandler
+#    description: Get user information with id from UserInfo table
+#    events:
+#      - http:
+#          path: /userInfo/{id}
+#          method: get
+#          cors: true
 #  getAllUserInfo:
 #    handler: com.serverless.GetAllUserInfoHandler
 #    description: Get all user information from UserInfo table
@@ -82,12 +82,12 @@ functions:
           path: /addUserToGroup
           method: post
           cors: true
-  listUsers:
-    handler: com.serverless.cognito.ListUsersHandler
-    description: List all users
+  listCandidates:
+    handler: com.serverless.cognito.ListCandidatesHandler
+    description: List all candidates
     events:
       - http:
-          path: /listUsers
+          path: /listCandidates
           method: get
           cors: true
   signIn:

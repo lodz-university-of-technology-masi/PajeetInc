@@ -16,7 +16,7 @@ import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 
 
-public class ListUsersHandler implements RequestHandler<Map<String, Object>, ApiGatewayResponse> {
+public class ListCandidatesHandler implements RequestHandler<Map<String, Object>, ApiGatewayResponse> {
     private static final Logger LOG = LogManager.getLogger(SignUpHandler.class);
     private static final CognitoConfig cognitoConfig = new CognitoConfig();
     private static final AWSCognitoIdentityProvider cognitoClient = new UserManagement()
@@ -38,7 +38,19 @@ public class ListUsersHandler implements RequestHandler<Map<String, Object>, Api
             listUsersRequest.setAttributesToGet(attrToGet);
 
             ListUsersResult listUsersResult = cognitoClient.listUsers(listUsersRequest);
-            String jsonString = objectMapper.writeValueAsString(listUsersResult.getUsers());
+
+            List<UserType> candidates = new ArrayList<>();
+            List<UserType> allUsers = listUsersResult.getUsers();
+            for (UserType user : allUsers) {
+                List<AttributeType> currUserAttr = user.getAttributes();
+                for(AttributeType attrToCheck: currUserAttr) {
+                    if (attrToCheck.getName().equals("profile") && attrToCheck.getValue().equals("Candidate")) {
+                        candidates.add(user);
+                    }
+                }
+            }
+
+            String jsonString = objectMapper.writeValueAsString(candidates);
             JsonNode node = objectMapper.readValue(jsonString, JsonNode.class);
 //            LOG.info(node);
 
