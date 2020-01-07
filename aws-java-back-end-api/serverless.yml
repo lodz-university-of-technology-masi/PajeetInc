@@ -18,7 +18,6 @@ provider:
   runtime: java8
   stage: ${opt:stage, 'dev'}
   region: ${opt:region, 'us-east-1'}
-  iamRoleStates
 #  iamRoleStatements:
 #    - Effect: Allow
 #      Action:
