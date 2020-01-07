@@ -162,18 +162,4 @@ public class GetTestsHandler implements RequestStreamHandler {
         outputStream.write("]".getBytes());
         outputStream.flush();
     }
-
-    private void writeItemsAlreadyCommaSeparated() throws IOException {
-        outputStream = new BufferedOutputStream(outputStream);
-        outputStream.write("[".getBytes());
-        for (int i = 0; i < jsons.size(); i++) {
-            String itemAsString = jsons.get(i);
-            if (i == jsons.size() - 1 && itemAsString.length() != 0) {
-                itemAsString = itemAsString.substring(0, itemAsString.length() - 1);
-            }
-            outputStream.write(itemAsString.getBytes());
-        }
-        outputStream.write("]".getBytes());
-        outputStream.flush();
-    }
 }

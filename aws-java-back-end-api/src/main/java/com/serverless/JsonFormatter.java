@@ -148,30 +148,6 @@ public class JsonFormatter {
         return test.toString();
     }
 
-    protected static String removeCandidateFromCandidatesByFinished(boolean finished, Iterator<JsonNode> candidates) throws IOException {
-        String result = "";
-        while (candidates.hasNext()) {
-            JsonNode candidate = candidates.next();
-            if (finished == candidate.get("finished").asBoolean()) {
-                result += JsonFormatter.getCandidateAsJsonString(candidate);
-                result += ",";
-            }
-        }
-        return result;
-    }
-
-    protected static String removeCandidateFromCandidatesByRated(boolean rated, Iterator<JsonNode> candidates) throws IOException {
-        String result = "";
-        while (candidates.hasNext()) {
-            JsonNode candidate = candidates.next();
-            if (rated == candidate.get("rated").asBoolean()) {
-                result += JsonFormatter.getCandidateAsJsonString(candidate);
-                result += ",";
-            }
-        }
-        return result;
-    }
-
     protected static String removeCorrectAnswersFromTest(String itemAsString) throws IOException {
         JsonNode test = new ObjectMapper().readValue(itemAsString, JsonNode.class);
         JsonNode questions = test.get("questions");
