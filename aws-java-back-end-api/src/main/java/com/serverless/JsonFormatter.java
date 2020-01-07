@@ -3,6 +3,7 @@ package com.serverless;
 import com.amazonaws.services.dynamodbv2.document.Item;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import java.io.IOException;
 import java.util.Iterator;
@@ -10,7 +11,7 @@ import java.util.Iterator;
 public class JsonFormatter {
 
     protected static String getCandidatesAsJsonString(
-            String username, String answers, boolean passed, boolean finished, int points, Item test) throws IOException {
+            String username, String answers, boolean passed, boolean finished, boolean rated, int points, Item test) throws IOException {
         String result = "[";
         Iterator<JsonNode> candidates = new ObjectMapper().readValue(test.getJSONPretty("candidates"), JsonNode.class).iterator();
         while (candidates.hasNext()) {
@@ -18,7 +19,7 @@ public class JsonFormatter {
             if (!candidate.get("username").asText().contains(username)) {
                 result += getCandidateAsJsonString(candidate);
             } else {
-                result += getCandidateAsJsonString(username, answers, passed, finished, points);
+                result += getCandidateAsJsonString(username, answers, passed, finished, rated, points);
             }
             result += candidates.hasNext() == true ? "," : "";
         }
@@ -33,17 +34,19 @@ public class JsonFormatter {
                 "\"answers\":" + answersAsText + "," +
                 "\"passed\":" + candidate.get("passed").asBoolean() + "," +
                 "\"finished\":" + candidate.get("finished").asBoolean() + "," +
+                "\"rated\":" + candidate.get("rated").asBoolean() + "," +
                 "\"points\":" + candidate.get("points").asInt() +
                 "}";
         return result;
     }
 
-    protected static String getCandidateAsJsonString(String username, String answers, boolean passed, boolean finished, int points) {
+    protected static String getCandidateAsJsonString(String username, String answers, boolean passed, boolean finished, boolean rated, int points) {
         String result = "{" +
                 "\"username\":\"" + username + "\"," +
                 "\"answers\":" + answers + "," +
                 "\"passed\":" + passed + "," +
                 "\"finished\":" + finished + "," +
+                "\"rated\":" + rated + "," +
                 "\"points\":" + points +
                 "}";
         ;
@@ -132,5 +135,40 @@ public class JsonFormatter {
         questions += "]";
 
         return questions;
+    }
+
+    protected static String removeAttributeFromTest(String item, String attribute) throws IOException {
+        JsonNode test = new ObjectMapper().readValue(item, JsonNode.class);
+        ((ObjectNode) test).remove(attribute);
+        return test.toString();
+    }
+
+    protected static String removeCandidatesFromTest(String itemAsString) throws IOException {
+        JsonNode test = new ObjectMapper().readValue(itemAsString, JsonNode.class);
+        ((ObjectNode) test).remove("candidates");
+        return test.toString();
+    }
+
+    protected static String removeQuestionsFromTest(String itemAsString) throws IOException {
+        JsonNode test = new ObjectMapper().readValue(itemAsString, JsonNode.class);
+        ((ObjectNode) test).remove("questions");
+        return test.toString();
+    }
+
+    protected static String removeCorrectAnswersFromTest(String itemAsString) throws IOException {
+        JsonNode test = new ObjectMapper().readValue(itemAsString, JsonNode.class);
+        JsonNode questions = test.get("questions");
+        for (int i = 0; i < questions.size(); i++) {
+            JsonNode question = questions.get(i);
+            if (question.get("question_type").asText().contains("W")) {
+                JsonNode answers = question.get("answers");
+                for (int j = 0; j < answers.size(); j++) {
+                    ((ObjectNode) answers.get(j)).remove("correct");
+                }
+            } else if (question.get("question_type").asText().contains("L")) {
+                ((ObjectNode) question).remove("correct_answer");
+            }
+        }
+        return test.toString();
     }
 }

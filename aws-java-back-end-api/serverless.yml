@@ -193,6 +193,22 @@ functions:
                 "username": $input.json("$.username"),
                 "answers": $input.json("$.answers")
               }'
+  getTests:
+    handler: com.serverless.GetTestsHandler
+    description: Get all tests
+    events:
+      - http:
+          path: /get-tests
+          method: get
+          cors: true
+          integration: lambda
+          request:
+            template:
+              application/json: '{
+                "user": "$input.params("user")",
+                "role": "$input.params("role")",
+                "status": "$input.params("status")"
+              }'
 
 resources:
   Resources:

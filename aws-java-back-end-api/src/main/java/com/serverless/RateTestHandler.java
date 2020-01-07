@@ -40,8 +40,9 @@ public class RateTestHandler implements RequestStreamHandler {
         int points = calculatePoints(answers);
         boolean passed = isPassed(points, test.getInt("min_points"));
         boolean finished = true;
+        boolean rated = true;
 
-        String result = JsonFormatter.getCandidatesAsJsonString(username, answers, passed, finished, points, test);
+        String result = JsonFormatter.getCandidatesAsJsonString(username, answers, passed, finished, rated, points, test);
         return result;
     }
 

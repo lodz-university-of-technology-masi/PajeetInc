@@ -46,7 +46,7 @@ public class AssignCandidateHandler implements RequestStreamHandler {
                 // exception
             }
         }
-        result +=  JsonFormatter.getCandidateAsJsonString(username, "[]", false, false, 0);
+        result +=  JsonFormatter.getCandidateAsJsonString(username, "[]", false, false, false, 0);
         result += "]";
         return result;
     }
