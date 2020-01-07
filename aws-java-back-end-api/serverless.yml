@@ -50,14 +50,6 @@ functions:
           path: /confirmSignUp
           method: post
           cors: true
-  addUserToGroup:
-    handler: com.serverless.cognito.AddUserToGroupHandler
-    description: Add user to group
-    events:
-      - http:
-          path: /addUserToGroup
-          method: post
-          cors: true
   listCandidates:
     handler: com.serverless.cognito.ListCandidatesHandler
     description: List all candidates

@@ -1,9 +1,7 @@
 package com.serverless.cognito;
 
 import com.amazonaws.services.cognitoidp.AWSCognitoIdentityProvider;
-import com.amazonaws.services.cognitoidp.model.AttributeType;
-import com.amazonaws.services.cognitoidp.model.SignUpRequest;
-import com.amazonaws.services.cognitoidp.model.SignUpResult;
+import com.amazonaws.services.cognitoidp.model.*;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.serverless.ApiGatewayResponse;
@@ -27,6 +25,21 @@ public class SignUpHandler implements RequestHandler<Map<String, Object>, ApiGat
     private static final AWSCognitoIdentityProvider cognitoClient = new UserManagement()
             .getAmazonCognitoIdentityClient();
 
+    private AdminAddUserToGroupResult addUserToGroup(String email, String group) {
+        try {
+            AdminAddUserToGroupRequest addRequest = new AdminAddUserToGroupRequest();
+            addRequest.setUserPoolId(cognitoConfig.getUserPoolId());
+            addRequest.setUsername(email);
+            addRequest.setGroupName(group);
+
+            AdminAddUserToGroupResult addResult = cognitoClient.adminAddUserToGroup(addRequest);
+            return addResult;
+        } catch(Exception ex) {
+            LOG.error("Error in adding user to a group " + ex);
+        }
+        return null;
+    }
+
     @Override
     public ApiGatewayResponse handleRequest(Map<String, Object> input, Context context) {
         try {
@@ -45,16 +58,23 @@ public class SignUpHandler implements RequestHandler<Map<String, Object>, ApiGat
             signUpRequest.setUsername((String)input.get("email"));
             signUpRequest.setPassword((String)input.get("password"));
 
-
             List<AttributeType> cognitoAttrs = new LinkedList<>();
             cognitoAttrs.add(new AttributeType()
                     .withName("profile")
                     .withValue((String)input.get("profile")));
-
             signUpRequest.setUserAttributes(cognitoAttrs);
 
-
             SignUpResult signUpResult = cognitoClient.signUp(signUpRequest);
+
+            String group = "";
+            if ((input.get("profile")).equals("Candidate")) {
+                group = "Candidates";
+                LOG.info(addUserToGroup((String) input.get("email"), group));
+            }
+            else if ((input.get("profile")).equals("Recruiter")) {
+                group = "Recruiters";
+                LOG.info(addUserToGroup((String) input.get("email"), group));
+            }
 
             return ApiGatewayResponse.builder()
                     .setStatusCode(200)
