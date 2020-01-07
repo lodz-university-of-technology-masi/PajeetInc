@@ -81,11 +81,11 @@ public class AssignCandidateHandler implements RequestStreamHandler {
         for (int i = 0; i < answers.size(); i++) {
             JsonNode answer = answers.get(i);
             json += "{" +
+                    "\"question\": \"" + answer.get("question").asText() + "\"," +
                     "\"type\": \"" + answer.get("type").asText() + "\"," +
-                    "\"content\": \"" + answer.get("content").asText() + "\"" +
-                    "\"correct\": \"" + answer.get("correct").asText() + "\"" +
+                    "\"content\": \"" + answer.get("content").asText() + "\"," +
+                    "\"correct\": \"" + answer.get("correct").asText() + "\"," +
                     "\"rated\": \"" + answer.get("rated").asText() + "\"" +
-                    "\"question\": \"" + answer.get("question").asText() + "\"" +
                     "}";
             json += i != answers.size() - 1 ? "," : "";
         }

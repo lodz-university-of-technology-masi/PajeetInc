@@ -109,9 +109,10 @@ public class PassTestHandler implements RequestStreamHandler {
                 }
             }
             json += "{" +
+                    "\"question\": \"" + answer.get("question").asText() + "\"," +
                     "\"type\": \"" + answer.get("type").asText() + "\"," +
-                    "\"content\": \"" + answer.get("content").asText() + "\"" +
-                    "\"correct\": \"" + correct + "\"" +
+                    "\"content\": \"" + answer.get("content").asText() + "\"," +
+                    "\"correct\": \"" + correct + "\"," +
                     "\"rated\": \"" + rated + "\"" +
                     "}";
             json += i != answers.size() - 1 ? "," : "";
@@ -150,9 +151,10 @@ public class PassTestHandler implements RequestStreamHandler {
         for (int i = 0; i < answers.size(); i++) {
             JsonNode answer = answers.get(i);
             json += "{" +
+                    "\"question\": \"" + answer.get("question").asText() + "\"," +
                     "\"type\": \"" + answer.get("type").asText() + "\"," +
-                    "\"content\": \"" + answer.get("content").asText() + "\"" +
-                    "\"correct\": \"" + answer.get("correct").asText() + "\"" +
+                    "\"content\": \"" + answer.get("content").asText() + "\"," +
+                    "\"correct\": \"" + answer.get("correct").asText() + "\"," +
                     "\"rated\": \"" + answer.get("rated").asText() + "\"" +
                     "}";
             json += i != answers.size() - 1 ? "," : "";
