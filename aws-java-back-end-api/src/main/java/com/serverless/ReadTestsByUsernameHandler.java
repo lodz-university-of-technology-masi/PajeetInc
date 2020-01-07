@@ -8,14 +8,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
-import com.amazonaws.services.dynamodbv2.document.DynamoDB;
 import com.amazonaws.services.dynamodbv2.document.Item;
-import com.amazonaws.services.dynamodbv2.document.ItemCollection;
-import com.amazonaws.services.dynamodbv2.document.ScanOutcome;
 import com.amazonaws.services.dynamodbv2.document.Table;
-import com.amazonaws.services.dynamodbv2.document.spec.ScanSpec;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -23,18 +17,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 public class ReadTestsByUsernameHandler implements RequestStreamHandler {
-
-//    JsonNode rootNode = new ObjectMapper().readValue(inputStream, JsonNode.class);
-//        if (rootNode.get("correct-answers").asBoolean()) {
-//        iterator = removeCorrectAttributes(iterator);
-//    } else {
-//
-//    }
-
-//    private Iterator<Item> removeCorrectAttributes(Iterator<Item> iterator) {
-//
-//        return iterator;
-//    }
 
     @Override
     public void handleRequest(InputStream inputStream, OutputStream outputStream, Context context) throws IOException {
@@ -44,7 +26,7 @@ public class ReadTestsByUsernameHandler implements RequestStreamHandler {
         Iterator<Item> iterator = DynamoDbController.getItemsFromTable(
                 "recruiter_id, test_id, max_points, min_points, questions, test_name, candidates", tests);
 
-        List<String> itemsAsStrings = new ArrayList<String>();
+        List<String> itemsAsStrings = new ArrayList<>();
         ObjectMapper objectMapper = new ObjectMapper();
         while (iterator.hasNext()) {
             Item item = iterator.next();
@@ -62,7 +44,7 @@ public class ReadTestsByUsernameHandler implements RequestStreamHandler {
 
                     itemAsString = removeCorrectAnswersFromTest(itemAsString);
                     itemsAsStrings.add(itemAsString);
-                    continue;
+                    break;
                 }
             }
         }

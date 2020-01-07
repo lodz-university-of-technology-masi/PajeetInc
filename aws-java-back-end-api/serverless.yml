@@ -175,6 +175,24 @@ functions:
                 "testName": $input.json("$.test-name"),
                 "username": $input.json("$.username")
               }'
+  rateTest:
+    handler: com.serverless.RateTestHandler
+    description: Rate candidate answers
+    events:
+      - http:
+          path: /rate-test
+          method: post
+          cors: true
+          integration: lambda
+          request:
+            template:
+              application/json: '{
+                "recruiterId": $input.json("$.recruiter-id"),
+                "testId": $input.json("$.test-id"),
+                "testName": $input.json("$.test-name"),
+                "username": $input.json("$.username"),
+                "answers": $input.json("$.answers")
+              }'
 
 resources:
   Resources:

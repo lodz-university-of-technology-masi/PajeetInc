@@ -3,14 +3,10 @@ package com.serverless;
 import com.amazonaws.services.dynamodbv2.document.Item;
 import com.amazonaws.services.dynamodbv2.document.PrimaryKey;
 import com.amazonaws.services.dynamodbv2.document.Table;
-import com.amazonaws.services.dynamodbv2.document.spec.GetItemSpec;
-import com.amazonaws.services.dynamodbv2.document.spec.UpdateItemSpec;
-import com.amazonaws.services.dynamodbv2.document.utils.ValueMap;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -23,8 +19,7 @@ public class PassTestHandler implements RequestStreamHandler {
 
     @Override
     public void handleRequest(InputStream inputStream, OutputStream outputStream, Context context) throws IOException {
-        ObjectMapper objectMapper = new ObjectMapper();
-        JsonNode rootNode = objectMapper.readValue(inputStream, JsonNode.class);
+        JsonNode rootNode = new ObjectMapper().readValue(inputStream, JsonNode.class);
 
         String recruiterId = rootNode.get("recruiterId").asText();
         String testId = rootNode.get("testId").asText();
@@ -33,16 +28,10 @@ public class PassTestHandler implements RequestStreamHandler {
         Table tests = DynamoDbController.getTable("Tests");
         PrimaryKey primaryKey = new PrimaryKey("recruiter_id", recruiterId, "test_id", testId);
 
-        GetItemSpec spec = new GetItemSpec()
-                .withPrimaryKey(primaryKey);
-        Item test = tests.getItem(spec);
+        Item test = DynamoDbController.getItemByPrimaryKey(primaryKey, tests);
 
         String candidates = updateCandidates(rootNode, test);
-
-        UpdateItemSpec updateItemSpec = new UpdateItemSpec().withPrimaryKey(primaryKey)
-                .withUpdateExpression("set candidates=:c")
-                .withValueMap(new ValueMap().withJSON(":c", candidates));
-        tests.updateItem(updateItemSpec);
+        DynamoDbController.updateCandidates(primaryKey, candidates, tests);
     }
 
     private String updateCandidates(JsonNode rootNode, Item test) throws IOException {
@@ -50,37 +39,14 @@ public class PassTestHandler implements RequestStreamHandler {
         String answers = getAnswersWithClosedAnswersRatedAsJson(rootNode.get("answers"), test);
         int points = calculatePoints(answers);
         boolean passed = isPassed(points, test.getInt("min_points"));
+        boolean finished = true;
 
-        String result = "[";
-        Iterator<JsonNode> candidates = new ObjectMapper().readValue(test.getJSONPretty("candidates"), JsonNode.class).iterator();
-        while (candidates.hasNext()) {
-            JsonNode candidate = candidates.next();
-            if (!candidate.get("username").asText().contains(username)) {
-                String answersAsText = getAnswersAsJson(candidate.get("answers"));
-                result += "{" +
-                        "\"username\":\"" + candidate.get("username").asText() + "\"," +
-                        "\"answers\":" + answersAsText + "," +
-                        "\"passed\":" + candidate.get("passed").asBoolean() + "," +
-                        "\"finished\":" + candidate.get("finished").asBoolean() + "," +
-                        "\"points\":" + candidate.get("points").asInt() +
-                        "}";
-            } else {
-                result += "{" +
-                        "\"username\":\"" + username + "\"," +
-                        "\"answers\":" + answers + "," +
-                        "\"passed\":" + passed + "," +
-                        "\"finished\":" + "true" + "," +
-                        "\"points\":" + points +
-                        "}";
-            }
-            result += candidates.hasNext() == true ? "," : "";
-        }
-        result += "]";
+        String result = JsonFormatter.getCandidatesAsJsonString(username, answers, passed, finished, points, test);
         return result;
     }
 
     private String getAnswersWithClosedAnswersRatedAsJson(JsonNode answers, Item test) throws IOException {
-        List<JsonNode> questions =
+        List<JsonNode> testQuestions =
                 iteratorToList(
                         new ObjectMapper().readValue(test.getJSONPretty("questions"), JsonNode.class).iterator()
                 );
@@ -90,31 +56,42 @@ public class PassTestHandler implements RequestStreamHandler {
             JsonNode answer = answers.get(i);
             boolean correct = false;
             boolean rated = false;
-            if (answer.get("type").asText().contains("W")) {
-                JsonNode testQuestion = questions.stream().filter(
+            String type = answer.get("type").asText();
+            if (
+                    type.contains("W") || type.contains("L")
+            ) {
+                JsonNode testQuestion = testQuestions.stream().filter(
                         q -> q.get("question_content").asText().contains(
                                 answer.get("question").asText()
                         )
                 ).findFirst().get();
 
-                JsonNode testAnswers = testQuestion.get("answers");
-                for (int j = 0; j < testAnswers.size(); j++) {
-                    JsonNode testAnswer = testAnswers.get(j);
-                    if (testAnswer.get("answer").asText()
-                            .contains(answer.get("content").asText())) {
-                        correct = testAnswer.get("correct").asBoolean();
+                if (type.contains("W")) {
+                    JsonNode testAnswers = testQuestion.get("answers");
+                    for (int j = 0; j < testAnswers.size(); j++) {
+                        JsonNode testAnswer = testAnswers.get(j);
+                        if (testAnswer.get("answer").asText()
+                                .contains(answer.get("content").asText())) {
+                            correct = testAnswer.get("correct").asBoolean();
+                            rated = true;
+                            break;
+                        }
+                    }
+                } else if (type.contains("L")) {
+                    Double testCorrectAnswer = testQuestion.get("correct_answer").asDouble();
+                    if (answer.get("content").asDouble() == testCorrectAnswer) {
+                        correct = true;
                         rated = true;
-                        break;
                     }
                 }
             }
-            json += "{" +
-                    "\"question\": \"" + answer.get("question").asText() + "\"," +
-                    "\"type\": \"" + answer.get("type").asText() + "\"," +
-                    "\"content\": \"" + answer.get("content").asText() + "\"," +
-                    "\"correct\": \"" + correct + "\"," +
-                    "\"rated\": \"" + rated + "\"" +
-                    "}";
+            json += JsonFormatter.getCandidateAnswerAsJsonString(
+                    answer.get("question").asText(),
+                    answer.get("type").asText(),
+                    answer.get("content").asText(),
+                    correct,
+                    rated
+            );
             json += i != answers.size() - 1 ? "," : "";
         }
         json += "]";
@@ -125,9 +102,13 @@ public class PassTestHandler implements RequestStreamHandler {
         int points = 0;
         List<JsonNode> answers = iteratorToList(new ObjectMapper().readValue(json, JsonNode.class).iterator());
         for (int i = 0; i < answers.size(); i++) {
+            String type = answers.get(i).get("type").asText();
             if (
-                    answers.get(i).get("type").asText().contains("W") &&
-                    answers.get(i).get("correct").asBoolean()
+                    (
+                            type.contains("W") || type.contains("L")
+                    ) &&
+                            answers.get(i).get("correct").asBoolean()
+
             ) {
                 points += 1;
             }
@@ -144,22 +125,5 @@ public class PassTestHandler implements RequestStreamHandler {
         List<JsonNode> list = new ArrayList<>();
         iterator.forEachRemaining(list::add);
         return list;
-    }
-
-    private String getAnswersAsJson(JsonNode answers) {
-        String json = "[";
-        for (int i = 0; i < answers.size(); i++) {
-            JsonNode answer = answers.get(i);
-            json += "{" +
-                    "\"question\": \"" + answer.get("question").asText() + "\"," +
-                    "\"type\": \"" + answer.get("type").asText() + "\"," +
-                    "\"content\": \"" + answer.get("content").asText() + "\"," +
-                    "\"correct\": \"" + answer.get("correct").asText() + "\"," +
-                    "\"rated\": \"" + answer.get("rated").asText() + "\"" +
-                    "}";
-            json += i != answers.size() - 1 ? "," : "";
-        }
-        json += "]";
-        return json;
     }
 }

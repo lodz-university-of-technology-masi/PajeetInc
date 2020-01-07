@@ -3,9 +3,6 @@ package com.serverless;
 import com.amazonaws.services.dynamodbv2.document.Item;
 import com.amazonaws.services.dynamodbv2.document.PrimaryKey;
 import com.amazonaws.services.dynamodbv2.document.Table;
-import com.amazonaws.services.dynamodbv2.document.spec.GetItemSpec;
-import com.amazonaws.services.dynamodbv2.document.spec.UpdateItemSpec;
-import com.amazonaws.services.dynamodbv2.document.utils.ValueMap;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -20,26 +17,19 @@ public class AssignCandidateHandler implements RequestStreamHandler {
 
     @Override
     public void handleRequest(InputStream inputStream, OutputStream outputStream, Context context) throws IOException {
-        ObjectMapper objectMapper = new ObjectMapper();
-        JsonNode rootNode = objectMapper.readValue(inputStream, JsonNode.class);
+        JsonNode rootNode = new ObjectMapper().readValue(inputStream, JsonNode.class);
 
         String recruiterId = rootNode.get("recruiterId").asText();
         String testId = rootNode.get("testId").asText();
         String testName = rootNode.get("testName").asText();
 
         Table tests = DynamoDbController.getTable("Tests");
-        PrimaryKey primaryKey = new PrimaryKey("recruiter_id", recruiterId, "test_id", testId);
 
-        GetItemSpec spec = new GetItemSpec()
-                .withPrimaryKey(primaryKey);
-        Item test = tests.getItem(spec);
+        PrimaryKey primaryKey = new PrimaryKey("recruiter_id", recruiterId, "test_id", testId);
+        Item test = DynamoDbController.getItemByPrimaryKey(primaryKey, tests);
 
         String candidates = updateCandidates(rootNode, test);
-
-        UpdateItemSpec updateItemSpec = new UpdateItemSpec().withPrimaryKey(primaryKey)
-                .withUpdateExpression("set candidates=:c")
-                .withValueMap(new ValueMap().withJSON(":c", candidates));
-        tests.updateItem(updateItemSpec);
+        DynamoDbController.updateCandidates(primaryKey, candidates, tests);
     }
 
     private String updateCandidates(JsonNode rootNode, Item test) throws IOException {
@@ -50,46 +40,14 @@ public class AssignCandidateHandler implements RequestStreamHandler {
         while (candidates.hasNext()) {
             JsonNode candidate = candidates.next();
             if (!candidate.get("username").asText().contains(username)) {
-                String answersAsText = getAnswersAsJson(candidate.get("answers"));
-                result += "{" +
-                        "\"username\":\"" + candidate.get("username").asText() + "\"," +
-                        "\"answers\":" + answersAsText + "," +
-                        "\"passed\":" + candidate.get("passed").asBoolean() + "," +
-                        "\"finished\":" + candidate.get("finished").asBoolean() + "," +
-                        "\"points\":" + candidate.get("points").asInt() +
-                        "}";
+                result += JsonFormatter.getCandidateAsJsonString(candidate);
                 result += ",";
             } else {
                 // exception
             }
         }
-
-        result += "{" +
-                "\"username\":\"" + username + "\"," +
-                "\"answers\":" + "[]" + "," +
-                "\"passed\":" + "false" + "," +
-                "\"finished\":" + "false" + "," +
-                "\"points\":" + "0" +
-                "}";
-
+        result +=  JsonFormatter.getCandidateAsJsonString(username, "[]", false, false, 0);
         result += "]";
         return result;
-    }
-
-    private String getAnswersAsJson(JsonNode answers) {
-        String json = "[";
-        for (int i = 0; i < answers.size(); i++) {
-            JsonNode answer = answers.get(i);
-            json += "{" +
-                    "\"question\": \"" + answer.get("question").asText() + "\"," +
-                    "\"type\": \"" + answer.get("type").asText() + "\"," +
-                    "\"content\": \"" + answer.get("content").asText() + "\"," +
-                    "\"correct\": \"" + answer.get("correct").asText() + "\"," +
-                    "\"rated\": \"" + answer.get("rated").asText() + "\"" +
-                    "}";
-            json += i != answers.size() - 1 ? "," : "";
-        }
-        json += "]";
-        return json;
     }
 }

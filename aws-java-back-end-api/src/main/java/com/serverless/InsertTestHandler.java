@@ -35,7 +35,7 @@ public class InsertTestHandler  implements RequestStreamHandler {
         String testName = rootNode.get("testName").asText();
         int minPoints = rootNode.get("minPoints").asInt();
         int maxPoints = rootNode.get("maxPoints").asInt();
-        String questions = InputStreamSelector.getQuestionsAsJson(rootNode);
+        String questions = JsonFormatter.getQuestionsAsJsonString(rootNode);
 
         PrimaryKey primaryKey = new PrimaryKey("recruiter_id", recruiterId, "test_id", testId);
         Item test = new Item().withPrimaryKey(primaryKey).withString("test_name", testName)
