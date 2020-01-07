@@ -26,13 +26,7 @@ public class GetTestsHandler implements RequestStreamHandler {
 
     @Override
     public void handleRequest(InputStream inputStream, OutputStream outputStream, Context context) throws IOException {
-        table = DynamoDbController.getTable("Tests");
-        tests = DynamoDbController.getItemsFromTable(
-                "recruiter_id, test_id, max_points, min_points, questions, test_name, candidates", table);
-        objectMapper = new ObjectMapper();
-        jsons = new ArrayList<>();
-        this.outputStream = outputStream;
-        candidateInTests = new ArrayList<>();
+        init(outputStream);
 
         JsonNode rootNode = new ObjectMapper().readValue(inputStream, JsonNode.class);
         String user = rootNode.get("user").asText();
@@ -47,15 +41,24 @@ public class GetTestsHandler implements RequestStreamHandler {
             }
         } else if (role.contains("recruiter")) {
             if (status.contains("assigned")) {
-                getAssignedRecruiterTests(user);
+                getRecruiterTestsByFinished(false, user);
             } else if (status.contains("finished")) {
-                getFinishedRecruiterTests(user);
+                getRecruiterTestsByFinished(true, user);
             } else if (status.contains("rated")) {
                 getRatedRecruiterTests(user);
             }
         }
-
         writeItemsToOutputStream();
+    }
+
+    private void init(OutputStream outputStream) {
+        table = DynamoDbController.getTable("Tests");
+        tests = DynamoDbController.getItemsFromTable(
+                "recruiter_id, test_id, max_points, min_points, questions, test_name, candidates", table);
+        objectMapper = new ObjectMapper();
+        jsons = new ArrayList<>();
+        this.outputStream = outputStream;
+        candidateInTests = new ArrayList<>();
     }
 
     private void getAssignedCandidateTests(String user) throws IOException {
@@ -98,16 +101,34 @@ public class GetTestsHandler implements RequestStreamHandler {
         }
     }
 
-    private void getAssignedRecruiterTests(String user) throws IOException {
-
-    }
-
-    private void getFinishedRecruiterTests(String user) throws IOException {
-
+    private void getRecruiterTestsByFinished(boolean finished, String user) throws IOException {
+        Iterator<Item> tests = DynamoDbController.getAllTestsByRecruiterId(user, table);
+        while(tests.hasNext()) {
+            Item test = tests.next();
+            Iterator<JsonNode> candidates = new ObjectMapper().readValue(test.getJSONPretty("candidates"), JsonNode.class).iterator();
+            while (candidates.hasNext()) {
+                JsonNode candidate = candidates.next();
+                if (finished == candidate.get("finished").asBoolean()) {
+                    String json = JsonFormatter.getCandidateAsJsonString(candidate);
+                    jsons.add(json);
+                }
+            }
+        }
     }
 
     private void getRatedRecruiterTests(String user) throws IOException {
-
+        Iterator<Item> tests = DynamoDbController.getAllTestsByRecruiterId(user, table);
+        while(tests.hasNext()) {
+            Item test = tests.next();
+            Iterator<JsonNode> candidates = new ObjectMapper().readValue(test.getJSONPretty("candidates"), JsonNode.class).iterator();
+            while (candidates.hasNext()) {
+                JsonNode candidate = candidates.next();
+                if (candidate.get("rated").asBoolean()) {
+                    String json = JsonFormatter.getCandidateAsJsonString(candidate);
+                    jsons.add(json);
+                }
+            }
+        }
     }
 
     private List<JsonNode> findCandidateTests(String user) throws IOException {
@@ -136,6 +157,20 @@ public class GetTestsHandler implements RequestStreamHandler {
         outputStream.write("[".getBytes());
         for (int i = 0; i < jsons.size(); i++) {
             String itemAsString = i == jsons.size() - 1 ? jsons.get(i) : jsons.get(i) + ",";
+            outputStream.write(itemAsString.getBytes());
+        }
+        outputStream.write("]".getBytes());
+        outputStream.flush();
+    }
+
+    private void writeItemsAlreadyCommaSeparated() throws IOException {
+        outputStream = new BufferedOutputStream(outputStream);
+        outputStream.write("[".getBytes());
+        for (int i = 0; i < jsons.size(); i++) {
+            String itemAsString = jsons.get(i);
+            if (i == jsons.size() - 1 && itemAsString.length() != 0) {
+                itemAsString = itemAsString.substring(0, itemAsString.length() - 1);
+            }
             outputStream.write(itemAsString.getBytes());
         }
         outputStream.write("]".getBytes());

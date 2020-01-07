@@ -40,38 +40,15 @@ public class ReadTestsByUsernameHandler implements RequestStreamHandler {
                 String candidateUsername = candidate.get("username").asText();
                 if (candidateUsername.equals(username)) {
                     String itemAsString = item.toJSONPretty();
-                    itemAsString = removeCandidatesFromTest(itemAsString);
+                    itemAsString = JsonFormatter.removeCandidatesFromTest(itemAsString);
 
-                    itemAsString = removeCorrectAnswersFromTest(itemAsString);
+                    itemAsString = JsonFormatter.removeCorrectAnswersFromTest(itemAsString);
                     itemsAsStrings.add(itemAsString);
                     break;
                 }
             }
         }
         writeItemsToOutputStream(itemsAsStrings, outputStream);
-    }
-
-    private String removeCandidatesFromTest(String itemAsString) throws IOException {
-        JsonNode test = new ObjectMapper().readValue(itemAsString, JsonNode.class);
-        ((ObjectNode) test).remove("candidates");
-        return test.toString();
-    }
-
-    private String removeCorrectAnswersFromTest(String itemAsString) throws IOException {
-        JsonNode test = new ObjectMapper().readValue(itemAsString, JsonNode.class);
-        JsonNode questions = test.get("questions");
-        for (int i = 0; i < questions.size(); i++) {
-            JsonNode question = questions.get(i);
-            if (question.get("question_type").asText().contains("W")) {
-                JsonNode answers = question.get("answers");
-                for (int j = 0; j < answers.size(); j++) {
-                    ((ObjectNode) answers.get(j)).remove("correct");
-                }
-            } else if (question.get("question_type").asText().contains("L")) {
-                ((ObjectNode) question).remove("correct_answer");
-            }
-        }
-        return test.toString();
     }
 
     private void writeItemsToOutputStream(List<String> itemsAsStrings, OutputStream outputStream) throws IOException {
