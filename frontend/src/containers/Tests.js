@@ -11,7 +11,7 @@ export default function Tests() {
   useEffect(() => {
     const fetchData = async () => {
       const result = await axios(
-        'https://dxix4h5we1.execute-api.us-east-1.amazonaws.com/dev/tests',
+        'https://owe6jjn5we.execute-api.us-east-1.amazonaws.com/dev/tests',
       );
       console.log(result)
       setTests(result.data);
