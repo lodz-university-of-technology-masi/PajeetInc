@@ -51,18 +51,20 @@ export default class Signup extends Component {
 		this.setState({ isLoading: true });
 
 		try {
-			const newUser = await Auth.signUp({
-				username: this.state.email,
-				password: this.state.password,
-				attributes: {
-					email: this.state.email,
-					profile: this.state.profile,
-					name: this.state.profile
-				}
-			});
-			this.setState({
-				newUser
-			});
+			Axios.post('https://unyfv0eps9.execute-api.us-east-1.amazonaws.com/dev/signUp',
+			{
+				["email"]: this.state.email,
+				["password"]: this.state.password, 
+				["profile"]: this.state.profile
+			}).then( (res) => {
+				console.log(res.data.codeDeliveryDetails)
+				const newUser = res.data.codeDeliveryDetails
+				this.setState({
+					newUser
+				});
+			}).catch( (res) => {
+				console.log(res)
+			})
 		} catch (e) {
 			alert(e.message);
 		}
@@ -76,15 +78,28 @@ export default class Signup extends Component {
 		this.setState({ isLoading: true });
 
 		try {
-			await Auth.confirmSignUp(this.state.email, this.state.confirmationCode);
-			console.log({
-				["id"]: this.state.username,["username"]: this.state.email, ["profile"]: this.state.profile})
-			Axios.post('https://unyfv0eps9.execute-api.us-east-1.amazonaws.com/dev/userInfo',{
-			["id"]: this.state.email,["username"]: this.state.email, ["profile"]: this.state.profile})
-			await Auth.signIn(this.state.email, this.state.password);
-
-			this.props.userHasAuthenticated(true);
-			this.props.history.push('/');
+			Axios.post('https://unyfv0eps9.execute-api.us-east-1.amazonaws.com/dev/confirmSignUp',
+			{
+				["email"]: this.state.email,
+				["confirmation_code"]: this.state.confirmationCode
+			}).then( res => {
+				console.log(res)
+				Axios.post('https://unyfv0eps9.execute-api.us-east-1.amazonaws.com/dev/signIn',
+				{
+					["email"]: this.state.email,
+					["password"]: this.state.password
+				}).then( res => {
+					console.log(res)
+					localStorage.setItem('currentUser', JSON.stringify(res.data));
+					this.props.userHasAuthenticated(true);
+					this.props.history.push('/');
+				}).catch( res => {
+					console.log(res)
+				})
+			}).catch( res => {
+				//todo
+				console.log('wrong code')
+			})
 		} catch (e) {
 			alert(e.message);
 			this.setState({ isLoading: false });
