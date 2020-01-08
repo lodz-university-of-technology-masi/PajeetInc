@@ -10,6 +10,7 @@ import {
 } from "react-bootstrap";
 import LoaderButton from '../components/LoaderButton';
 import "./ResetPassword.css";
+import Axios from 'axios';
 
 export default class ResetPassword extends Component {
   constructor(props) {
@@ -51,8 +52,16 @@ export default class ResetPassword extends Component {
     this.setState({ isSendingCode: true });
 
     try {
-      await Auth.forgotPassword(this.state.email);
-      this.setState({ codeSent: true });
+      Axios.post('https://unyfv0eps9.execute-api.us-east-1.amazonaws.com/dev/forgotPassword',
+			{
+				["email"]: this.state.email
+			}).then(res => {
+        console.log(res)
+        this.setState({ codeSent: true });
+			}).catch(res => {
+				console.log(res)
+			})
+      
     } catch (e) {
       alert(e.message);
       this.setState({ isSendingCode: false });
@@ -65,12 +74,17 @@ export default class ResetPassword extends Component {
     this.setState({ isConfirming: true });
 
     try {
-      await Auth.forgotPasswordSubmit(
-        this.state.email,
-        this.state.code,
-        this.state.password
-      );
-      this.setState({ confirmed: true });
+      Axios.post('https://unyfv0eps9.execute-api.us-east-1.amazonaws.com/dev/confirmPassword',
+			{
+        ["email"]: this.state.email,
+        ["confirmation_code"]: this.state.code,
+        ["password"]: this.state.password
+			}).then(res => {
+        console.log(res)
+        this.setState({ confirmed: true });
+			}).catch(res => {
+				console.log(res)
+			})
     } catch (e) {
       alert(e.message);
       this.setState({ isConfirming: false });
