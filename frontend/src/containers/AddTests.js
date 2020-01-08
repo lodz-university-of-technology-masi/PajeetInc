@@ -64,6 +64,7 @@ export default function AddTests({history}) {
     Object.keys(obj).forEach(key => obj[key] == null && delete obj[key]);
   };
 
+
   const [questions, dispatch] = useReducer(reducer, [])
   return (
 
@@ -118,7 +119,7 @@ export default function AddTests({history}) {
               <Checkbox onClick={() => setCorrectAnswere(true)}>
                 Poprawna Odpowiedz?
               </Checkbox>
-              <Button onClick={() =>{setAnswersNumber([...answersNumber, num + 1]); setAnsweresClosed([{answer: questionAnswere, correct:correctAnswere},...answeresClosed])}}>Dodaj Odpowiedz</Button>
+              <Button onClick={() =>{setAnswersNumber([...answersNumber, num + 1]); setAnsweresClosed([{answer: questionAnswere, correct:correctAnswere},...answeresClosed]); setCorrectAnswere(false)}}>Dodaj Odpowiedz</Button>
             </ListGroup> 
             )
           })
