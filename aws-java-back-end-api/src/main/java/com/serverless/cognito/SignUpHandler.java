@@ -2,6 +2,8 @@ package com.serverless.cognito;
 
 import com.amazonaws.services.cognitoidp.AWSCognitoIdentityProvider;
 import com.amazonaws.services.cognitoidp.model.*;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.serverless.ApiGatewayResponse;
 import com.serverless.Response;
 import java.util.Collections;
@@ -40,6 +42,8 @@ public class SignUpHandler implements RequestHandler<Map<String, Object>, ApiGat
     public ApiGatewayResponse handleRequest(Map<String, Object> input, Context context) {
         try {
             LOG.info(input);
+            JsonNode body = new ObjectMapper().readValue((String) input.get("body"), JsonNode.class);
+            LOG.info(body);
 
             /* request json
             {
@@ -51,36 +55,43 @@ public class SignUpHandler implements RequestHandler<Map<String, Object>, ApiGat
 
             SignUpRequest signUpRequest = new SignUpRequest();
             signUpRequest.setClientId(cognitoConfig.getClientId());
-            signUpRequest.setUsername((String)input.get("email"));
-            signUpRequest.setPassword((String)input.get("password"));
+            signUpRequest.setUsername(body.get("email").asText());
+            signUpRequest.setPassword(body.get("password").asText());
 
             List<AttributeType> cognitoAttrs = new LinkedList<>();
             cognitoAttrs.add(new AttributeType()
                     .withName("profile")
-                    .withValue((String)input.get("profile")));
+                    .withValue(body.get("profile").asText()));
             signUpRequest.setUserAttributes(cognitoAttrs);
 
-            SignUpResult signUpResult = cognitoClient.signUp(signUpRequest);
+            try {
+                SignUpResult signUpResult = cognitoClient.signUp(signUpRequest);
 
-            String group = "";
-            if ((input.get("profile")).equals("Candidate")) {
-                group = "Candidates";
-                LOG.info(addUserToGroup((String) input.get("email"), group));
+                String group = "";
+                if ((body.get("profile").asText()).equals("Candidate")) {
+                    group = "Candidates";
+                    LOG.info(addUserToGroup(body.get("email").asText(), group));
+                } else if ((body.get("profile").asText()).equals("Recruiter")) {
+                    group = "Recruiters";
+                    LOG.info(addUserToGroup(body.get("email").asText(), group));
+                }
+                return ApiGatewayResponse.builder()
+                        .setStatusCode(200)
+                        .setObjectBody(signUpResult)
+                        .setHeaders(Collections.singletonMap("X-Powered-By", "AWS Lambda & Serverless"))
+                        .build();
+            } catch(UsernameExistsException ex) {
+                LOG.error(ex.getMessage());
+                return ApiGatewayResponse.builder()
+                        .setStatusCode(ex.getStatusCode())
+                        .setRawBody(ex.getErrorCode() + ": " + ex.getErrorMessage())
+                        .setHeaders(Collections.singletonMap("X-Powered-By", "AWS Lambda & Serverless"))
+                        .build();
             }
-            else if ((input.get("profile")).equals("Recruiter")) {
-                group = "Recruiters";
-                LOG.info(addUserToGroup((String) input.get("email"), group));
-            }
-
-            return ApiGatewayResponse.builder()
-                    .setStatusCode(200)
-                    .setObjectBody(signUpResult)
-                    .setHeaders(Collections.singletonMap("X-Powered-By", "AWS Lambda & Serverless"))
-                    .build();
 
         } catch (Exception ex) {
             LOG.error("Error in processing input request: " + ex);
-            Response responseBody = new Response("Error in retrieving user items: ", input);
+            Response responseBody = new Response("Error in processing input request: ", input);
             return ApiGatewayResponse.builder()
                     .setStatusCode(500)
                     .setObjectBody(responseBody)

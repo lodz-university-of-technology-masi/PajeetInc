@@ -64,14 +64,22 @@ functions:
     events:
       - http:
           path: /signIn
-          method: get
+          method: post
           cors: true
-  changePassword:
-    handler: com.serverless.cognito.ChangePasswordHandler
-    description: Change user password
+  confirmPassword:
+    handler: com.serverless.cognito.ConfirmForgotPassword
+    description: Confirm changing user password
     events:
       - http:
-          path: /changePassword
+          path: /confirmPassword
+          method: post
+          cors: true
+  forgotPassword:
+    handler: com.serverless.cognito.ForgotPasswordHandler
+    description: Attempt changing password
+    events:
+      - http:
+          path: /forgotPassword
           method: post
           cors: true
 

@@ -15,7 +15,7 @@ import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 
 
-public class ConfirmSignUpHandler implements RequestHandler<Map<String, Object>, ApiGatewayResponse> {
+public class ConfirmForgotPassword implements RequestHandler<Map<String, Object>, ApiGatewayResponse> {
     private static final Logger LOG = LogManager.getLogger(ConfirmSignUpHandler.class);
     private static final CognitoConfig cognitoConfig = new CognitoConfig();
     private static final AWSCognitoIdentityProvider cognitoClient = new UserManagement()
@@ -31,31 +31,33 @@ public class ConfirmSignUpHandler implements RequestHandler<Map<String, Object>,
             /*
             {
                 "email": "kpm14005@eveav.com",
-                "confirmation_code": "928205"
+                "confirmation_code": 213213,
+                "password": "!Password123"
             }
             */
 
-            ConfirmSignUpRequest confirmSignUpRequest = new ConfirmSignUpRequest();
-            confirmSignUpRequest.setClientId(cognitoConfig.getClientId());
-            confirmSignUpRequest.setUsername(body.get("email").asText());
-            confirmSignUpRequest.setConfirmationCode(body.get("confirmation_code").asText());
-
             try {
-                ConfirmSignUpResult confirmSignUpResult = cognitoClient.confirmSignUp(confirmSignUpRequest);
+                ConfirmForgotPasswordRequest confirmForgotPasswordRequest = new ConfirmForgotPasswordRequest();
+                confirmForgotPasswordRequest.setClientId(cognitoConfig.getClientId());
+                confirmForgotPasswordRequest.setUsername(body.get("email").asText());
+                confirmForgotPasswordRequest.setConfirmationCode(body.get("confirmation_code").asText());
+                confirmForgotPasswordRequest.setPassword(body.get("password").asText());
+                ConfirmForgotPasswordResult confirmForgotPasswordResult =
+                        cognitoClient.confirmForgotPassword(confirmForgotPasswordRequest);
+
 
                 return ApiGatewayResponse.builder()
                         .setStatusCode(200)
-                        .setRawBody("Account has been confirmed.")
+                        .setObjectBody(confirmForgotPasswordResult)
                         .setHeaders(Collections.singletonMap("X-Powered-By", "AWS Lambda & Serverless"))
                         .build();
-            } catch (ExpiredCodeException ex) {
+            } catch (NotAuthorizedException ex) {
                 return ApiGatewayResponse.builder()
-                        .setStatusCode(200)
+                        .setStatusCode(ex.getStatusCode())
                         .setRawBody(ex.getErrorCode() + ": " + ex.getErrorMessage())
                         .setHeaders(Collections.singletonMap("X-Powered-By", "AWS Lambda & Serverless"))
                         .build();
             }
-
         } catch (Exception ex) {
             LOG.error("Error in processing input request: " + ex);
             Response responseBody = new Response("Error in processing input request: ", input);
