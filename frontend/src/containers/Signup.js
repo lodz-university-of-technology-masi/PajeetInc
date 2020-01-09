@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { HelpBlock, FormGroup, FormControl, ControlLabel } from 'react-bootstrap';
 import LoaderButton from '../components/LoaderButton';
-import { Auth } from 'aws-amplify';
+import Axios from 'axios';
 
 import './Signup.css';
 
@@ -15,6 +15,7 @@ export default class Signup extends Component {
 			password: '',
 			confirmPassword: '',
 			confirmationCode: '',
+			profile: '',
 			newUser: null
 		};
 	}
@@ -37,19 +38,32 @@ export default class Signup extends Component {
 		});
 	};
 
+	handleProfileChange = event => {
+		this.setState({
+			profile: event.target.value
+		});
+	}
+
 	handleSubmit = async event => {
 		event.preventDefault();
 
 		this.setState({ isLoading: true });
 
 		try {
-			const newUser = await Auth.signUp({
-				username: this.state.email,
-				password: this.state.password
-			});
-			this.setState({
-				newUser
-			});
+			Axios.post('https://unyfv0eps9.execute-api.us-east-1.amazonaws.com/dev/signUp',
+			{
+				["email"]: this.state.email,
+				["password"]: this.state.password, 
+				["profile"]: this.state.profile
+			}).then( (res) => {
+				console.log(res.data.codeDeliveryDetails)
+				const newUser = res.data.codeDeliveryDetails
+				this.setState({
+					newUser
+				});
+			}).catch( (res) => {
+				console.log(res)
+			})
 		} catch (e) {
 			alert(e.message);
 		}
@@ -57,17 +71,46 @@ export default class Signup extends Component {
 		this.setState({ isLoading: false });
 	};
 
+	parseJwt(token) {
+		var base64Url = token.split('.')[1];
+		var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+		var jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+			return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+		}).join(''));
+	
+		return JSON.parse(jsonPayload);
+	}
+
 	handleConfirmationSubmit = async event => {
 		event.preventDefault();
 
 		this.setState({ isLoading: true });
 
 		try {
-			await Auth.confirmSignUp(this.state.email, this.state.confirmationCode);
-			await Auth.signIn(this.state.email, this.state.password);
-
-			this.props.userHasAuthenticated(true);
-			this.props.history.push('/');
+			Axios.post('https://unyfv0eps9.execute-api.us-east-1.amazonaws.com/dev/confirmSignUp',
+			{
+				["email"]: this.state.email,
+				["confirmation_code"]: this.state.confirmationCode
+			}).then( res => {
+				console.log(res)
+				Axios.post('https://unyfv0eps9.execute-api.us-east-1.amazonaws.com/dev/signIn',
+				{
+					["email"]: this.state.email,
+					["password"]: this.state.password
+				}).then( res => {
+					console.log(res)
+					localStorage.setItem('currentUser', JSON.stringify(res.data));
+					localStorage.setItem('currentUsername', this.parseJwt(res.data.idToken).email);
+					this.props.setCurrentUser(res.data)
+					this.props.userHasAuthenticated(true);
+					this.props.history.push('/');
+				}).catch( res => {
+					console.log(res)
+				})
+			}).catch( res => {
+				//todo
+				console.log('wrong code')
+			})
 		} catch (e) {
 			alert(e.message);
 			this.setState({ isLoading: false });
@@ -109,6 +152,14 @@ export default class Signup extends Component {
 				<FormGroup controlId="confirmPassword" bsSize="large">
 					<ControlLabel>Confirm Password</ControlLabel>
 					<FormControl value={this.state.confirmPassword} onChange={this.handleChange} type="password" />
+				</FormGroup>
+				<FormGroup controlId="profileType" bsSize="large">
+					<ControlLabel>Profile Type</ControlLabel>
+					<FormControl componentClass="select" value={this.state.profile} onChange={this.handleProfileChange}>
+						<option value="default" hidden>Select a profile</option>
+						<option value="Candidate">Candidate</option>
+						<option value="Recruiter">Recruiter</option>
+					</FormControl>
 				</FormGroup>
 				<LoaderButton
 					block

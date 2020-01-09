@@ -12,103 +12,205 @@
 # Happy Coding!
 
 service: back-end
-# app and org for use with dashboard.serverless.com
-#app: your-app-name
-#org: your-org-name
-
-# You can pin your service to only deploy with a specific Serverless version
-# Check out our docs for more details
-# frameworkVersion: "=X.X.X"
 
 provider:
   name: aws
   runtime: java8
   stage: ${opt:stage, 'dev'}
   region: ${opt:region, 'us-east-1'}
-# you can overwrite defaults here
-#  stage: dev
-#  region: us-east-1
-
-# you can add statements to the Lambda function's IAM Role here
 #  iamRoleStatements:
-#    - Effect: "Allow"
+#    - Effect: Allow
 #      Action:
-#        - "s3:ListBucket"
-#      Resource: { "Fn::Join" : ["", ["arn:aws:s3:::", { "Ref" : "ServerlessDeploymentBucket" } ] ]  }
-#    - Effect: "Allow"
-#      Action:
-#        - "s3:PutObject"
+#        - dynamodb:Query
+#        - dynamodb:Scan
+#        - dynamodb:GetItem
+#        - dynamodb:PutItem
+#        - dynamodb:UpdateItem
+#        - dynamodb:DeleteItem
 #      Resource:
-#        Fn::Join:
-#          - ""
-#          - - "arn:aws:s3:::"
-#            - "Ref" : "ServerlessDeploymentBucket"
-#            - "/*"
+#        - { "Fn::GetAtt": ["UserInfoTable", "Arn" ] }
 
-# you can define service wide environment variables here
-#  environment:
-#    variable1: value1
-
-# you can add packaging information here
 package:
   artifact: target/back-end-api-dev.jar
 
 functions:
-  hello:
-    handler: com.serverless.HelloHandler
+  signUp:
+    handler: com.serverless.cognito.SignUpHandler
+    description: Sign up new user
     events:
       - http:
-          path: /forms
+          path: /signUp
+          method: post
+          cors: true
+  confirmSignUp:
+    handler: com.serverless.cognito.ConfirmSignUpHandler
+    description: Confirm user account email
+    events:
+      - http:
+          path: /confirmSignUp
+          method: post
+          cors: true
+  listCandidates:
+    handler: com.serverless.cognito.ListCandidatesHandler
+    description: List all candidates
+    events:
+      - http:
+          path: /listCandidates
           method: get
           cors: true
-#    The following are a few example events you can configure
-#    NOTE: Please make sure to change your handler code to work with those events
-#    Check the event documentation for details
-#    events:
-#      - http:
-#          path: users/create
-#          method: get
-#      - websocket: $connect
-#      - s3: ${env:BUCKET}
-#      - schedule: rate(10 minutes)
-#      - sns: greeter-topic
-#      - stream: arn:aws:dynamodb:region:XXXXXX:table/foo/stream/1970-01-01T00:00:00.000
-#      - alexaSkill: amzn1.ask.skill.xx-xx-xx-xx
-#      - alexaSmartHome: amzn1.ask.skill.xx-xx-xx-xx
-#      - iot:
-#          sql: "SELECT * FROM 'some_topic'"
-#      - cloudwatchEvent:
-#          event:
-#            source:
-#              - "aws.ec2"
-#            detail-type:
-#              - "EC2 Instance State-change Notification"
-#            detail:
-#              state:
-#                - pending
-#      - cloudwatchLog: '/aws/lambda/hello'
-#      - cognitoUserPool:
-#          pool: MyUserPool
-#          trigger: PreSignUp
-#      - alb:
-#          listenerArn: arn:aws:elasticloadbalancing:us-east-1:XXXXXX:listener/app/my-load-balancer/50dc6c495c0c9188/
-#          priority: 1
-#          conditions:
-#            host: example.com
-#            path: /hello
+  signIn:
+    handler: com.serverless.cognito.SignInHandler
+    description: Sign in user
+    events:
+      - http:
+          path: /signIn
+          method: post
+          cors: true
+  confirmPassword:
+    handler: com.serverless.cognito.ConfirmForgotPassword
+    description: Confirm changing user password
+    events:
+      - http:
+          path: /confirmPassword
+          method: post
+          cors: true
+  forgotPassword:
+    handler: com.serverless.cognito.ForgotPasswordHandler
+    description: Attempt changing password
+    events:
+      - http:
+          path: /forgotPassword
+          method: post
+          cors: true
 
-#    Define function environment variables here
-#    environment:
-#      variable2: value2
+  readTests:
+    handler: com.serverless.ReadTestsHandler
+    description: Get all tests from Tests table
+    events:
+      - http:
+          path: /tests
+          method: get
+          cors: true
+          integration: lambda
+  readTestsByUsername:
+    handler: com.serverless.ReadTestsByUsernameHandler
+    description: Get all tests assigned to specific candidate
+    events:
+      - http:
+          path: /tests/{username}
+          method: get
+          cors: true
+          integration: lambda
+          request:
+            template:
+              application/json: '{
+                "username": "$input.params("username")"
+              }'
+  insertTest:
+    handler: com.serverless.InsertTestHandler
+    description: Insert test into Tests table
+    events:
+      - http:
+          path: /tests
+          method: post
+          cors: true
+          integration: lambda
+          request:
+            template:
+              application/json: '{
+                "recruiterId": $input.json("$.recruiter-id"),
+                "testName": $input.json("$.test-name"),
+                "minPoints": $input.json("$.min-points"),
+                "maxPoints": $input.json("$.max-points"),
+                "questions": $input.json("$.questions")
+              }'
+  passTest:
+    handler: com.serverless.PassTestHandler
+    description: Updating tests table with candidate answers
+    events:
+      - http:
+          path: /pass-test
+          method: post
+          cors: true
+          integration: lambda
+          request:
+            template:
+              application/json: '{
+                "recruiterId": $input.json("$.recruiter-id"),
+                "testId": $input.json("$.test-id"),
+                "testName": $input.json("$.test-name"),
+                "username": $input.json("$.username"),
+                "answers": $input.json("$.answers")
+              }'
+  assignCandidate:
+    handler: com.serverless.AssignCandidateHandler
+    description: Assigning candidate to test
+    events:
+      - http:
+          path: /assign-candidate
+          method: post
+          cors: true
+          integration: lambda
+          request:
+            template:
+              application/json: '{
+                "recruiterId": $input.json("$.recruiter-id"),
+                "testId": $input.json("$.test-id"),
+                "testName": $input.json("$.test-name"),
+                "username": $input.json("$.username")
+              }'
+  rateTest:
+    handler: com.serverless.RateTestHandler
+    description: Rate candidate answers
+    events:
+      - http:
+          path: /rate-test
+          method: post
+          cors: true
+          integration: lambda
+          request:
+            template:
+              application/json: '{
+                "recruiterId": $input.json("$.recruiter-id"),
+                "testId": $input.json("$.test-id"),
+                "testName": $input.json("$.test-name"),
+                "username": $input.json("$.username"),
+                "answers": $input.json("$.answers")
+              }'
+  getTests:
+    handler: com.serverless.GetTestsHandler
+    description: Get all tests
+    events:
+      - http:
+          path: /get-tests
+          method: get
+          cors: true
+          integration: lambda
+          request:
+            template:
+              application/json: '{
+                "user": "$input.params("user")",
+                "role": "$input.params("role")",
+                "status": "$input.params("status")"
+              }'
 
-# you can add CloudFormation resource templates here
-#resources:
-#  Resources:
-#    NewResource:
-#      Type: AWS::S3::Bucket
+resources:
+  Resources:
+# TODO: jak jest juz tabela to jest problem https://stackoverflow.com/questions/41620437/how-to-continue-deploy-if-dynamodb-table-already-exists
+#    Tests:
+#      Type: AWS::DynamoDB::Table
 #      Properties:
-#        BucketName: my-new-bucket
-#  Outputs:
-#     NewOutput:
-#       Description: "Description for the output"
-#       Value: "Some output value"
+#        TableName: Tests
+#        AttributeDefinitions:
+#          - AttributeName: recruiter_id
+#            AttributeType: S
+#          - AttributeName: test_id
+#            AttributeType: S
+#        KeySchema:
+#          - AttributeName: recruiter_id
+#            KeyType: HASH
+#          - AttributeName: test_id
+#            KeyType: RANGE
+#        ProvisionedThroughput:
+#          ReadCapacityUnits: 1
+#          WriteCapacityUnits: 1

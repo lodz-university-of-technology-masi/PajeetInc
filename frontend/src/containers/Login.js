@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { FormGroup, FormControl, ControlLabel } from 'react-bootstrap';
 import LoaderButton from '../components/LoaderButton';
-import { Auth } from 'aws-amplify';
+import Axios from 'axios';
 
 import './Login.css';
 
@@ -14,6 +14,16 @@ export default class Login extends Component {
 			email: '',
 			password: ''
 		};
+	}
+
+	parseJwt(token) {
+		var base64Url = token.split('.')[1];
+		var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+		var jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+			return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+		}).join(''));
+	
+		return JSON.parse(jsonPayload);
 	}
 
 	validateForm() {
@@ -32,10 +42,21 @@ export default class Login extends Component {
 		this.setState({ isLoading: true });
 
 		try {
-			await Auth.signIn(this.state.email, this.state.password);
-			console.log('User logged in');
-			this.props.userHasAuthenticated(true);
-			this.props.history.push('/');
+			Axios.post('https://unyfv0eps9.execute-api.us-east-1.amazonaws.com/dev/signIn',
+			{
+				["email"]: this.state.email,
+				["password"]: this.state.password
+			}).then(res => {
+				console.log('User logged in');
+				localStorage.setItem('currentUser', JSON.stringify(res.data));
+				localStorage.setItem('currentUsername', this.parseJwt(res.data.idToken).email);
+				this.props.setCurrentUser(res.data)
+				this.props.userHasAuthenticated(true);
+				this.props.history.push('/');
+			}).catch(res => {
+				console.log(res)
+				//todo wrong password message
+			})
 		} catch (e) {
 			alert(e.message);
 			this.setState({ isLoading: false });
@@ -54,6 +75,7 @@ export default class Login extends Component {
 						<ControlLabel>Password</ControlLabel>
 						<FormControl value={this.state.password} onChange={this.handleChange} type="password" />
 					</FormGroup>
+					<a href="/resetpassword">Forgot password?</a>
 					<LoaderButton
 						block
 						bsSize="large"
