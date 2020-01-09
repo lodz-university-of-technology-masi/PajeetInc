@@ -1,5 +1,4 @@
 import React, { Component } from "react";
-import { Auth } from "aws-amplify";
 import { Link } from "react-router-dom";
 import {
   HelpBlock,

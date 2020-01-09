@@ -4,7 +4,6 @@ import { Link, withRouter } from 'react-router-dom';
 
 import { Nav, Navbar, NavItem } from 'react-bootstrap';
 import Routes from './Routes';
-import { Auth } from 'aws-amplify';
 import { IntlProviderWrapper } from './translations/IntProviderWrapper'
 import { FormattedMessage } from 'react-intl';
 import { LanguageSwitch } from './components/LanguageSwitch'
@@ -68,7 +67,7 @@ class App extends Component {
 			isAuthenticated: this.state.isAuthenticated,
 			userHasAuthenticated: this.userHasAuthenticated,
 			currentUser: this.state.currentUser,
-			setCurrentUser: this.state.currentUser
+			setCurrentUser: this.setCurrentUser
 		};
 		return (
 			<IntlProviderWrapper>

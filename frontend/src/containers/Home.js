@@ -1,7 +1,5 @@
 import React, { Component } from 'react';
-//import { API } from 'aws-amplify';
 import './Home.css';
-import { Auth } from 'aws-amplify';
 
 
 export default class Home extends Component {

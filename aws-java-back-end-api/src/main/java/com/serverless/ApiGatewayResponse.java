@@ -68,7 +68,6 @@ public class ApiGatewayResponse {
 		public Builder setHeaders(Map<String, String> headers) {
 			if (headers == null) {
 				Map<String, String> constHeaders = new HashMap<>();
-				constHeaders.put("Content-Type", "application/json");
 				constHeaders.put("Access-Control-Allow-Origin", "*");
 				this.headers = Collections.unmodifiableMap(new HashMap<>(constHeaders));
 			}

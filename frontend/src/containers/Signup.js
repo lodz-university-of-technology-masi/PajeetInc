@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import { HelpBlock, FormGroup, FormControl, ControlLabel } from 'react-bootstrap';
 import LoaderButton from '../components/LoaderButton';
-import { Auth } from 'aws-amplify';
 import Axios from 'axios';
 
 import './Signup.css';
@@ -91,6 +90,7 @@ export default class Signup extends Component {
 				}).then( res => {
 					console.log(res)
 					localStorage.setItem('currentUser', JSON.stringify(res.data));
+					this.props.setCurrentUser(res.data)
 					this.props.userHasAuthenticated(true);
 					this.props.history.push('/');
 				}).catch( res => {

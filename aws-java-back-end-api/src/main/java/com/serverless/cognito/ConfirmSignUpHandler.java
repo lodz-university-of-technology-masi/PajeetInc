@@ -46,13 +46,13 @@ public class ConfirmSignUpHandler implements RequestHandler<Map<String, Object>,
                 return ApiGatewayResponse.builder()
                         .setStatusCode(200)
                         .setRawBody("Account has been confirmed.")
-                        .setHeaders(Collections.singletonMap("X-Powered-By", "AWS Lambda & Serverless"))
+                        .setHeaders(Collections.singletonMap("Access-Control-Allow-Origin", "*"))
                         .build();
             } catch (ExpiredCodeException ex) {
                 return ApiGatewayResponse.builder()
                         .setStatusCode(200)
                         .setRawBody(ex.getErrorCode() + ": " + ex.getErrorMessage())
-                        .setHeaders(Collections.singletonMap("X-Powered-By", "AWS Lambda & Serverless"))
+                        .setHeaders(Collections.singletonMap("Access-Control-Allow-Origin", "*"))
                         .build();
             }
 
@@ -62,7 +62,7 @@ public class ConfirmSignUpHandler implements RequestHandler<Map<String, Object>,
             return ApiGatewayResponse.builder()
                     .setStatusCode(500)
                     .setObjectBody(responseBody)
-                    .setHeaders(Collections.singletonMap("X-Powered-By", "AWS Lambda & Serverless"))
+                    .setHeaders(Collections.singletonMap("Access-Control-Allow-Origin", "*"))
                     .build();
         }
     }
