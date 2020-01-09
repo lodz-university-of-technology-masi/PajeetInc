@@ -1,6 +1,6 @@
 import React, {useState, useEffect} from 'react'
 import axios from 'axios'
-import {Button, Panel} from 'react-bootstrap'
+import {Button, Panel, PageHeader} from 'react-bootstrap'
 import AnswerTest from './AnswerTest'
 
 export default function UserTests() {
@@ -9,10 +9,9 @@ export default function UserTests() {
   useEffect(() => {
     const fetchData = async () => {
       const result = await axios(
-        'https://owe6jjn5we.execute-api.us-east-1.amazonaws.com/dev/tests/maciej@wp.ru',
+        'https://owe6jjn5we.execute-api.us-east-1.amazonaws.com/dev/get-tests?user=maciej@wp.ru&role=candidate&status=assigned',
       );
       setTests(result.data);
-      console.log(tests)
     };
     fetchData();
   }, []);
@@ -20,8 +19,14 @@ export default function UserTests() {
     <div>
       {tests.map((test, i)=>{
         return(
-        <div>
+        <div> 
+          <PageHeader>Moje testy do przejścia</PageHeader>
+          <Panel>
+            <Panel.Heading>
+              <Panel.Title>{test.test_name}</Panel.Title>
+            </Panel.Heading>
           <AnswerTest test={test} />
+          </Panel>
         </div>
         )
     })}
