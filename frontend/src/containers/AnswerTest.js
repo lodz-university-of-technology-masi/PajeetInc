@@ -7,7 +7,7 @@ export default function AnswerTest({test}) {
   useEffect(() => {
     const fetchData = async () => {
       const result = await axios(
-        'https://owe6jjn5we.execute-api.us-east-1.amazonaws.com/dev/tests/maciej@wp.ru',
+        'https://owe6jjn5we.execute-api.us-east-1.amazonaws.com/dev/tests/' + localStorage.getItem('currentUsername'),
       );
       setTests(result.data);
       console.log(result.data)

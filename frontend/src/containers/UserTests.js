@@ -8,11 +8,13 @@ export default function UserTests() {
   const [showForm, setshowForm] = useState([])
   useEffect(() => {
     const fetchData = async () => {
+      const url = 'https://owe6jjn5we.execute-api.us-east-1.amazonaws.com/dev/get-tests?user='+ localStorage.getItem('currentUsername') + '&role=candidate&status=assigned' ;
       const result = await axios(
-        'https://owe6jjn5we.execute-api.us-east-1.amazonaws.com/dev/tests/maciej@wp.ru',
+        url,
       );
       setTests(result.data);
-      console.log(tests)
+      console.log(tests);
+      console.log(url);
     };
     fetchData();
   }, []);

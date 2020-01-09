@@ -42,7 +42,7 @@ export default function AddCandidates() {
       });
   }
   function submitCandidate(){
-    axios.post('https://owe6jjn5we.execute-api.us-east-1.amazonaws.com/dev/assign-candidate',{["recruiter-id"]:"rekruter420",["test-id"]:testId, ["test-name"]: testName,["username"]: username})
+    axios.post('https://owe6jjn5we.execute-api.us-east-1.amazonaws.com/dev/assign-candidate',{["recruiter-id"]:localStorage.getItem('currentUsername'),["test-id"]:testId, ["test-name"]: testName,["username"]: username})
   }
   return (
     <div>

@@ -54,7 +54,7 @@ export default function AddTests({history}) {
 
   const submitTest = () => {
     console.log({["recruiter-id"]:"rekruter420",["test-name"]:testName, ["min-points"]: minPoints,["max-points"]: maxPoints ,questions})
-    Axios.post('https://owe6jjn5we.execute-api.us-east-1.amazonaws.com/dev/tests',{["recruiter-id"]:"rekruter420",["test-name"]:testName, ["min-points"]: minPoints,["max-points"]: maxPoints ,questions})
+    Axios.post('https://owe6jjn5we.execute-api.us-east-1.amazonaws.com/dev/tests',{["recruiter-id"]: localStorage.getItem('currentUsername'),["test-name"]:testName, ["min-points"]: minPoints,["max-points"]: maxPoints ,questions})
         .then(() => {
           history.push('/tests')
         })
