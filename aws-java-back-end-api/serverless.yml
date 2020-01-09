@@ -18,45 +18,69 @@ provider:
   runtime: java8
   stage: ${opt:stage, 'dev'}
   region: ${opt:region, 'us-east-1'}
-  iamRoleStatements:
-    - Effect: Allow
-      Action:
-        - dynamodb:Query
-        - dynamodb:Scan
-        - dynamodb:GetItem
-        - dynamodb:PutItem
-        - dynamodb:UpdateItem
-        - dynamodb:DeleteItem
-      Resource:
-        - { "Fn::GetAtt": ["UserInfoTable", "Arn" ] }
+#  iamRoleStatements:
+#    - Effect: Allow
+#      Action:
+#        - dynamodb:Query
+#        - dynamodb:Scan
+#        - dynamodb:GetItem
+#        - dynamodb:PutItem
+#        - dynamodb:UpdateItem
+#        - dynamodb:DeleteItem
+#      Resource:
+#        - { "Fn::GetAtt": ["UserInfoTable", "Arn" ] }
 
 package:
   artifact: target/back-end-api-dev.jar
 
 functions:
-  addUserInfo:
-    handler: com.serverless.AddUserInfoHandler
-    description: Add user information to UserInfo table
+  signUp:
+    handler: com.serverless.cognito.SignUpHandler
+    description: Sign up new user
     events:
       - http:
-          path: /userInfo
+          path: /signUp
           method: post
           cors: true
-  getUserInfo:
-    handler: com.serverless.GetUserInfoHandler
-    description: Get user information with id from UserInfo table
+  confirmSignUp:
+    handler: com.serverless.cognito.ConfirmSignUpHandler
+    description: Confirm user account email
     events:
       - http:
-          path: /userInfo/{id}
+          path: /confirmSignUp
+          method: post
+          cors: true
+  listCandidates:
+    handler: com.serverless.cognito.ListCandidatesHandler
+    description: List all candidates
+    events:
+      - http:
+          path: /listCandidates
           method: get
           cors: true
-  getAllUserInfo:
-    handler: com.serverless.GetAllUserInfoHandler
-    description: Get all user information from UserInfo table
+  signIn:
+    handler: com.serverless.cognito.SignInHandler
+    description: Sign in user
     events:
       - http:
-          path: /userInfo
-          method: get
+          path: /signIn
+          method: post
+          cors: true
+  confirmPassword:
+    handler: com.serverless.cognito.ConfirmForgotPassword
+    description: Confirm changing user password
+    events:
+      - http:
+          path: /confirmPassword
+          method: post
+          cors: true
+  forgotPassword:
+    handler: com.serverless.cognito.ForgotPasswordHandler
+    description: Attempt changing password
+    events:
+      - http:
+          path: /forgotPassword
+          method: post
           cors: true
 
   readTests:
@@ -82,7 +106,6 @@ functions:
               application/json: '{
                 "username": "$input.params("username")"
               }'
-
   insertTest:
     handler: com.serverless.InsertTestHandler
     description: Insert test into Tests table
@@ -101,27 +124,79 @@ functions:
                 "maxPoints": $input.json("$.max-points"),
                 "questions": $input.json("$.questions")
               }'
+  passTest:
+    handler: com.serverless.PassTestHandler
+    description: Updating tests table with candidate answers
+    events:
+      - http:
+          path: /pass-test
+          method: post
+          cors: true
+          integration: lambda
+          request:
+            template:
+              application/json: '{
+                "recruiterId": $input.json("$.recruiter-id"),
+                "testId": $input.json("$.test-id"),
+                "testName": $input.json("$.test-name"),
+                "username": $input.json("$.username"),
+                "answers": $input.json("$.answers")
+              }'
+  assignCandidate:
+    handler: com.serverless.AssignCandidateHandler
+    description: Assigning candidate to test
+    events:
+      - http:
+          path: /assign-candidate
+          method: post
+          cors: true
+          integration: lambda
+          request:
+            template:
+              application/json: '{
+                "recruiterId": $input.json("$.recruiter-id"),
+                "testId": $input.json("$.test-id"),
+                "testName": $input.json("$.test-name"),
+                "username": $input.json("$.username")
+              }'
+  rateTest:
+    handler: com.serverless.RateTestHandler
+    description: Rate candidate answers
+    events:
+      - http:
+          path: /rate-test
+          method: post
+          cors: true
+          integration: lambda
+          request:
+            template:
+              application/json: '{
+                "recruiterId": $input.json("$.recruiter-id"),
+                "testId": $input.json("$.test-id"),
+                "testName": $input.json("$.test-name"),
+                "username": $input.json("$.username"),
+                "answers": $input.json("$.answers")
+              }'
+  getTests:
+    handler: com.serverless.GetTestsHandler
+    description: Get all tests
+    events:
+      - http:
+          path: /get-tests
+          method: get
+          cors: true
+          integration: lambda
+          request:
+            template:
+              application/json: '{
+                "user": "$input.params("user")",
+                "role": "$input.params("role")",
+                "status": "$input.params("status")"
+              }'
 
 resources:
   Resources:
-    UserInfoTable:
-      Type: AWS::DynamoDB::Table
-      Properties:
-        TableName: UserInfoTable
-        AttributeDefinitions:
-          - AttributeName: id
-            AttributeType: S
-          - AttributeName: username
-            AttributeType: S
-        KeySchema:
-          - AttributeName: id
-            KeyType: HASH
-          - AttributeName: username
-            KeyType: RANGE
-        ProvisionedThroughput:
-          ReadCapacityUnits: 1
-          WriteCapacityUnits: 1
-
+# TODO: jak jest juz tabela to jest problem https://stackoverflow.com/questions/41620437/how-to-continue-deploy-if-dynamodb-table-already-exists
 #    Tests:
 #      Type: AWS::DynamoDB::Table
 #      Properties:

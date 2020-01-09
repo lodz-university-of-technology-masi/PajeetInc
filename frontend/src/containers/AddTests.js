@@ -52,7 +52,7 @@ export default function AddTests({history}) {
 
   const submitTest = () => {
     console.log({["recruiter-id"]:"rekruter420",["test-name"]:testName, ["min-points"]: minPoints,["max-points"]: maxPoints ,questions})
-    Axios.post('https://dxix4h5we1.execute-api.us-east-1.amazonaws.com/dev/tests',{["recruiter-id"]:"rekruter420",["test-name"]:testName, ["min-points"]: minPoints,["max-points"]: maxPoints ,questions})
+    Axios.post('https://owe6jjn5we.execute-api.us-east-1.amazonaws.com/dev/tests',{["recruiter-id"]: localStorage.getItem('currentUsername'),["test-name"]:testName, ["min-points"]: minPoints,["max-points"]: maxPoints ,questions})
         .then(() => {
           history.push('/tests')
         })
@@ -61,7 +61,6 @@ export default function AddTests({history}) {
   const removeEmpty = obj => {
     Object.keys(obj).forEach(key => obj[key] == null && delete obj[key]);
   };
-
   const setupClosedAnswers = (e) => {
     if (isNaN(parseInt(e.target.value))) {
       setAnswersNumber([...Array(parseInt(0)).keys()])
@@ -129,7 +128,7 @@ export default function AddTests({history}) {
               <FormControl as="textarea" rows="3" onChange={(e) => {  let nanswers = [...answeresClosed]; let currentanswer = answeresClosed[num]; currentanswer.answer=e.target.value; setAnsweresClosed(nanswers) } } />
               <Checkbox onClick={(e) => { let nanswers = [...answeresClosed]; let currentanswer = answeresClosed[num]; currentanswer.correct=e.target.checked; setAnsweresClosed(nanswers) }}>
                 Poprawna Odpowiedz?
-              </Checkbox>    
+              </Checkbox>
             </ListGroup> 
             )
           })
