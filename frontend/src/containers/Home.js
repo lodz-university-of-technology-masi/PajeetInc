@@ -1,7 +1,5 @@
 import React, { Component } from 'react';
-//import { API } from 'aws-amplify';
 import './Home.css';
-import { Auth } from 'aws-amplify';
 
 
 export default class Home extends Component {
@@ -20,8 +18,7 @@ export default class Home extends Component {
 			return;
 		}
 		try {
-			this.state.currentUser = await Auth.currentAuthenticatedUser();
-			console.log(this.state.currentUser);
+			console.log(this.props.currentUser);
 		} catch (e) {
 			console.log('fetch exception');
 			alert(e);
@@ -43,7 +40,7 @@ export default class Home extends Component {
 		return (
 			<div className="LoggedHomePage">
 				<p>{!this.state.isLoading}</p>
-				<p>{this.props.isAuthenticated && !this.state.isLoading && this.state.currentUser.attributes.profile}</p>
+				<p>{this.props.currentUser && !this.state.isLoading && 'zalogowany'}</p>
 
 			</div>
 		);

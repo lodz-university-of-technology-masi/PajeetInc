@@ -18,45 +18,69 @@ provider:
   runtime: java8
   stage: ${opt:stage, 'dev'}
   region: ${opt:region, 'us-east-1'}
-  iamRoleStatements:
-    - Effect: Allow
-      Action:
-        - dynamodb:Query
-        - dynamodb:Scan
-        - dynamodb:GetItem
-        - dynamodb:PutItem
-        - dynamodb:UpdateItem
-        - dynamodb:DeleteItem
-      Resource:
-        - { "Fn::GetAtt": ["UserInfoTable", "Arn" ] }
+#  iamRoleStatements:
+#    - Effect: Allow
+#      Action:
+#        - dynamodb:Query
+#        - dynamodb:Scan
+#        - dynamodb:GetItem
+#        - dynamodb:PutItem
+#        - dynamodb:UpdateItem
+#        - dynamodb:DeleteItem
+#      Resource:
+#        - { "Fn::GetAtt": ["UserInfoTable", "Arn" ] }
 
 package:
   artifact: target/back-end-api-dev.jar
 
 functions:
-  addUserInfo:
-    handler: com.serverless.AddUserInfoHandler
-    description: Add user information to UserInfo table
+  signUp:
+    handler: com.serverless.cognito.SignUpHandler
+    description: Sign up new user
     events:
       - http:
-          path: /userInfo
+          path: /signUp
           method: post
           cors: true
-  getUserInfo:
-    handler: com.serverless.GetUserInfoHandler
-    description: Get user information with id from UserInfo table
+  confirmSignUp:
+    handler: com.serverless.cognito.ConfirmSignUpHandler
+    description: Confirm user account email
     events:
       - http:
-          path: /userInfo/{id}
+          path: /confirmSignUp
+          method: post
+          cors: true
+  listCandidates:
+    handler: com.serverless.cognito.ListCandidatesHandler
+    description: List all candidates
+    events:
+      - http:
+          path: /listCandidates
           method: get
           cors: true
-  getAllUserInfo:
-    handler: com.serverless.GetAllUserInfoHandler
-    description: Get all user information from UserInfo table
+  signIn:
+    handler: com.serverless.cognito.SignInHandler
+    description: Sign in user
     events:
       - http:
-          path: /userInfo
-          method: get
+          path: /signIn
+          method: post
+          cors: true
+  confirmPassword:
+    handler: com.serverless.cognito.ConfirmForgotPassword
+    description: Confirm changing user password
+    events:
+      - http:
+          path: /confirmPassword
+          method: post
+          cors: true
+  forgotPassword:
+    handler: com.serverless.cognito.ForgotPasswordHandler
+    description: Attempt changing password
+    events:
+      - http:
+          path: /forgotPassword
+          method: post
           cors: true
 
   readTests:
@@ -82,7 +106,6 @@ functions:
               application/json: '{
                 "username": "$input.params("username")"
               }'
-
   insertTest:
     handler: com.serverless.InsertTestHandler
     description: Insert test into Tests table
@@ -104,38 +127,20 @@ functions:
 
 resources:
   Resources:
-    UserInfoTable:
+    Tests:
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName: UserInfoTable
+        TableName: Tests
         AttributeDefinitions:
-          - AttributeName: id
+          - AttributeName: recruiter_id
             AttributeType: S
-          - AttributeName: username
+          - AttributeName: test_id
             AttributeType: S
         KeySchema:
-          - AttributeName: id
+          - AttributeName: recruiter_id
             KeyType: HASH
-          - AttributeName: username
+          - AttributeName: test_id
             KeyType: RANGE
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
-
-#    Tests:
-#      Type: AWS::DynamoDB::Table
-#      Properties:
-#        TableName: Tests
-#        AttributeDefinitions:
-#          - AttributeName: recruiter_id
-#            AttributeType: S
-#          - AttributeName: test_id
-#            AttributeType: S
-#        KeySchema:
-#          - AttributeName: recruiter_id
-#            KeyType: HASH
-#          - AttributeName: test_id
-#            KeyType: RANGE
-#        ProvisionedThroughput:
-#          ReadCapacityUnits: 1
-#          WriteCapacityUnits: 1
