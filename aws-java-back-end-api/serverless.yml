@@ -116,23 +116,93 @@ functions:
                 "maxPoints": $input.json("$.max-points"),
                 "questions": $input.json("$.questions")
               }'
+  passTest:
+    handler: com.serverless.PassTestHandler
+    description: Updating tests table with candidate answers
+    events:
+      - http:
+          path: /pass-test
+          method: post
+          cors: true
+          integration: lambda
+          request:
+            template:
+              application/json: '{
+                "recruiterId": $input.json("$.recruiter-id"),
+                "testId": $input.json("$.test-id"),
+                "testName": $input.json("$.test-name"),
+                "username": $input.json("$.username"),
+                "answers": $input.json("$.answers")
+              }'
+  assignCandidate:
+    handler: com.serverless.AssignCandidateHandler
+    description: Assigning candidate to test
+    events:
+      - http:
+          path: /assign-candidate
+          method: post
+          cors: true
+          integration: lambda
+          request:
+            template:
+              application/json: '{
+                "recruiterId": $input.json("$.recruiter-id"),
+                "testId": $input.json("$.test-id"),
+                "testName": $input.json("$.test-name"),
+                "username": $input.json("$.username")
+              }'
+  rateTest:
+    handler: com.serverless.RateTestHandler
+    description: Rate candidate answers
+    events:
+      - http:
+          path: /rate-test
+          method: post
+          cors: true
+          integration: lambda
+          request:
+            template:
+              application/json: '{
+                "recruiterId": $input.json("$.recruiter-id"),
+                "testId": $input.json("$.test-id"),
+                "testName": $input.json("$.test-name"),
+                "username": $input.json("$.username"),
+                "answers": $input.json("$.answers")
+              }'
+  getTests:
+    handler: com.serverless.GetTestsHandler
+    description: Get all tests
+    events:
+      - http:
+          path: /get-tests
+          method: get
+          cors: true
+          integration: lambda
+          request:
+            template:
+              application/json: '{
+                "user": "$input.params("user")",
+                "role": "$input.params("role")",
+                "status": "$input.params("status")"
+              }'
 
 resources:
   Resources:
-    Tests:
-      Type: AWS::DynamoDB::Table
-      Properties:
-        TableName: Tests
-        AttributeDefinitions:
-          - AttributeName: recruiter_id
-            AttributeType: S
-          - AttributeName: test_id
-            AttributeType: S
-        KeySchema:
-          - AttributeName: recruiter_id
-            KeyType: HASH
-          - AttributeName: test_id
-            KeyType: RANGE
-        ProvisionedThroughput:
-          ReadCapacityUnits: 1
-          WriteCapacityUnits: 1
+# TODO: jak jest juz tabela to jest problem https://stackoverflow.com/questions/41620437/how-to-continue-deploy-if-dynamodb-table-already-exists
+#    Tests:
+#      Type: AWS::DynamoDB::Table
+#      Properties:
+#        TableName: Tests
+#        AttributeDefinitions:
+#          - AttributeName: recruiter_id
+#            AttributeType: S
+#          - AttributeName: test_id
+#            AttributeType: S
+#        KeySchema:
+#          - AttributeName: recruiter_id
+#            KeyType: HASH
+#          - AttributeName: test_id
+#            KeyType: RANGE
+#        ProvisionedThroughput:
+#          ReadCapacityUnits: 1
+#          WriteCapacityUnits: 1
