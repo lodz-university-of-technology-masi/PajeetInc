@@ -3,6 +3,7 @@ package com.serverless;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
@@ -65,7 +66,14 @@ public class ApiGatewayResponse {
 		}
 
 		public Builder setHeaders(Map<String, String> headers) {
-			this.headers = headers;
+			if (headers == null) {
+				Map<String, String> constHeaders = new HashMap<>();
+				constHeaders.put("Access-Control-Allow-Origin", "*");
+				this.headers = Collections.unmodifiableMap(new HashMap<>(constHeaders));
+			}
+			else {
+				this.headers = headers;
+			}
 			return this;
 		}
 

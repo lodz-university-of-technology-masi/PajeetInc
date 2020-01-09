@@ -2,6 +2,8 @@ package com.serverless.cognito;
 
 import com.amazonaws.services.cognitoidp.AWSCognitoIdentityProvider;
 import com.amazonaws.services.cognitoidp.model.*;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.serverless.ApiGatewayResponse;
 import com.serverless.Response;
 import java.util.Collections;
@@ -23,6 +25,8 @@ public class ConfirmSignUpHandler implements RequestHandler<Map<String, Object>,
     public ApiGatewayResponse handleRequest(Map<String, Object> input, Context context) {
         try {
             LOG.info(input);
+            JsonNode body = new ObjectMapper().readValue((String) input.get("body"), JsonNode.class);
+            LOG.info(body);
 
             /*
             {
@@ -33,24 +37,32 @@ public class ConfirmSignUpHandler implements RequestHandler<Map<String, Object>,
 
             ConfirmSignUpRequest confirmSignUpRequest = new ConfirmSignUpRequest();
             confirmSignUpRequest.setClientId(cognitoConfig.getClientId());
-            confirmSignUpRequest.setUsername((String)input.get("email"));
-            confirmSignUpRequest.setConfirmationCode((String)input.get("confirmation_code"));
+            confirmSignUpRequest.setUsername(body.get("email").asText());
+            confirmSignUpRequest.setConfirmationCode(body.get("confirmation_code").asText());
 
-            ConfirmSignUpResult confirmSignUpResult = cognitoClient.confirmSignUp(confirmSignUpRequest);
+            try {
+                ConfirmSignUpResult confirmSignUpResult = cognitoClient.confirmSignUp(confirmSignUpRequest);
 
-            return ApiGatewayResponse.builder()
-                    .setStatusCode(200)
-                    .setObjectBody(confirmSignUpResult)
-                    .setHeaders(Collections.singletonMap("X-Powered-By", "AWS Lambda & Serverless"))
-                    .build();
+                return ApiGatewayResponse.builder()
+                        .setStatusCode(200)
+                        .setRawBody("Account has been confirmed.")
+                        .setHeaders(Collections.singletonMap("Access-Control-Allow-Origin", "*"))
+                        .build();
+            } catch (ExpiredCodeException ex) {
+                return ApiGatewayResponse.builder()
+                        .setStatusCode(200)
+                        .setRawBody(ex.getErrorCode() + ": " + ex.getErrorMessage())
+                        .setHeaders(Collections.singletonMap("Access-Control-Allow-Origin", "*"))
+                        .build();
+            }
 
         } catch (Exception ex) {
             LOG.error("Error in processing input request: " + ex);
-            Response responseBody = new Response("Error in retrieving user items: ", input);
+            Response responseBody = new Response("Error in processing input request: ", input);
             return ApiGatewayResponse.builder()
                     .setStatusCode(500)
                     .setObjectBody(responseBody)
-                    .setHeaders(Collections.singletonMap("X-Powered-By", "AWS Lambda & Serverless"))
+                    .setHeaders(Collections.singletonMap("Access-Control-Allow-Origin", "*"))
                     .build();
         }
     }

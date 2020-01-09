@@ -4,7 +4,6 @@ import { Link, withRouter } from 'react-router-dom';
 
 import { Nav, Navbar, NavItem } from 'react-bootstrap';
 import Routes from './Routes';
-import { Auth } from 'aws-amplify';
 import { IntlProviderWrapper } from './translations/IntProviderWrapper'
 import { FormattedMessage } from 'react-intl';
 import { LanguageSwitch } from './components/LanguageSwitch'
@@ -17,13 +16,25 @@ class App extends Component {
 
 		this.state = {
 			isAuthenticated: false,
-			isAuthenticating: true
+			isAuthenticating: true,
+			currentUser: null
 		};
+	}
+
+	async checkIfLoggedIn() {
+		if (JSON.parse(localStorage.getItem('currentUser')) !== null)
+			return true
+		else return false
+	}
+
+	async logOut() {
+		localStorage.removeItem('currentUser');
 	}
 
 	async componentDidMount() {
 		try {
-			if (await Auth.currentSession()) {
+			if (await this.checkIfLoggedIn()) {
+				this.state.currentUser = JSON.parse(localStorage.getItem('currentUser'))
 				this.userHasAuthenticated(true);
 			}
 		} catch (e) {
@@ -35,12 +46,18 @@ class App extends Component {
 		this.setState({ isAuthenticating: false });
 	}
 
+
+
 	userHasAuthenticated = authenticated => {
 		this.setState({ isAuthenticated: authenticated });
 	};
 
+	setCurrentUser = user => {
+		this.setState({ currentUser: user });
+	};
+
 	handleLogout = async event => {
-		await Auth.signOut();
+		await this.logOut();
 
 		this.userHasAuthenticated(false);
 		this.props.history.push('/login');
@@ -48,7 +65,9 @@ class App extends Component {
 	render() {
 		const childProps = {
 			isAuthenticated: this.state.isAuthenticated,
-			userHasAuthenticated: this.userHasAuthenticated
+			userHasAuthenticated: this.userHasAuthenticated,
+			currentUser: this.state.currentUser,
+			setCurrentUser: this.setCurrentUser
 		};
 		return (
 			<IntlProviderWrapper>

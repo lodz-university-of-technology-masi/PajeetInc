@@ -41,7 +41,7 @@ public class ListCandidatesHandler implements RequestHandler<Map<String, Object>
             return ApiGatewayResponse.builder()
                     .setStatusCode(200)
                     .setObjectBody(node)
-                    .setHeaders(Collections.singletonMap("X-Powered-By", "AWS Lambda & Serverless"))
+                    .setHeaders(Collections.singletonMap("Access-Control-Allow-Origin", "*"))
                     .build();
 
         } catch (Exception ex) {
@@ -50,7 +50,7 @@ public class ListCandidatesHandler implements RequestHandler<Map<String, Object>
             return ApiGatewayResponse.builder()
                     .setStatusCode(500)
                     .setObjectBody(responseBody)
-                    .setHeaders(Collections.singletonMap("X-Powered-By", "AWS Lambda & Serverless"))
+                    .setHeaders(Collections.singletonMap("Access-Control-Allow-Origin", "*"))
                     .build();
         }
     }

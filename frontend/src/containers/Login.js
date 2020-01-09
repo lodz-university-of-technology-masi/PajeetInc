@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { FormGroup, FormControl, ControlLabel } from 'react-bootstrap';
 import LoaderButton from '../components/LoaderButton';
-import { Auth } from 'aws-amplify';
+import Axios from 'axios';
 
 import './Login.css';
 
@@ -32,10 +32,21 @@ export default class Login extends Component {
 		this.setState({ isLoading: true });
 
 		try {
-			await Auth.signIn(this.state.email, this.state.password);
-			console.log('User logged in');
-			this.props.userHasAuthenticated(true);
-			this.props.history.push('/');
+			Axios.post('https://unyfv0eps9.execute-api.us-east-1.amazonaws.com/dev/signIn',
+			{
+				["email"]: this.state.email,
+				["password"]: this.state.password
+			}).then(res => {
+				console.log(res)
+				console.log('User logged in');
+				localStorage.setItem('currentUser', JSON.stringify(res.data));
+				this.props.setCurrentUser(res.data)
+				this.props.userHasAuthenticated(true);
+				this.props.history.push('/');
+			}).catch(res => {
+				console.log(res)
+				//todo wrong password message
+			})
 		} catch (e) {
 			alert(e.message);
 			this.setState({ isLoading: false });

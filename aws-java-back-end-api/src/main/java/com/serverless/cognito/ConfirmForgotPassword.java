@@ -6,8 +6,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.serverless.ApiGatewayResponse;
 import com.serverless.Response;
-
-import java.util.*;
+import java.util.Collections;
+import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -15,8 +15,8 @@ import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 
 
-public class SignInHandler implements RequestHandler<Map<String, Object>, ApiGatewayResponse> {
-    private static final Logger LOG = LogManager.getLogger(SignUpHandler.class);
+public class ConfirmForgotPassword implements RequestHandler<Map<String, Object>, ApiGatewayResponse> {
+    private static final Logger LOG = LogManager.getLogger(ConfirmSignUpHandler.class);
     private static final CognitoConfig cognitoConfig = new CognitoConfig();
     private static final AWSCognitoIdentityProvider cognitoClient = new UserManagement()
             .getAmazonCognitoIdentityClient();
@@ -27,26 +27,28 @@ public class SignInHandler implements RequestHandler<Map<String, Object>, ApiGat
             LOG.info(input);
             JsonNode body = new ObjectMapper().readValue((String) input.get("body"), JsonNode.class);
             LOG.info(body);
+
             /*
             {
-                "email": "example@example.com",
+                "email": "kpm14005@eveav.com",
+                "confirmation_code": 213213,
                 "password": "!Password123"
             }
-             */
-
-            AdminInitiateAuthRequest authRequest = new AdminInitiateAuthRequest();
-            authRequest.setAuthFlow(AuthFlowType.ADMIN_USER_PASSWORD_AUTH);
-            authRequest.setClientId(cognitoConfig.getClientId());
-            authRequest.setUserPoolId(cognitoConfig.getUserPoolId());
-            authRequest.addAuthParametersEntry("USERNAME", body.get("email").asText());
-            authRequest.addAuthParametersEntry("PASSWORD", body.get("password").asText());
+            */
 
             try {
-                AdminInitiateAuthResult authResult = cognitoClient.adminInitiateAuth(authRequest);
+                ConfirmForgotPasswordRequest confirmForgotPasswordRequest = new ConfirmForgotPasswordRequest();
+                confirmForgotPasswordRequest.setClientId(cognitoConfig.getClientId());
+                confirmForgotPasswordRequest.setUsername(body.get("email").asText());
+                confirmForgotPasswordRequest.setConfirmationCode(body.get("confirmation_code").asText());
+                confirmForgotPasswordRequest.setPassword(body.get("password").asText());
+                ConfirmForgotPasswordResult confirmForgotPasswordResult =
+                        cognitoClient.confirmForgotPassword(confirmForgotPasswordRequest);
+
 
                 return ApiGatewayResponse.builder()
                         .setStatusCode(200)
-                        .setObjectBody(authResult.getAuthenticationResult())
+                        .setObjectBody(confirmForgotPasswordResult)
                         .setHeaders(Collections.singletonMap("Access-Control-Allow-Origin", "*"))
                         .build();
             } catch (NotAuthorizedException ex) {
