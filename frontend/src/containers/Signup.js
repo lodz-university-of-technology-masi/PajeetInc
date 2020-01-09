@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { HelpBlock, FormGroup, FormControl, ControlLabel } from 'react-bootstrap';
 import LoaderButton from '../components/LoaderButton';
 import { Auth } from 'aws-amplify';
+import Axios from 'axios';
 
 import './Signup.css';
 
@@ -15,6 +16,7 @@ export default class Signup extends Component {
 			password: '',
 			confirmPassword: '',
 			confirmationCode: '',
+			profile: '',
 			newUser: null
 		};
 	}
@@ -37,6 +39,12 @@ export default class Signup extends Component {
 		});
 	};
 
+	handleProfileChange = event => {
+		this.setState({
+			profile: event.target.value
+		});
+	}
+
 	handleSubmit = async event => {
 		event.preventDefault();
 
@@ -45,7 +53,12 @@ export default class Signup extends Component {
 		try {
 			const newUser = await Auth.signUp({
 				username: this.state.email,
-				password: this.state.password
+				password: this.state.password,
+				attributes: {
+					email: this.state.email,
+					profile: this.state.profile,
+					name: this.state.profile
+				}
 			});
 			this.setState({
 				newUser
@@ -64,6 +77,10 @@ export default class Signup extends Component {
 
 		try {
 			await Auth.confirmSignUp(this.state.email, this.state.confirmationCode);
+			console.log({
+				["id"]: this.state.username,["username"]: this.state.email, ["profile"]: this.state.profile})
+			Axios.post('https://unyfv0eps9.execute-api.us-east-1.amazonaws.com/dev/userInfo',{
+			["id"]: this.state.email,["username"]: this.state.email, ["profile"]: this.state.profile})
 			await Auth.signIn(this.state.email, this.state.password);
 
 			this.props.userHasAuthenticated(true);
@@ -109,6 +126,14 @@ export default class Signup extends Component {
 				<FormGroup controlId="confirmPassword" bsSize="large">
 					<ControlLabel>Confirm Password</ControlLabel>
 					<FormControl value={this.state.confirmPassword} onChange={this.handleChange} type="password" />
+				</FormGroup>
+				<FormGroup controlId="profileType" bsSize="large">
+					<ControlLabel>Profile Type</ControlLabel>
+					<FormControl componentClass="select" value={this.state.profile} onChange={this.handleProfileChange}>
+						<option value="default" hidden>Select a profile</option>
+						<option value="Candidate">Candidate</option>
+						<option value="Recruiter">Recruiter</option>
+					</FormControl>
 				</FormGroup>
 				<LoaderButton
 					block
