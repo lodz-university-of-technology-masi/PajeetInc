@@ -8,18 +8,13 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
-import com.amazonaws.services.dynamodbv2.document.DynamoDB;
 import com.amazonaws.services.dynamodbv2.document.Item;
-import com.amazonaws.services.dynamodbv2.document.ItemCollection;
-import com.amazonaws.services.dynamodbv2.document.ScanOutcome;
 import com.amazonaws.services.dynamodbv2.document.Table;
-import com.amazonaws.services.dynamodbv2.document.spec.ScanSpec;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 public class ReadTestsByUsernameHandler implements RequestStreamHandler {
 
@@ -31,7 +26,7 @@ public class ReadTestsByUsernameHandler implements RequestStreamHandler {
         Iterator<Item> iterator = DynamoDbController.getItemsFromTable(
                 "recruiter_id, test_id, max_points, min_points, questions, test_name, candidates", tests);
 
-        List<String> itemsAsStrings = new ArrayList<String>();
+        List<String> itemsAsStrings = new ArrayList<>();
         ObjectMapper objectMapper = new ObjectMapper();
         while (iterator.hasNext()) {
             Item item = iterator.next();
@@ -44,9 +39,12 @@ public class ReadTestsByUsernameHandler implements RequestStreamHandler {
                 JsonNode candidate = candidates.get(i);
                 String candidateUsername = candidate.get("username").asText();
                 if (candidateUsername.equals(username)) {
-                    String itemAsString = item.toJSONPretty() + ",";
+                    String itemAsString = item.toJSONPretty();
+                    itemAsString = JsonFormatter.removeCandidatesFromTest(itemAsString);
+
+                    itemAsString = JsonFormatter.removeCorrectAnswersFromTest(itemAsString);
                     itemsAsStrings.add(itemAsString);
-                    continue;
+                    break;
                 }
             }
         }
@@ -56,14 +54,9 @@ public class ReadTestsByUsernameHandler implements RequestStreamHandler {
     private void writeItemsToOutputStream(List<String> itemsAsStrings, OutputStream outputStream) throws IOException {
         outputStream = new BufferedOutputStream(outputStream);
         outputStream.write("[".getBytes());
-        if (itemsAsStrings.size() != 0) {
-            for (int i = 0; i < itemsAsStrings.size(); i++) {
-                if (i == itemsAsStrings.size() - 1) {
-                    String element = itemsAsStrings.get(i).substring(0, itemsAsStrings.get(i).length() - 1);
-                    itemsAsStrings.set(i, element);
-                }
-                outputStream.write(itemsAsStrings.get(i).getBytes());
-            }
+        for (int i = 0; i < itemsAsStrings.size(); i++) {
+            String itemAsString = i == itemsAsStrings.size() - 1 ? itemsAsStrings.get(i) : itemsAsStrings.get(i) + ",";
+            outputStream.write(itemAsString.getBytes());
         }
         outputStream.write("]".getBytes());
         outputStream.flush();

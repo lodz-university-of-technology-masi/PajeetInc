@@ -6,7 +6,6 @@ import {Button} from 'react-bootstrap'
 import Test from '../components/Test'
 
 export default function AddCandidates() {
-
   const [testId, setTestId] = useState([]);
   const [testName, setTestName] = useState([]);
   const [username, setUsername] = useState([]);
@@ -28,6 +27,7 @@ export default function AddCandidates() {
       const result = await axios(
         'https://unyfv0eps9.execute-api.us-east-1.amazonaws.com/dev/listCandidates',
       );
+
       console.log(result);
       setUsers(result.data);
     };
@@ -44,6 +44,7 @@ export default function AddCandidates() {
   }
   function submitCandidate(){
     axios.post('https://owe6jjn5we.execute-api.us-east-1.amazonaws.com/dev/assign-candidate',{["recruiter-id"]:localStorage.getItem('currentUsername'),["test-id"]:testId, ["test-name"]: testName,["username"]: username})
+
   }
   return (
     <div>
@@ -62,6 +63,7 @@ export default function AddCandidates() {
             })}
         </FormControl>
         <Button type="submit" onClick={() => submitCandidate()}>Dodaj kandydata</Button>
+
     </div>
   )
 }
