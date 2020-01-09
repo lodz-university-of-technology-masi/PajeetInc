@@ -15,18 +15,19 @@ export default function AddCandidates() {
       const result = await axios(
         'https://owe6jjn5we.execute-api.us-east-1.amazonaws.com/dev/tests',
       );
-      console.log(result)
+      console.log(result);
       setTests(result.data);
     };
     fetchData();
   }, []);
+
   const [users, setUsers] = useState([]);
   useEffect(() => {
     const fetchData = async () => {
       const result = await axios(
         'https://unyfv0eps9.execute-api.us-east-1.amazonaws.com/dev/listCandidates',
       );
-      console.log("122");
+
       console.log(result);
       setUsers(result.data);
     };
@@ -42,7 +43,8 @@ export default function AddCandidates() {
       });
   }
   function submitCandidate(){
-    axios.post('https://owe6jjn5we.execute-api.us-east-1.amazonaws.com/dev/assign-candidate',{["recruiter-id"]:"rekruter420",["test-id"]:testId, ["test-name"]: testName,["username"]: username})
+    axios.post('https://owe6jjn5we.execute-api.us-east-1.amazonaws.com/dev/assign-candidate',{["recruiter-id"]:localStorage.getItem('currentUsername'),["test-id"]:testId, ["test-name"]: testName,["username"]: username})
+
   }
   return (
     <div>
@@ -60,7 +62,8 @@ export default function AddCandidates() {
                 return <option value={user.attributes[3].value}>{user.attributes[3].value}</option>
             })}
         </FormControl>
-        <Button type="submit" onClick={() => submitCandidate()}>Zatwierdź test</Button>
+        <Button type="submit" onClick={() => submitCandidate()}>Dodaj kandydata</Button>
+
     </div>
   )
 }

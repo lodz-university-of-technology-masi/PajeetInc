@@ -77,6 +77,18 @@ class App extends Component {
 							<Navbar.Brand>
 								<Link to="/">Test application</Link>
 							</Navbar.Brand>
+							<Navbar.Brand>
+								<Link to="/tests">Testy</Link>
+							</Navbar.Brand>
+							<Navbar.Brand>
+								<Link to="/add_tests">Dodaj test</Link>
+							</Navbar.Brand>
+							<Navbar.Brand>
+								<Link to="/add_candidates">Dodaj kandydata</Link>
+							</Navbar.Brand>
+							<Navbar.Brand>
+								<Link to="/my_tests">Moje testy</Link>
+							</Navbar.Brand>
 							<Navbar.Toggle />
 						</Navbar.Header>
 						<Navbar.Collapse>
