@@ -4,7 +4,6 @@ import com.amazonaws.services.cognitoidp.AWSCognitoIdentityProvider;
 import com.amazonaws.services.cognitoidp.model.*;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.serverless.ApiGatewayResponse;
 import com.serverless.Response;
 
@@ -29,30 +28,15 @@ public class ListCandidatesHandler implements RequestHandler<Map<String, Object>
             //todo - use getPaginationToken() and setPaginationToken() to get all the users if there are
             //more than 60 (this is a max limit per listusersRequest)
 
-            ListUsersRequest listUsersRequest = new ListUsersRequest();
-            listUsersRequest.setUserPoolId(cognitoConfig.getUserPoolId());
+            ListUsersInGroupRequest listCandidatesRequest = new ListUsersInGroupRequest();
+            listCandidatesRequest.setUserPoolId(cognitoConfig.getUserPoolId());
+            listCandidatesRequest.setGroupName("Candidates");
 
-            List<String> attrToGet = new ArrayList<>();
-            attrToGet.add("email");
-            attrToGet.add("profile");
-            listUsersRequest.setAttributesToGet(attrToGet);
+            ListUsersInGroupResult listCandidatesResult = cognitoClient.listUsersInGroup(listCandidatesRequest);
 
-            ListUsersResult listUsersResult = cognitoClient.listUsers(listUsersRequest);
-
-            List<UserType> candidates = new ArrayList<>();
-            List<UserType> allUsers = listUsersResult.getUsers();
-            for (UserType user : allUsers) {
-                List<AttributeType> currUserAttr = user.getAttributes();
-                for(AttributeType attrToCheck: currUserAttr) {
-                    if (attrToCheck.getName().equals("profile") && attrToCheck.getValue().equals("Candidate")) {
-                        candidates.add(user);
-                    }
-                }
-            }
-
-            String jsonString = objectMapper.writeValueAsString(candidates);
+            String jsonString = objectMapper.writeValueAsString(listCandidatesResult.getUsers());
             JsonNode node = objectMapper.readValue(jsonString, JsonNode.class);
-//            LOG.info(node);
+            LOG.info(jsonString);
 
             return ApiGatewayResponse.builder()
                     .setStatusCode(200)

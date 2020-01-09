@@ -18,46 +18,22 @@ provider:
   runtime: java8
   stage: ${opt:stage, 'dev'}
   region: ${opt:region, 'us-east-1'}
-  iamRoleStatements:
-    - Effect: Allow
-      Action:
-        - dynamodb:Query
-        - dynamodb:Scan
-        - dynamodb:GetItem
-        - dynamodb:PutItem
-        - dynamodb:UpdateItem
-        - dynamodb:DeleteItem
-      Resource:
-        - { "Fn::GetAtt": ["UserInfoTable", "Arn" ] }
+#  iamRoleStatements:
+#    - Effect: Allow
+#      Action:
+#        - dynamodb:Query
+#        - dynamodb:Scan
+#        - dynamodb:GetItem
+#        - dynamodb:PutItem
+#        - dynamodb:UpdateItem
+#        - dynamodb:DeleteItem
+#      Resource:
+#        - { "Fn::GetAtt": ["UserInfoTable", "Arn" ] }
 
 package:
   artifact: target/back-end-api-dev.jar
 
 functions:
-#  addUserInfo:
-#    handler: com.serverless.AddUserInfoHandler
-#    description: Add user information to UserInfo table
-#    events:
-#      - http:
-#          path: /userInfo
-#          method: post
-#          cors: true
-#  getUserInfo:
-#    handler: com.serverless.GetUserInfoHandler
-#    description: Get user information with id from UserInfo table
-#    events:
-#      - http:
-#          path: /userInfo/{id}
-#          method: get
-#          cors: true
-#  getAllUserInfo:
-#    handler: com.serverless.GetAllUserInfoHandler
-#    description: Get all user information from UserInfo table
-#    events:
-#      - http:
-#          path: /userInfo
-#          method: get
-#          cors: true
   signUp:
     handler: com.serverless.cognito.SignUpHandler
     description: Sign up new user
@@ -72,14 +48,6 @@ functions:
     events:
       - http:
           path: /confirmSignUp
-          method: post
-          cors: true
-  addUserToGroup:
-    handler: com.serverless.cognito.AddUserToGroupHandler
-    description: Add user to group
-    events:
-      - http:
-          path: /addUserToGroup
           method: post
           cors: true
   listCandidates:
@@ -97,6 +65,14 @@ functions:
       - http:
           path: /signIn
           method: get
+          cors: true
+  changePassword:
+    handler: com.serverless.cognito.ChangePasswordHandler
+    description: Change user password
+    events:
+      - http:
+          path: /changePassword
+          method: post
           cors: true
 
   readTests:
@@ -212,24 +188,6 @@ functions:
 
 resources:
   Resources:
-    UserInfoTable:
-      Type: AWS::DynamoDB::Table
-      Properties:
-        TableName: UserInfoTable
-        AttributeDefinitions:
-          - AttributeName: id
-            AttributeType: S
-          - AttributeName: username
-            AttributeType: S
-        KeySchema:
-          - AttributeName: id
-            KeyType: HASH
-          - AttributeName: username
-            KeyType: RANGE
-        ProvisionedThroughput:
-          ReadCapacityUnits: 1
-          WriteCapacityUnits: 1
-
 # TODO: jak jest juz tabela to jest problem https://stackoverflow.com/questions/41620437/how-to-continue-deploy-if-dynamodb-table-already-exists
 #    Tests:
 #      Type: AWS::DynamoDB::Table
