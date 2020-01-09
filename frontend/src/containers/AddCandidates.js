@@ -60,7 +60,7 @@ export default function AddCandidates() {
                 return <option value={user.attributes[3].value}>{user.attributes[3].value}</option>
             })}
         </FormControl>
-        <Button type="submit" onClick={() => submitCandidate()}>Zatwierdź test</Button>
+        <Button type="submit" onClick={() => submitCandidate()}>Dodaj kandydata</Button>
     </div>
   )
 }
