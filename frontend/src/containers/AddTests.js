@@ -9,8 +9,7 @@ export default function AddTests({history}) {
   const [questionType, setQuestionType] = useState("O")
   const [questionText, setQuestionText] = useState("")
   const [questionAnswere, setQuestionAnswere] = useState(null)
-  const [answersNumber, setAnswersNumber] = useState([0])
-  const [correctAnswere, setCorrectAnswere] = useState(false)
+  const [answersNumber, setAnswersNumber] = useState([])
   const [answeresClosed, setAnsweresClosed] = useState([])
   const [testName, setTestName] = useState("")
   const [minPoints, setMinPoints] = useState("")
@@ -28,7 +27,6 @@ export default function AddTests({history}) {
   const handleForce = data => {
     data.forEach((q) => {
       removeEmpty(q)
-      console.log(q)
       if(q.type == 'L'){
         setQuestionType(q.type)
         setQuestionText(q.content)
@@ -58,17 +56,28 @@ export default function AddTests({history}) {
         .then(() => {
           history.push('/tests')
         })
-  
   }
+
   const removeEmpty = obj => {
     Object.keys(obj).forEach(key => obj[key] == null && delete obj[key]);
   };
 
+  const setupClosedAnswers = (e) => {
+    if (isNaN(parseInt(e.target.value))) {
+      setAnswersNumber([...Array(parseInt(0)).keys()])
+      setAnsweresClosed([...Array(parseInt(0)).keys()].map((n) => {
+        return  {answer:"", correct: false}
+       }))
+    } else {
+      setAnswersNumber([...Array(parseInt(e.target.value)).keys()]);
+      setAnsweresClosed([...Array(parseInt(e.target.value)).keys()].map((n) => {
+        return  {answer:"", correct: false}
+       }))
+    }
+  }
+
   const [questions, dispatch] = useReducer(reducer, [])
   return (
-
-    
-
     <div>
       <PageHeader>Dodawanie testu</PageHeader>
       <CSVReader onFileLoaded={handleForce}
@@ -109,23 +118,22 @@ export default function AddTests({history}) {
       <FormGroup controlId="exampleForm.ControlTextarea1">
         <ControlLabel>Pytanie</ControlLabel>
         <FormControl as="textarea" rows="3" onChange={(e) => setQuestionText(e.target.value)} />
+        <ControlLabel>Liczba odpowidzi</ControlLabel>
+        <FormControl as="textarea" rows="3" onChange={(e) => { setupClosedAnswers(e) } } />
         <Panel>
-          {answersNumber.map((num) => {
+          {
+          answersNumber.map((num) => {
             return(
               <ListGroup>
-              <ControlLabel>Odpowiedź {num}</ControlLabel>
-              <FormControl as="textarea" rows="3" onChange={(e) => setQuestionAnswere(e.target.value)} />
-              <Checkbox onClick={() => setCorrectAnswere(true)}>
+              <ControlLabel>Odpowiedź {num + 1}</ControlLabel>
+              <FormControl as="textarea" rows="3" onChange={(e) => {  let nanswers = [...answeresClosed]; let currentanswer = answeresClosed[num]; currentanswer.answer=e.target.value; setAnsweresClosed(nanswers) } } />
+              <Checkbox onClick={(e) => { let nanswers = [...answeresClosed]; let currentanswer = answeresClosed[num]; currentanswer.correct=e.target.checked; setAnsweresClosed(nanswers) }}>
                 Poprawna Odpowiedz?
-              </Checkbox>
-              <Button onClick={() =>{setAnswersNumber([...answersNumber, num + 1]); setAnsweresClosed([{answer: questionAnswere, correct:correctAnswere},...answeresClosed])}}>Dodaj Odpowiedz</Button>
+              </Checkbox>    
             </ListGroup> 
             )
           })
         }
-        <Button onClick={() =>{
-           setAnsweresClosed([{answer: questionAnswere, correct:correctAnswere},...answeresClosed]);
-          }}>Zatwierdź Odpowiedzi</Button>
         </Panel>
         </FormGroup>
       ) : null
@@ -133,7 +141,7 @@ export default function AddTests({history}) {
       {    
         questionType == "W" ? (
       <div>
-        <Button variant="primary" onClick={() => {setAnsweresClosed([{answere: questionAnswere, correct:correctAnswere},...answeresClosed]); setAnswersNumber([0]); setCorrectAnswere(false); dispatch({type: "addQuestion", payload: {content:questionText, type: questionType, answers: answeresClosed} }); setAnsweresClosed([])}}>Dodaj Pytanie</Button>
+        <Button variant="primary" onClick={() => {setAnswersNumber([]); dispatch({type: "addQuestion", payload: {content:questionText, type: questionType, answers: answeresClosed} }); setAnsweresClosed([]) }}>Dodaj Pytanie</Button>
       </div>
       )
       :
