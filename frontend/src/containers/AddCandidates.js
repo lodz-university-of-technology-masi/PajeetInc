@@ -6,6 +6,7 @@ import {Button} from 'react-bootstrap'
 import Test from '../components/Test'
 
 export default function AddCandidates() {
+
   const [testId, setTestId] = useState([]);
   const [testName, setTestName] = useState([]);
   const [username, setUsername] = useState([]);
@@ -15,18 +16,18 @@ export default function AddCandidates() {
       const result = await axios(
         'https://owe6jjn5we.execute-api.us-east-1.amazonaws.com/dev/tests',
       );
-      console.log(result)
+      console.log(result);
       setTests(result.data);
     };
     fetchData();
   }, []);
+
   const [users, setUsers] = useState([]);
   useEffect(() => {
     const fetchData = async () => {
       const result = await axios(
         'https://unyfv0eps9.execute-api.us-east-1.amazonaws.com/dev/listCandidates',
       );
-      console.log("122");
       console.log(result);
       setUsers(result.data);
     };
