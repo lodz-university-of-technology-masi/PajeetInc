@@ -1,6 +1,6 @@
 import React, {useState, useEffect} from 'react'
 import axios from 'axios'
-import {Button, Panel} from 'react-bootstrap'
+import {Button, Panel, PageHeader} from 'react-bootstrap'
 import AnswerTest from './AnswerTest'
 
 export default function UserTests() {
@@ -13,8 +13,6 @@ export default function UserTests() {
         url,
       );
       setTests(result.data);
-      console.log(tests);
-      console.log(url);
     };
     fetchData();
   }, []);
@@ -22,8 +20,14 @@ export default function UserTests() {
     <div>
       {tests.map((test, i)=>{
         return(
-        <div>
+        <div> 
+          <PageHeader>Moje testy do przejścia</PageHeader>
+          <Panel>
+            <Panel.Heading>
+              <Panel.Title>{test.test_name}</Panel.Title>
+            </Panel.Heading>
           <AnswerTest test={test} />
+          </Panel>
         </div>
         )
     })}
