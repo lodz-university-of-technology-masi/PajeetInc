@@ -41,6 +41,14 @@ export default class Login extends Component {
 
 		this.setState({ isLoading: true });
 
+	//	{
+	//		"email": "tcg79194@eveav.com",
+	//			"password": "!Password123",
+	//		"profile": "Candidate"
+	//	}
+
+
+
 		try {
 			Axios.post('https://unyfv0eps9.execute-api.us-east-1.amazonaws.com/dev/signIn',
 			{
@@ -48,10 +56,13 @@ export default class Login extends Component {
 				["password"]: this.state.password
 			}).then(res => {
 				console.log('User logged in');
+				console.log(this.parseJwt(res.data.idToken))
 				localStorage.setItem('currentUser', JSON.stringify(res.data));
 				localStorage.setItem('currentUsername', this.parseJwt(res.data.idToken).email);
+				localStorage.setItem('profile', this.parseJwt(res.data.idToken).profile);
 				this.props.setCurrentUser(res.data)
 				this.props.userHasAuthenticated(true);
+				this.props.setUserProfile(this.parseJwt(res.data.idToken).profile)
 				this.props.history.push('/');
 			}).catch(res => {
 				console.log(res)
