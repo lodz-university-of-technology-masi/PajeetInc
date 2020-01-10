@@ -108,6 +108,7 @@ functions:
           cors: true
 
   readTests:
+#    role: testsTableAccess
     handler: com.serverless.tests.ReadTestsHandler
     description: Get all tests from Tests table
     events:
@@ -117,6 +118,7 @@ functions:
           cors: true
           integration: lambda
   readTestsByUsername:
+#    role: testsTableAccess
     handler: com.serverless.tests.ReadTestsByUsernameHandler
     description: Get all tests assigned to specific candidate
     events:
@@ -131,6 +133,7 @@ functions:
                 "username": "$input.params("username")"
               }'
   insertTest:
+#    role: testsTableAccess
     handler: com.serverless.tests.InsertTestHandler
     description: Insert test into Tests table
     events:
@@ -149,12 +152,13 @@ functions:
                 "questions": $input.json("$.questions")
               }'
   passTest:
+#    role: testsTableAccess
     handler: com.serverless.tests.PassTestHandler
     description: Updating tests table with candidate answers
     events:
       - http:
           path: /pass-test
-          method: post
+          method: put
           cors: true
           integration: lambda
           request:
@@ -167,12 +171,13 @@ functions:
                 "answers": $input.json("$.answers")
               }'
   assignCandidate:
+#    role: testsTableAccess
     handler: com.serverless.tests.AssignCandidateHandler
     description: Assigning candidate to test
     events:
       - http:
           path: /assign-candidate
-          method: post
+          method: put
           cors: true
           integration: lambda
           request:
@@ -184,12 +189,13 @@ functions:
                 "username": $input.json("$.username")
               }'
   rateTest:
+#    role: testsTableAccess
     handler: com.serverless.tests.RateTestHandler
     description: Rate candidate answers
     events:
       - http:
           path: /rate-test
-          method: post
+          method: put
           cors: true
           integration: lambda
           request:
@@ -202,6 +208,7 @@ functions:
                 "answers": $input.json("$.answers")
               }'
   getTests:
+#    role: testsTableAccess
     handler: com.serverless.tests.GetTestsHandler
     description: Get all tests
     events:
@@ -218,8 +225,47 @@ functions:
                 "status": "$input.params("status")"
               }'
 
-resources:
-  Resources:
+#  iamRoleStatements:
+#    - Effect: Allow
+#      Action:
+#        - dynamodb:Query
+#        - dynamodb:Scan
+#        - dynamodb:GetItem
+#        - dynamodb:PutItem
+#        - dynamodb:UpdateItem
+#        - dynamodb:DeleteItem
+#      Resource:
+#        - { "Fn::GetAtt": ["UserInfoTable", "Arn" ] }
+
+
+#resources:
+#  Resources:
+#    testsTableAccess:
+#      Type: AWS::IAM::Role
+#      Properties:
+#        RoleName: TestsTableAccess
+#        AssumeRolePolicyDocument:
+#          Version: "2012-10-17"
+#          Statement:
+#          - Effect: Allow
+#          Action:
+#            - dynamodb:DescribeReservedCapacity*
+#            - dynamodb:List*
+#            - dynamodb:DescribeTimeToLive
+#            - dynamodb:DescribeLimits
+#            - dynamodb:CreateTable
+#            - dynamodb:BatchGet*
+#            - dynamodb:PutItem
+#            - dynamodb:DescribeTable
+#            - dynamodb:Delete*
+#            - dynamodb:Get*
+#            - dynamodb:BatchWrite*
+#            - dynamodb:Scan
+#            - dynamodb:Query
+#            - dynamodb:DescribeStream
+#            - dynamodb:Update*
+#          "Resource": "*"
+
 # TODO: jak jest juz tabela to jest problem https://stackoverflow.com/questions/41620437/how-to-continue-deploy-if-dynamodb-table-already-exists
 #    Tests:
 #      Type: AWS::DynamoDB::Table
