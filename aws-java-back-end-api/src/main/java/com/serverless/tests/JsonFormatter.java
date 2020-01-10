@@ -11,7 +11,7 @@ import java.util.Iterator;
 public class JsonFormatter {
 
     protected static String getCandidatesAsJsonString(
-            String username, String answers, boolean passed, boolean finished, boolean rated, int points, Item test) throws IOException {
+            String username, String answers, boolean passed, boolean finished, boolean rated, double points, Item test) throws IOException {
         String result = "[";
         Iterator<JsonNode> candidates = new ObjectMapper().readValue(test.getJSONPretty("candidates"), JsonNode.class).iterator();
         while (candidates.hasNext()) {
@@ -35,12 +35,12 @@ public class JsonFormatter {
                 "\"passed\":" + candidate.get("passed").asBoolean() + "," +
                 "\"finished\":" + candidate.get("finished").asBoolean() + "," +
                 "\"rated\":" + candidate.get("rated").asBoolean() + "," +
-                "\"points\":" + candidate.get("points").asInt() +
+                "\"points\":" + candidate.get("points").asDouble() +
                 "}";
         return result;
     }
 
-    protected static String getCandidateAsJsonString(String username, String answers, boolean passed, boolean finished, boolean rated, int points) {
+    protected static String getCandidateAsJsonString(String username, String answers, boolean passed, boolean finished, boolean rated, double points) {
         String result = "{" +
                 "\"username\":\"" + username + "\"," +
                 "\"answers\":" + answers + "," +
@@ -69,17 +69,19 @@ public class JsonFormatter {
                 "\"type\": \"" + answer.get("type").asText() + "\"," +
                 "\"content\": \"" + answer.get("content").asText() + "\"," +
                 "\"correct\": \"" + answer.get("correct").asText() + "\"," +
+                "\"points\": \"" + answer.get("points").asDouble() + "\"," +
                 "\"rated\": \"" + answer.get("rated").asText() + "\"" +
                 "}";
         return result;
     }
 
-    protected static String getCandidateAnswerAsJsonString(String question, String type, String content, boolean correct, boolean rated) {
+    protected static String getCandidateAnswerAsJsonString(String question, String type, String content, boolean correct, boolean rated, double points) {
         String result = "{" +
                 "\"question\": \"" + question + "\"," +
                 "\"type\": \"" + type + "\"," +
                 "\"content\": \"" + content + "\"," +
                 "\"correct\": \"" + correct + "\"," +
+                "\"points\": \"" + points + "\"," +
                 "\"rated\": \"" + rated + "\"" +
                 "}";
         return result;
@@ -95,8 +97,12 @@ public class JsonFormatter {
             JsonNode singleQuestionNode = allQuestionsNode.get(i);
             String type = singleQuestionNode.get("type").asText();
             String content = singleQuestionNode.get("content").asText();
+            double points = singleQuestionNode.get("points").asDouble();
 
-            questions += "{\"question_content\":\"" + content + "\"," + "\"question_type\":\"" + type + "\"";
+            questions += "{"+
+                    "\"question_content\":\"" + content + "\"," +
+                    "\"points\":\"" + points + "\"," +
+                    "\"question_type\":\"" + type + "\"";
             if (!type.contentEquals("O")) {
                 questions += ",";
             }
@@ -111,7 +117,10 @@ public class JsonFormatter {
                     String answer = singleAnswerNode.get("answer").asText();
                     Boolean correct = singleAnswerNode.get("correct").asBoolean();
 
-                    questions += "{\"answer\":\"" + answer + "\"," + "\"correct\":" + correct + "}";
+                    questions += "{"+
+                            "\"answer\":\"" + answer + "\"," +
+                            "\"correct\":" + correct +
+                            "}";
                     if (j != allAnswersNodeSize - 1) {
                         questions += ",";
                     } else {
@@ -119,7 +128,7 @@ public class JsonFormatter {
                     }
                 }
             } else if (type.contentEquals("L")) {
-                int correctAnswer = singleQuestionNode.get("correctAnswer").asInt();
+                double correctAnswer = singleQuestionNode.get("correctAnswer").asDouble();
                 questions += "\"correct_answer\":" + correctAnswer;
             } else if (type.contentEquals("O")) {
 
