@@ -9,6 +9,9 @@ import com.amazonaws.services.dynamodbv2.document.spec.ScanSpec;
 import com.amazonaws.services.dynamodbv2.document.spec.UpdateItemSpec;
 import com.amazonaws.services.dynamodbv2.document.utils.ValueMap;
 
+import java.io.BufferedOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.Iterator;
 
 public class DynamoDbController {
@@ -46,5 +49,17 @@ public class DynamoDbController {
                         .withString(":id", recruiterId));
         Iterator<Item> items = tests.query(spec).iterator();
         return items;
+    }
+
+    protected static void writeItemsToOutputStream(Iterator<Item> iterator, OutputStream outputStream) throws IOException {
+        outputStream = new BufferedOutputStream(outputStream);
+        outputStream.write("[".getBytes());
+        while (iterator.hasNext()) {
+            Item item = iterator.next();
+            String itemAsString = (iterator.hasNext()) ? item.toJSONPretty() + "," : item.toJSONPretty();
+            outputStream.write(itemAsString.getBytes());
+        }
+        outputStream.write("]".getBytes());
+        outputStream.flush();
     }
 }

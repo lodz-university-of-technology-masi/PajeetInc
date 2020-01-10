@@ -16,7 +16,7 @@ public class JsonFormatter {
         Iterator<JsonNode> candidates = new ObjectMapper().readValue(test.getJSONPretty("candidates"), JsonNode.class).iterator();
         while (candidates.hasNext()) {
             JsonNode candidate = candidates.next();
-            if (!candidate.get("username").asText().contains(username)) {
+            if (!candidate.get("username").asText().contentEquals(username)) {
                 result += getCandidateAsJsonString(candidate);
             } else {
                 result += getCandidateAsJsonString(username, answers, passed, finished, rated, points);
@@ -97,11 +97,11 @@ public class JsonFormatter {
             String content = singleQuestionNode.get("content").asText();
 
             questions += "{\"question_content\":\"" + content + "\"," + "\"question_type\":\"" + type + "\"";
-            if (!type.contains("O")) {
+            if (!type.contentEquals("O")) {
                 questions += ",";
             }
 
-            if (type.contains("W")) {
+            if (type.contentEquals("W")) {
                 JsonNode allAnswersNode = singleQuestionNode.get("answers");
                 int allAnswersNodeSize = allAnswersNode.size();
 
@@ -118,10 +118,10 @@ public class JsonFormatter {
                         questions += "]";
                     }
                 }
-            } else if (type.contains("L")) {
+            } else if (type.contentEquals("L")) {
                 int correctAnswer = singleQuestionNode.get("correctAnswer").asInt();
                 questions += "\"correct_answer\":" + correctAnswer;
-            } else if (type.contains("O")) {
+            } else if (type.contentEquals("O")) {
 
             } else {
                 // wyjątek
@@ -153,12 +153,12 @@ public class JsonFormatter {
         JsonNode questions = test.get("questions");
         for (int i = 0; i < questions.size(); i++) {
             JsonNode question = questions.get(i);
-            if (question.get("question_type").asText().contains("W")) {
+            if (question.get("question_type").asText().contentEquals("W")) {
                 JsonNode answers = question.get("answers");
                 for (int j = 0; j < answers.size(); j++) {
                     ((ObjectNode) answers.get(j)).remove("correct");
                 }
-            } else if (question.get("question_type").asText().contains("L")) {
+            } else if (question.get("question_type").asText().contentEquals("L")) {
                 ((ObjectNode) question).remove("correct_answer");
             }
         }

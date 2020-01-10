@@ -59,30 +59,30 @@ public class PassTestHandler implements RequestStreamHandler {
             boolean rated = false;
             String type = answer.get("type").asText();
             if (
-                    type.contains("W") || type.contains("L")
+                    type.contentEquals("W") || type.contentEquals("L")
             ) {
                 JsonNode testQuestion = testQuestions.stream().filter(
-                        q -> q.get("question_content").asText().contains(
+                        q -> q.get("question_content").asText().contentEquals(
                                 answer.get("question").asText()
                         )
                 ).findFirst().get();
 
-                if (type.contains("W")) {
+                if (type.contentEquals("W")) {
                     JsonNode testAnswers = testQuestion.get("answers");
                     for (int j = 0; j < testAnswers.size(); j++) {
                         JsonNode testAnswer = testAnswers.get(j);
                         if (testAnswer.get("answer").asText()
-                                .contains(answer.get("content").asText())) {
+                                .contentEquals(answer.get("content").asText())) {
                             correct = testAnswer.get("correct").asBoolean();
                             rated = true;
                             break;
                         }
                     }
-                } else if (type.contains("L")) {
+                } else if (type.contentEquals("L")) {
                     Double testCorrectAnswer = testQuestion.get("correct_answer").asDouble();
+                    rated = true;
                     if (answer.get("content").asDouble() == testCorrectAnswer) {
                         correct = true;
-                        rated = true;
                     }
                 }
             }
@@ -106,7 +106,7 @@ public class PassTestHandler implements RequestStreamHandler {
             String type = answers.get(i).get("type").asText();
             if (
                     (
-                            type.contains("W") || type.contains("L")
+                            type.contentEquals("W") || type.contentEquals("L")
                     ) &&
                             answers.get(i).get("correct").asBoolean()
 

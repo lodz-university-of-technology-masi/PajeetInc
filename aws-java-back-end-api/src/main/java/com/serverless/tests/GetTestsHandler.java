@@ -33,18 +33,18 @@ public class GetTestsHandler implements RequestStreamHandler {
         String role = rootNode.get("role").asText();
         String status = rootNode.get("status").asText();
 
-        if (role.contains("candidate")) {
-            if (status.contains("assigned")) {
+        if (role.contentEquals("candidate")) {
+            if (status.contentEquals("assigned")) {
                 getAssignedCandidateTests(user);
-            } else if (status.contains("finished")) {
+            } else if (status.contentEquals("finished")) {
                 getFinishedCandidateTests(user);
             }
-        } else if (role.contains("recruiter")) {
-            if (status.contains("assigned")) {
+        } else if (role.contentEquals("recruiter")) {
+            if (status.contentEquals("assigned")) {
                 getRecruiterTestsByFinished(false, user);
-            } else if (status.contains("finished")) {
+            } else if (status.contentEquals("finished")) {
                 getRecruiterTestsByFinished(true, user);
-            } else if (status.contains("rated")) {
+            } else if (status.contentEquals("rated")) {
                 getRatedRecruiterTests(user);
             }
         }
@@ -114,6 +114,11 @@ public class GetTestsHandler implements RequestStreamHandler {
                 JsonNode candidate = candidates.next();
                 if (finished == candidate.get("finished").asBoolean()) {
                     String json = JsonFormatter.getCandidateAsJsonString(candidate);
+                    json = json.substring(0, json.length() - 1);
+                    json += ",";
+                    json += "\""+"testName"+"\":\"" + test.get("test_name") + "\",";
+                    json += "\""+"testId"+"\":\"" + test.get("test_id") + "\"";
+                    json += "}";
                     jsons.add(json);
                 }
             }
@@ -146,7 +151,7 @@ public class GetTestsHandler implements RequestStreamHandler {
             }
             for (JsonNode candidate : candidates) {
                 String username = candidate.get("username").asText();
-                if (username.contains(user)) {
+                if (username.contentEquals(user)) {
                     result.add(test);
                     candidateInTests.add(candidate);
                     break;

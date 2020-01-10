@@ -39,7 +39,7 @@ public class AssignCandidateHandler implements RequestStreamHandler {
         Iterator<JsonNode> candidates = new ObjectMapper().readValue(test.getJSONPretty("candidates"), JsonNode.class).iterator();
         while (candidates.hasNext()) {
             JsonNode candidate = candidates.next();
-            if (!candidate.get("username").asText().contains(username)) {
+            if (!candidate.get("username").asText().contentEquals(username)) {
                 result += JsonFormatter.getCandidateAsJsonString(candidate);
                 result += ",";
             } else {

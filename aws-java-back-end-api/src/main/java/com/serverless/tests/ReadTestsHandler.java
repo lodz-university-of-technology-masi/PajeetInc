@@ -10,6 +10,8 @@ import com.amazonaws.services.dynamodbv2.document.Item;
 import com.amazonaws.services.dynamodbv2.document.Table;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class ReadTestsHandler implements RequestStreamHandler {
 
@@ -18,18 +20,6 @@ public class ReadTestsHandler implements RequestStreamHandler {
         Table tests = DynamoDbController.getTable("Tests");
         Iterator<Item> iterator = DynamoDbController.getItemsFromTable(
                 "recruiter_id, test_id, max_points, min_points, questions, test_name", tests);
-        writeItemsToOutputStream(iterator, outputStream);
-    }
-
-    private void writeItemsToOutputStream(Iterator<Item> iterator, OutputStream outputStream) throws IOException {
-        outputStream = new BufferedOutputStream(outputStream);
-        outputStream.write("[".getBytes());
-        while (iterator.hasNext()) {
-            Item item = iterator.next();
-            String itemAsString = (iterator.hasNext()) ? item.toJSONPretty() + "," : item.toJSONPretty();
-            outputStream.write(itemAsString.getBytes());
-        }
-        outputStream.write("]".getBytes());
-        outputStream.flush();
+        DynamoDbController.writeItemsToOutputStream(iterator, outputStream);
     }
 }
