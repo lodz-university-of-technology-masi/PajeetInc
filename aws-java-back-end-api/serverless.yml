@@ -108,7 +108,7 @@ functions:
           cors: true
 
   readTests:
-    handler: com.serverless.ReadTestsHandler
+    handler: com.serverless.tests.ReadTestsHandler
     description: Get all tests from Tests table
     events:
       - http:
@@ -117,7 +117,7 @@ functions:
           cors: true
           integration: lambda
   readTestsByUsername:
-    handler: com.serverless.ReadTestsByUsernameHandler
+    handler: com.serverless.tests.ReadTestsByUsernameHandler
     description: Get all tests assigned to specific candidate
     events:
       - http:
@@ -131,7 +131,7 @@ functions:
                 "username": "$input.params("username")"
               }'
   insertTest:
-    handler: com.serverless.InsertTestHandler
+    handler: com.serverless.tests.InsertTestHandler
     description: Insert test into Tests table
     events:
       - http:
@@ -149,7 +149,7 @@ functions:
                 "questions": $input.json("$.questions")
               }'
   passTest:
-    handler: com.serverless.PassTestHandler
+    handler: com.serverless.tests.PassTestHandler
     description: Updating tests table with candidate answers
     events:
       - http:
@@ -167,7 +167,7 @@ functions:
                 "answers": $input.json("$.answers")
               }'
   assignCandidate:
-    handler: com.serverless.AssignCandidateHandler
+    handler: com.serverless.tests.AssignCandidateHandler
     description: Assigning candidate to test
     events:
       - http:
@@ -184,7 +184,7 @@ functions:
                 "username": $input.json("$.username")
               }'
   rateTest:
-    handler: com.serverless.RateTestHandler
+    handler: com.serverless.tests.RateTestHandler
     description: Rate candidate answers
     events:
       - http:
@@ -202,7 +202,7 @@ functions:
                 "answers": $input.json("$.answers")
               }'
   getTests:
-    handler: com.serverless.GetTestsHandler
+    handler: com.serverless.tests.GetTestsHandler
     description: Get all tests
     events:
       - http:

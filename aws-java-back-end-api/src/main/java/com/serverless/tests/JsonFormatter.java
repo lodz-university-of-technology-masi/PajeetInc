@@ -1,4 +1,4 @@
-package com.serverless;
+package com.serverless.tests;
 
 import com.amazonaws.services.dynamodbv2.document.Item;
 import com.fasterxml.jackson.databind.JsonNode;

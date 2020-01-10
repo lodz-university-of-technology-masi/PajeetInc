@@ -1,4 +1,4 @@
-package com.serverless;
+package com.serverless.tests;
 
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
@@ -9,9 +9,7 @@ import com.amazonaws.services.dynamodbv2.document.spec.ScanSpec;
 import com.amazonaws.services.dynamodbv2.document.spec.UpdateItemSpec;
 import com.amazonaws.services.dynamodbv2.document.utils.ValueMap;
 
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 
 public class DynamoDbController {
 
@@ -47,10 +45,6 @@ public class DynamoDbController {
                 .withValueMap(new ValueMap()
                         .withString(":id", recruiterId));
         Iterator<Item> items = tests.query(spec).iterator();
-//        List<String> testsIds = new ArrayList<>();
-//        while(items.hasNext()) {
-//            testsIds.add(items.next().ge);
-//        }
         return items;
     }
 }

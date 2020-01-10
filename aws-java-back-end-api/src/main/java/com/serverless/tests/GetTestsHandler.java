@@ -1,4 +1,4 @@
-package com.serverless;
+package com.serverless.tests;
 
 import com.amazonaws.services.dynamodbv2.document.Item;
 import com.amazonaws.services.dynamodbv2.document.Table;
@@ -89,6 +89,10 @@ public class GetTestsHandler implements RequestStreamHandler {
             if (!candidateInTest.get("rated").asBoolean()) {
                 json = JsonFormatter.getCandidateAsJsonString(
                         user, "[]", false, true, false, 0);
+                json = json.substring(0, json.length() - 1);
+                json += ",";
+                json += "\""+"testName"+"\":\"" + test.get("test_name").asText() + "\"";
+                json += "}";
                 jsons.add(json);
             } else {
                 json = JsonFormatter.getCandidateAsJsonString(candidateInTest);
