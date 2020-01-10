@@ -7,19 +7,27 @@ import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sun.org.apache.xpath.internal.operations.Bool;
 
+import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public class PassTestHandler implements RequestStreamHandler {
+
+    private List<String> jsons;
 
     @Override
     public void handleRequest(InputStream inputStream, OutputStream outputStream, Context context) throws IOException {
         JsonNode rootNode = new ObjectMapper().readValue(inputStream, JsonNode.class);
+
+        jsons = new ArrayList<>();
 
         String recruiterId = rootNode.get("recruiterId").asText();
         String testId = rootNode.get("testId").asText();
@@ -34,10 +42,25 @@ public class PassTestHandler implements RequestStreamHandler {
         DynamoDbController.updateCandidates(primaryKey, candidates, tests);
     }
 
+    private String itemsAsString() throws IOException {
+        String json = new String("[");
+        for (int i = 0; i < jsons.size(); i++) {
+            json += i == jsons.size() - 1 ? jsons.get(i) : jsons.get(i) + ",";
+        }
+        json += "]";
+        return json;
+    }
+
     private String updateCandidates(JsonNode rootNode, Item test) throws IOException {
         String username = rootNode.get("username").asText();
-        String answers = getAnswersWithClosedAnswersRatedAsJson(rootNode.get("answers"), test);
-        int points = calculatePoints(answers);
+        Map<String, List<JsonNode>> answersGroupedByQuestion = groupAnswersByQuestion(
+                getJsonNodesList(rootNode.get("answers"))
+        );
+
+        rateClosedAndNumericalAnswers(answersGroupedByQuestion, test);
+
+        String answers = itemsAsString();
+        double points = calculatePoints(answers);
         boolean passed = isPassed(points, test.getInt("min_points"));
         boolean finished = true;
         boolean rated = false;
@@ -46,62 +69,131 @@ public class PassTestHandler implements RequestStreamHandler {
         return result;
     }
 
-    private String getAnswersWithClosedAnswersRatedAsJson(JsonNode answers, Item test) throws IOException {
-        List<JsonNode> testQuestions =
-                iteratorToList(
-                        new ObjectMapper().readValue(test.getJSONPretty("questions"), JsonNode.class).iterator()
-                );
+    private void rateClosedAndNumericalAnswers(Map<String, List<JsonNode>> answersGroupedByQuestion, Item test) throws IOException {
+        List<JsonNode> testQuestions = getTestQuestions(test);
 
-        String json = "[";
-        for (int i = 0; i < answers.size(); i++) {
-            JsonNode answer = answers.get(i);
-            boolean correct = false;
-            boolean rated = false;
-            String type = answer.get("type").asText();
-            if (
-                    type.contentEquals("W") || type.contentEquals("L")
-            ) {
-                JsonNode testQuestion = testQuestions.stream().filter(
-                        q -> q.get("question_content").asText().contentEquals(
-                                answer.get("question").asText()
-                        )
-                ).findFirst().get();
+        List<String> questions = new ArrayList<String>(answersGroupedByQuestion.keySet());
+        for (int i = 0; i < answersGroupedByQuestion.size(); i++) {
 
+            String question = questions.get(i);
+            List<JsonNode> answers = answersGroupedByQuestion.get(question);
+            if (answers.size() != 0) {
+
+                String type = answers.get(0).get("type").asText();
                 if (type.contentEquals("W")) {
-                    JsonNode testAnswers = testQuestion.get("answers");
-                    for (int j = 0; j < testAnswers.size(); j++) {
-                        JsonNode testAnswer = testAnswers.get(j);
-                        if (testAnswer.get("answer").asText()
-                                .contentEquals(answer.get("content").asText())) {
-                            correct = testAnswer.get("correct").asBoolean();
-                            rated = true;
-                            break;
-                        }
-                    }
+                    JsonNode testQuestion = findItemByProperty(question, testQuestions);
+                    Points points = calculateClosedQuestionPoints(answers, testQuestion);
+                    addClosedToJson(answers, points, true);
                 } else if (type.contentEquals("L")) {
-                    Double testCorrectAnswer = testQuestion.get("correct_answer").asDouble();
-                    rated = true;
-                    if (answer.get("content").asDouble() == testCorrectAnswer) {
-                        correct = true;
-                    }
+                    JsonNode testQuestion = findItemByProperty(question, testQuestions);
+                    JsonNode answer = answers.get(0);
+                    double points = calculateNumericalQuestionPoints(answer, testQuestion);
+                    addToJson(answers, points == 0.0 ? false : true, true, points);
+                } else if (type.contentEquals("O")) {
+                    addToJson(answers, false, false, 0.0);
                 }
             }
-            json += JsonFormatter.getCandidateAnswerAsJsonString(
-                    answer.get("question").asText(),
-                    answer.get("type").asText(),
-                    answer.get("content").asText(),
-                    correct,
-                    rated
-            );
-            json += i != answers.size() - 1 ? "," : "";
+            // jesli typ to W, to zadna nie zaznaczona
+            // else 0.0
         }
-        json += "]";
-        return json;
     }
 
-    private int calculatePoints(String json) throws IOException {
+    private void addClosedToJson(List<JsonNode> answers, Points points, boolean rated) {
+        for (int i = 0; i < answers.size(); i++) {
+            JsonNode answer = answers.get(i);
+            jsons.add(
+                    JsonFormatter.getCandidateAnswerAsJsonString(
+                            answer.get("question").asText(),
+                            answer.get("type").asText(),
+                            answer.get("content").asText(),
+                            points.getCorrects().get(i),
+                            rated,
+                            points.getPoints()
+                    )
+            );
+        }
+    }
+
+    private void addToJson(List<JsonNode> answers, boolean correct, boolean rated, double points) {
+        for (JsonNode a : answers) {
+            jsons.add(
+                    JsonFormatter.getCandidateAnswerAsJsonString(
+                            a.get("question").asText(),
+                            a.get("type").asText(),
+                            a.get("content").asText(),
+                            correct,
+                            rated,
+                            points
+                    )
+            );
+        }
+    }
+
+    private Points calculateClosedQuestionPoints(List<JsonNode> answers, JsonNode testQuestion) throws IOException {
+        Points p = new Points();
+
+        //        double points = 0.0;
+
+        List<JsonNode> testAnswers = getJsonNodesList(testQuestion.get("answers"));
+
+        List<Boolean> corrects = new ArrayList<>();
+        // wszystkie zaznaczone
+        if (testAnswers.size() == answers.size()) {
+            p = new Points(0.0, corrects);
+        }
+        // zaznaczone mniej niz wwszystkie, wiecej niz 0 // nic nie zaznaczone sprawdzane jest wyzej
+        else {
+
+            int allGood = findAllGood(testAnswers);
+            int good = 0;
+            int wrong = 0;
+            for (JsonNode a : answers) {
+
+                JsonNode testAnswer = findItemByProperty(a.get("content").asText(), testAnswers);
+                if (testAnswer.get("correct").asBoolean()) {
+                    good++;
+                } else {
+                    wrong++;
+                }
+                corrects.add(testAnswer.get("correct").asBoolean());
+            }
+            double maxPointsPerQuestion = testQuestion.get("points").asDouble();
+            double points = calculateByGoodAndWrong(good, wrong, maxPointsPerQuestion, allGood);
+            double pointsPerAnswer = points / (answers.size() * 1.0);
+            p = new Points(pointsPerAnswer, corrects);
+        }
+
+        return p;
+    }
+
+    private double calculateNumericalQuestionPoints(JsonNode answer, JsonNode testQuestion) throws IOException {
+        double points = 0.0;
+        double correctAnswer = testQuestion.get("correct_answer").asDouble();
+        if (correctAnswer == answer.get("content").asDouble()) {
+            points = testQuestion.get("points").asDouble();
+        }
+        return points;
+    }
+
+    private double calculateByGoodAndWrong(int good, int wrong, double points, int allGood) {
+        double result = points;
+        if (good <= wrong || good == 0) {
+            result = 0.0;
+        } else if (good > wrong) {
+            result = points * 0.33;
+        } else if (good > 0 && good < allGood) {
+            result = points * 0.66;
+        } else if (good > 0 && good == allGood) {
+            result = points;
+        }
+        return result;
+    }
+
+    private double calculatePoints(String json) throws IOException {
         int points = 0;
         List<JsonNode> answers = iteratorToList(new ObjectMapper().readValue(json, JsonNode.class).iterator());
+
+
         for (int i = 0; i < answers.size(); i++) {
             String type = answers.get(i).get("type").asText();
             if (
@@ -111,13 +203,48 @@ public class PassTestHandler implements RequestStreamHandler {
                             answers.get(i).get("correct").asBoolean()
 
             ) {
-                points += 1;
+                points += answers.get(i).get("points").asDouble();
             }
         }
         return points;
     }
 
-    private boolean isPassed(int points, int minPoints) {
+    private List<JsonNode> getJsonNodesList(JsonNode node) {
+        List<JsonNode> nodes = new ArrayList<>();
+        for (int i = 0; i < node.size(); i++) {
+            nodes.add(node.get(i));
+        }
+        return nodes;
+    }
+
+    private Map<String, List<JsonNode>> groupAnswersByQuestion(List<JsonNode> answers) {
+        return answers.stream().collect(Collectors.groupingBy(a -> a.get("question").asText()));
+    }
+
+    private List<JsonNode> getTestQuestions(Item test) throws IOException {
+        return iteratorToList(
+                new ObjectMapper().readValue(test.getJSONPretty("questions"), JsonNode.class).iterator()
+        );
+    }
+
+    private JsonNode findItemByProperty(String property, List<JsonNode> items) {
+        return items
+                .stream()
+                .filter(
+                        tq -> tq.get("question_content").asText().contentEquals(property))
+                .findFirst()
+                .get();
+    }
+
+    private int findAllGood(List<JsonNode> testAnswers) {
+        return testAnswers
+                .stream()
+                .filter(
+                        ta -> ta.get("correct").asBoolean())
+                .collect(Collectors.toList()).size();
+    }
+
+    private boolean isPassed(double points, int minPoints) {
         boolean passed = points >= minPoints ? true : false;
         return passed;
     }
