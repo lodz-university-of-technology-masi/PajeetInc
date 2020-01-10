@@ -1,4 +1,4 @@
-package com.serverless;
+package com.serverless.tests;
 
 import java.io.BufferedOutputStream;
 import java.io.IOException;
@@ -14,7 +14,6 @@ import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 
 public class ReadTestsByUsernameHandler implements RequestStreamHandler {
 

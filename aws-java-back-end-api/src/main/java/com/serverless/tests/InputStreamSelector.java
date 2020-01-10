@@ -1,4 +1,4 @@
-package com.serverless;
+package com.serverless.tests;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
