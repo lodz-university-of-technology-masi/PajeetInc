@@ -13,7 +13,7 @@ export default function AddTests({history}) {
   const [answeresClosed, setAnsweresClosed] = useState([])
   const [testName, setTestName] = useState("")
   const [minPoints, setMinPoints] = useState("")
-  const [maxPoints, setMaxPoints] = useState("")
+  const [points, setPoints] = useState(0)
 
   function reducer(state, action) {
     switch (action.type) {
@@ -51,8 +51,8 @@ export default function AddTests({history}) {
   };
 
   const submitTest = () => {
-    console.log({["recruiter-id"]:"rekruter420",["test-name"]:testName, ["min-points"]: minPoints,["max-points"]: maxPoints ,questions})
-    Axios.post('https://owe6jjn5we.execute-api.us-east-1.amazonaws.com/dev/tests',{["recruiter-id"]: localStorage.getItem('currentUsername'),["test-name"]:testName, ["min-points"]: minPoints,["max-points"]: maxPoints ,questions})
+    const maxPoints = questions.reduce((prev, curr) => parseFloat(prev.points) + parseFloat(curr.points))
+    Axios.post('https://owe6jjn5we.execute-api.us-east-1.amazonaws.com/dev/tests',{recruiterId: localStorage.getItem('currentUsername'),testName:testName, minPoints: minPoints,maxPoints: maxPoints, questions})
         .then(() => {
           history.push('/tests')
         })
@@ -85,12 +85,21 @@ export default function AddTests({history}) {
                  dynamicTyping: true,
                  skipEmptyLines: true}}
       />
+      Przykładowy plik CSV importu
+      <pre>
+        <code>
+        type,content,correctAnswer,answers/0/answer,answers/0/correct,answers/1/answer,answers/1/correct,answers/2/answer,answers/2/correct <br/>
+        O,OPowiedz o przedmoicie,,,,,,, <br/>
+        L,Jaka dostaniemy ocene,5,,,,,, <br/>
+        W,Jak lubisz przedmoit,,wcale,true,bardz o bardzo ,true,bardzo,false <br/>
+        </code>
+      </pre>
       <ControlLabel>Nazwa testu</ControlLabel>
       <FormControl as="textarea" rows="3" onChange={(e) => setTestName(e.target.value)} />
-      <ControlLabel>Minimalna Liczba Punktów</ControlLabel>
+      <ControlLabel>Minimalna Liczba Punktów Do Zdania Testu</ControlLabel>
       <FormControl as="textarea" rows="3" onChange={(e) => setMinPoints(e.target.value)} />
-      <ControlLabel>Maksymalna Liczba Punktów</ControlLabel>
-      <FormControl as="textarea" rows="3" onChange={(e) => setMaxPoints(e.target.value)} />
+      <ControlLabel>Liczba Punktów Za Pytanie</ControlLabel>
+      <FormControl as="textarea" rows="3" onChange={(e) => setPoints(e.target.value)} />
       <p>Typ Pytania</p>
       <FormControl componentClass="select" onChange={(e) => setQuestionType(e.target.value)}>
         <option value="O">Otwarte</option>
@@ -140,12 +149,12 @@ export default function AddTests({history}) {
       {    
         questionType == "W" ? (
       <div>
-        <Button variant="primary" onClick={() => {setAnswersNumber([]); dispatch({type: "addQuestion", payload: {content:questionText, type: questionType, answers: answeresClosed} }); setAnsweresClosed([]) }}>Dodaj Pytanie</Button>
+        <Button variant="primary" onClick={() => { setAnswersNumber([]); dispatch({type: "addQuestion", payload: {content:questionText, points: points , type: questionType, answers: answeresClosed} }); setAnsweresClosed([]) }}>Dodaj Pytanie</Button>
       </div>
       )
       :
-        <Button variant="primary" onClick={() => dispatch({type: "addQuestion", payload: {content:questionText, type: questionType, correctAnswer: questionAnswere} })}>Dodaj Pytanie</Button>
-        }
+        <Button variant="primary" onClick={() => { dispatch({type: "addQuestion", payload: {content:questionText, points: points , type: questionType, correctAnswer: questionAnswere } })}}>Dodaj Pytanie</Button>
+      }
       <TestAdded questions={questions} index={0}/>
       <Button type="submit" onClick={() => submitTest()}>Zatwierdź test</Button>
     </div>

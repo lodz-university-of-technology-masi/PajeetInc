@@ -39,13 +39,13 @@ export default function AddCandidates() {
       console.log(value)
       setTestId(value);
       tests.forEach(test => {
-          if(test.test_id == value){
-              setTestName(test.test_name);
+          if(test.testId == value){
+              setTestName(test.testName);
           }
       });
   }
   function submitCandidate(){
-    axios.put('https://owe6jjn5we.execute-api.us-east-1.amazonaws.com/dev/assign-candidate',{["recruiter-id"]:localStorage.getItem('currentUsername'),["test-id"]:testId, ["test-name"]: testName,["username"]: username})
+    axios.put('https://owe6jjn5we.execute-api.us-east-1.amazonaws.com/dev/assign-candidate',{recruiterId:localStorage.getItem('currentUsername'),testId:testId, testName: testName,["username"]: username})
   }
   return (
     <div>
@@ -53,7 +53,7 @@ export default function AddCandidates() {
         <ControlLabel>Wybierz test</ControlLabel>
         <FormControl componentClass="select" onChange={(e) => setTestsValue(e.target.value)}>
             {tests.map((test, i) => {
-                return <option value={test.test_id}>{test.test_name}</option>
+                return <option value={test.testId}>{test.testName}</option>
             })}
         </FormControl>
 

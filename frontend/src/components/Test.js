@@ -8,9 +8,9 @@ export default function Test({questions, testName}) {
       {questions.map((question)=>{
        return(
               <Panel>
-                <Panel.Heading>{question.question_content}</Panel.Heading>
-                  {question.question_type == "L" ? (<Panel.Body>{question.correct_answer}</Panel.Body>) : null} 
-                  {question.question_type == "W" ? (
+                <Panel.Heading>{question.content}<span style={{float: "right"}}>Points: {question.points}</span></Panel.Heading>
+                  {question.type == "L" ? (<Panel.Body>{question.correct}</Panel.Body>) : null} 
+                  {question.type == "W" ? (
                 <Panel.Body>
                   <ListGroup>
                     {question.answers.map((answer)=>{
