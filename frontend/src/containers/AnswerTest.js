@@ -9,8 +9,8 @@ export default function AnswerTest({test}) {
   const [answers, setanswers] = useState(test.questions.map((q) => 
   { 
     return {
-      question: q.question_content,
-      type: q.question_type,
+      question: q.content,
+      type: q.type,
       content: "",
       correct: false,
       rated: true
@@ -20,7 +20,7 @@ export default function AnswerTest({test}) {
 
   const submitTest = (e) => {
     e.preventDefault()
-    axios.put('https://owe6jjn5we.execute-api.us-east-1.amazonaws.com/dev/pass-test',{answers,["recruiter-id"]: test.recruiter_id, ["test-id"]: test.test_id, ["testName"]: test.test_name, username: localStorage.getItem('currentUsername')}).then(() => {
+    axios.put('https://owe6jjn5we.execute-api.us-east-1.amazonaws.com/dev/pass-test',{answers, recruiterId: test.recruiterId, testId: test.testId, testName: test.testName, username: localStorage.getItem('currentUsername')}).then(() => {
 
       setshowAlertSucces(true);
     }).catch(() => {
@@ -45,14 +45,14 @@ export default function AnswerTest({test}) {
           {test.questions.map((question, index)=>{
             return(
               <div>
-              {question.question_type != "W" ? (
+              {question.type != "W" ? (
                 <FormGroup >
-                  <ControlLabel>{question.question_content}</ControlLabel>
+                  <ControlLabel>{question.content}</ControlLabel>
                   <FormControl onChange={(e) =>{let nanswers = [...answers]; let currentanswer = nanswers[index]; currentanswer.content=e.target.value; setanswers(nanswers)}}/>
                 </FormGroup>
               ): (
                 <FormGroup >
-                  <ControlLabel>{question.question_content}</ControlLabel>
+                  <ControlLabel>{question.content}</ControlLabel>
                   <FormGroup>
                     {question.answers.map((answer)=>{
                       return(
