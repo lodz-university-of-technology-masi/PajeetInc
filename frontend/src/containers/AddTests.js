@@ -30,13 +30,13 @@ export default function AddTests({history}) {
       if(q.type == 'L'){
         setQuestionType(q.type)
         setQuestionText(q.content)
-        setQuestionAnswere(q.correctAnswer)
-        dispatch({type: "addQuestion", payload: {content:q.content, type: q.type, correctAnswer: q.correctAnswer} })
+        setQuestionAnswere(q.correct)
+        dispatch({type: "addQuestion", payload: {content:q.content, type: q.type, correct: q.correct} })
       } 
       if(q.type == 'O'){
         setQuestionType(q.type)
         setQuestionText(q.content)
-        dispatch({type: "addQuestion", payload: {content:q.content, type: q.type, correctAnswer: questionAnswere} })
+        dispatch({type: "addQuestion", payload: {content:q.content, type: q.type, correct: questionAnswere} })
       } 
       if(q.type == 'W'){
         setQuestionType(q.type)
@@ -51,11 +51,14 @@ export default function AddTests({history}) {
   };
 
   const submitTest = () => {
-    const maxPointsn = ( questions.reduce((prev, curr) => parseFloat(prev.points) + parseFloat(curr.points)))
-    Axios.post('https://owe6jjn5we.execute-api.us-east-1.amazonaws.com/dev/tests',{recruiterId: localStorage.getItem('currentUsername'),testName:testName, minPoints: minPoints,maxPoints: maxPointsn, questions})
-        .then(() => {
-          history.push('/tests')
-        })
+    let maxPoints = questions.reduce((prev, curr) => {
+      console.log(prev, curr)
+      return ( {points: parseFloat(prev.points) + parseFloat(curr.points) } )
+    })
+    Axios.post('https://owe6jjn5we.execute-api.us-east-1.amazonaws.com/dev/tests',{recruiterId: localStorage.getItem('currentUsername'),testName:testName, minPoints: minPoints,maxPoints: maxPoints.points, questions})
+      .then(() => {
+        history.push('/tests')
+    })
   }
 
   const removeEmpty = obj => {
@@ -88,7 +91,7 @@ export default function AddTests({history}) {
       Przykładowy plik CSV importu
       <pre>
         <code>
-        type,content,correctAnswer,answers/0/answer,answers/0/correct,answers/1/answer,answers/1/correct,answers/2/answer,answers/2/correct <br/>
+        type,content,correct,answers/0/answer,answers/0/correct,answers/1/answer,answers/1/correct,answers/2/answer,answers/2/correct <br/>
         O,OPowiedz o przedmoicie,,,,,,, <br/>
         L,Jaka dostaniemy ocene,5,,,,,, <br/>
         W,Jak lubisz przedmoit,,wcale,true,bardz o bardzo ,true,bardzo,false <br/>
@@ -153,7 +156,7 @@ export default function AddTests({history}) {
       </div>
       )
       :
-        <Button variant="primary" onClick={() => { dispatch({type: "addQuestion", payload: {content:questionText, points: points , type: questionType, correctAnswer: questionAnswere } })}}>Dodaj Pytanie</Button>
+        <Button variant="primary" onClick={() => { dispatch({type: "addQuestion", payload: {content:questionText, points: points , type: questionType, correct: questionAnswere } })}}>Dodaj Pytanie</Button>
       }
       <TestAdded questions={questions} index={0}/>
       <Button type="submit" onClick={() => submitTest()}>Zatwierdź test</Button>
