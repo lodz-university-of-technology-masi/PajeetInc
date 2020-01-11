@@ -69,7 +69,8 @@ public class GetTestsHandler implements RequestStreamHandler {
             JsonNode test = tests.get(i);
             String json;
             JsonNode candidateInTest = candidateInTests.get(i);
-            if (!candidateInTest.get("finished").asBoolean()) {
+            if (candidateInTest.get("finished").asBoolean() == false &&
+                    candidateInTest.get("rated").asBoolean() == false) {
                 json = test.toString();
                 json = JsonFormatter.removeCandidatesFromTest(json);
                 json = JsonFormatter.removeCorrectAnswersFromTest(json);
@@ -86,19 +87,21 @@ public class GetTestsHandler implements RequestStreamHandler {
             JsonNode test = tests.get(i);
             String json = "";
             JsonNode candidateInTest = candidateInTests.get(i);
-            if (!candidateInTest.get("rated").asBoolean()) {
+            if (candidateInTest.get("rated").asBoolean() == false &&
+                    candidateInTest.get("finished").asBoolean() == true) {
                 json = JsonFormatter.getCandidateAsJsonString(
                         user, "[]", false, true, false, 0);
                 json = json.substring(0, json.length() - 1);
                 json += ",";
-                json += "\""+"testName"+"\":\"" + test.get("testName").asText() + "\"";
+                json += "\"" + "testName" + "\":\"" + test.get("testName").asText() + "\"";
                 json += "}";
                 jsons.add(json);
-            } else {
+            } else if (candidateInTest.get("rated").asBoolean() == true &&
+                    candidateInTest.get("finished").asBoolean() == true) {
                 json = JsonFormatter.getCandidateAsJsonString(candidateInTest);
                 json = json.substring(0, json.length() - 1);
                 json += ",";
-                json += "\""+"testName"+"\":\"" + test.get("testName").asText() + "\"";
+                json += "\"" + "testName" + "\":\"" + test.get("testName").asText() + "\"";
                 json += "}";
                 jsons.add(json);
             }
@@ -107,7 +110,7 @@ public class GetTestsHandler implements RequestStreamHandler {
 
     private void getRecruiterTestsByFinished(boolean finished, String user) throws IOException {
         Iterator<Item> tests = DynamoDbController.getAllTestsByRecruiterId(user, table);
-        while(tests.hasNext()) {
+        while (tests.hasNext()) {
             Item test = tests.next();
             Iterator<JsonNode> candidates = new ObjectMapper().readValue(test.getJSONPretty("candidates"), JsonNode.class).iterator();
             while (candidates.hasNext()) {
@@ -116,8 +119,8 @@ public class GetTestsHandler implements RequestStreamHandler {
                     String json = JsonFormatter.getCandidateAsJsonString(candidate);
                     json = json.substring(0, json.length() - 1);
                     json += ",";
-                    json += "\""+"testName"+"\":\"" + test.get("testName") + "\",";
-                    json += "\""+"testId"+"\":\"" + test.get("testId") + "\"";
+                    json += "\"" + "testName" + "\":\"" + test.get("testName") + "\",";
+                    json += "\"" + "testId" + "\":\"" + test.get("testId") + "\"";
                     json += "}";
                     jsons.add(json);
                 }
@@ -127,7 +130,7 @@ public class GetTestsHandler implements RequestStreamHandler {
 
     private void getRatedRecruiterTests(String user) throws IOException {
         Iterator<Item> tests = DynamoDbController.getAllTestsByRecruiterId(user, table);
-        while(tests.hasNext()) {
+        while (tests.hasNext()) {
             Item test = tests.next();
             Iterator<JsonNode> candidates = new ObjectMapper().readValue(test.getJSONPretty("candidates"), JsonNode.class).iterator();
             while (candidates.hasNext()) {
