@@ -27,25 +27,29 @@ export default function AddTests({history}) {
   const handleForce = data => {
     data.forEach((q) => {
       removeEmpty(q)
+      console.log(q)
       if(q.type == 'L'){
         setQuestionType(q.type)
         setQuestionText(q.content)
         setQuestionAnswere(q.correct)
-        dispatch({type: "addQuestion", payload: {content:q.content, type: q.type, correct: q.correct} })
+        setPoints(q.points)
+        dispatch({type: "addQuestion", payload: {content:q.content, points: q.points, type: q.type, correct: q.correct} })
       } 
       if(q.type == 'O'){
         setQuestionType(q.type)
         setQuestionText(q.content)
-        dispatch({type: "addQuestion", payload: {content:q.content, type: q.type, correct: questionAnswere} })
+        setPoints(q.points)
+        dispatch({type: "addQuestion", payload: {content:q.content, points: q.points, type: q.type, correct: questionAnswere} })
       } 
       if(q.type == 'W'){
         setQuestionType(q.type)
         setQuestionText(q.content)
+        setPoints(q.points)
         const answeres = []
-        for(let i = 0; i < Object.keys(q).length - 5; i++) {
+        for(let i = 0; i < Object.keys(q).length - 6; i++) {
           answeres.push({answer: q[`answers/${i}/answer`], correct:q[`answers/${i}/correct`]});
         }
-        dispatch({type: "addQuestion", payload: {content:q.content, type: q.type, answers:answeres }});      
+        dispatch({type: "addQuestion", payload: {content:q.content, points: q.points, type: q.type, answers:answeres }});      
       } 
     })
   };
@@ -55,9 +59,10 @@ export default function AddTests({history}) {
       console.log(prev, curr)
       return ( {points: parseFloat(prev.points) + parseFloat(curr.points) } )
     })
-    Axios.post('https://owe6jjn5we.execute-api.us-east-1.amazonaws.com/dev/tests',{recruiterId: localStorage.getItem('currentUsername'),testName:testName, minPoints: minPoints,maxPoints: maxPoints.points, questions})
+    console.log(maxPoints)
+    Axios.post('https://owe6jjn5we.execute-api.us-east-1.amazonaws.com/dev/tests',{recruiterId: localStorage.getItem('currentUsername'),testName:testName, minPoints: minPoints,maxPoints: String(maxPoints.points), questions})
       .then(() => {
-        history.push('/tests')
+    //    history.push('/tests')
     })
   }
 
@@ -91,10 +96,10 @@ export default function AddTests({history}) {
       Przykładowy plik CSV importu
       <pre>
         <code>
-        type,content,correct,answers/0/answer,answers/0/correct,answers/1/answer,answers/1/correct,answers/2/answer,answers/2/correct <br/>
-        O,OPowiedz o przedmoicie,,,,,,, <br/>
-        L,Jaka dostaniemy ocene,5,,,,,, <br/>
-        W,Jak lubisz przedmoit,,wcale,true,bardz o bardzo ,true,bardzo,false <br/>
+        type,content,points,correct,answers/0/answer,answers/0/correct,answers/1/answer,answers/1/correct,answers/2/answer,answers/2/correct <br/>
+        O,OPowiedz o przedmoicie,12,,,,,,, <br/>
+        L,Jaka dostaniemy ocene,4,5,,,,,, <br/>
+        W,Jak lubisz przedmoit,3,,wcale,true,bardz o bardzo ,true,bardzo,false <br/>
         </code>
       </pre>
       <ControlLabel>Nazwa testu</ControlLabel>

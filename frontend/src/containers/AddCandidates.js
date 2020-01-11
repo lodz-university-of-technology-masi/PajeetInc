@@ -52,6 +52,7 @@ export default function AddCandidates() {
         <PageHeader>Przypisanie kandydatów do testu</PageHeader>
         <ControlLabel>Wybierz test</ControlLabel>
         <FormControl componentClass="select" onChange={(e) => setTestsValue(e.target.value)}>
+            <option>{'Wybierz test'}</option>
             {tests.map((test, i) => {
                 return <option value={test.testId}>{test.testName}</option>
             })}
@@ -59,6 +60,7 @@ export default function AddCandidates() {
 
         <ControlLabel>Wybierz Kandydata</ControlLabel>
         <FormControl componentClass="select" onChange={(e) => setUsername(e.target.value)}>
+            <option>{'Wybierz kandydata'}</option>
             {users.map((user, i) => {
                 return <option value={user.attributes[3].value}>{user.attributes[3].value}</option>
             })}
