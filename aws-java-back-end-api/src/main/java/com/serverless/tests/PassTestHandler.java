@@ -68,6 +68,8 @@ public class PassTestHandler implements RequestStreamHandler {
     }
 
     private void rateClosedAndNumericalAnswers(Map<String, List<JsonNode>> answersGroupedByQuestion, Item test) throws IOException {
+//        double points = 0.0;
+
         List<JsonNode> testQuestions = getTestQuestions(test);
 
         List<String> questions = new ArrayList<String>(answersGroupedByQuestion.keySet());
@@ -147,7 +149,7 @@ public class PassTestHandler implements RequestStreamHandler {
             int wrong = 0;
             for (JsonNode a : answers) {
 
-                JsonNode testAnswer = findItemByProperty(a.get("content").asText(), testAnswers);
+                JsonNode testAnswer = findTestAnswerByContent(a.get("content").asText(), testAnswers);
                 if (testAnswer.get("correct").asBoolean()) {
                     good++;
                 } else {
@@ -175,20 +177,34 @@ public class PassTestHandler implements RequestStreamHandler {
 
     private double calculateByGoodAndWrong(int good, int wrong, double points, int allGood) {
         double result = points;
-        if (good <= wrong || good == 0) {
+        if (good == 0) {
             result = 0.0;
-        } else if (good > wrong) {
-            result = points * 0.33;
-        } else if (good > 0 && good < allGood) {
-            result = points * 0.66;
-        } else if (good > 0 && good == allGood) {
-            result = points;
+        } else if (good > 0) {
+            if (good == allGood) {
+                if (wrong == 0) {
+                    result = points;
+                } else if (wrong > 0) {
+                    if (good == wrong) {
+                        result = 0.0;
+                    } else if (good > wrong && wrong == 1) {
+                        result = points * 0.33;
+                    } else if (good > wrong && wrong > 1) {
+                        result = 0.0;
+                    }
+                }
+            } else if (good < allGood) {
+                if (wrong == 0) {
+                    result = points * 0.66;
+                } else if (wrong > 0) {
+                    result = 0.0;
+                }
+            }
         }
         return result;
     }
 
     private double calculatePoints(String json) throws IOException {
-        int points = 0;
+        double points = 0.0;
         List<JsonNode> answers = iteratorToList(new ObjectMapper().readValue(json, JsonNode.class).iterator());
 
 
@@ -223,6 +239,15 @@ public class PassTestHandler implements RequestStreamHandler {
         return iteratorToList(
                 new ObjectMapper().readValue(test.getJSONPretty("questions"), JsonNode.class).iterator()
         );
+    }
+
+    private JsonNode findTestAnswerByContent(String property, List<JsonNode> items) {
+        return items
+                .stream()
+                .filter(
+                        tq -> tq.get("answer").asText().contentEquals(property))
+                .findFirst()
+                .get();
     }
 
     private JsonNode findItemByProperty(String property, List<JsonNode> items) {
