@@ -62,14 +62,14 @@ public class PassTestHandler implements RequestStreamHandler {
         boolean passed = isPassed(points, test.getInt("minPoints"));
         boolean finished = true;
         boolean rated = false;
+//        boolean rated = testComprisesOnlyClosedAndNumerical();
+
 
         String result = JsonFormatter.getCandidatesAsJsonString(username, answers, passed, finished, rated, points, test);
         return result;
     }
 
     private void rateClosedAndNumericalAnswers(Map<String, List<JsonNode>> answersGroupedByQuestion, Item test) throws IOException {
-//        double points = 0.0;
-
         List<JsonNode> testQuestions = getTestQuestions(test);
 
         List<String> questions = new ArrayList<String>(answersGroupedByQuestion.keySet());
@@ -93,8 +93,6 @@ public class PassTestHandler implements RequestStreamHandler {
                     addToJson(answers, false, false, 0.0);
                 }
             }
-            // jesli typ to W, to zadna nie zaznaczona
-            // else 0.0
         }
     }
 
