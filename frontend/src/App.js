@@ -97,9 +97,6 @@ class App extends Component {
 										):(
 											<div>
 												<Navbar.Brand>
-													<Link to="/">Test application</Link>
-												</Navbar.Brand>
-												<Navbar.Brand>
 													<Link to="/my_tests">Moje testy</Link>
 												</Navbar.Brand>
 												<Navbar.Brand>
@@ -127,7 +124,10 @@ class App extends Component {
 							</Nav>
 							<Nav pullRight>
 								{this.state.isAuthenticated ? (
-									<NavItem onClick={this.handleLogout}>Logout</NavItem>
+									<div>
+										<p>{localStorage.getItem('currentUsername')} - {localStorage.getItem('profile')}</p>
+										<NavItem onClick={this.handleLogout}>Logout</NavItem>
+									</div>
 								) : (
 									<Fragment>
 										<LinkContainer to="/signup">
