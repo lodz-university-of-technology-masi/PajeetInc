@@ -4,6 +4,7 @@ import {Button, Panel, PageHeader} from 'react-bootstrap'
 import AnswerTest from './AnswerTest'
 import FinishedTest from './FinishedTest'
 import AssignedTest from './AssignedTest'
+import RateTest from '././RateTest'
 
 export default function UserTests() {
   const [tests, setTests] = useState([]);
@@ -33,7 +34,13 @@ export default function UserTests() {
 
   return (
     <div>
-    <PageHeader>Moje testy do przejścia</PageHeader>
+    {
+      localStorage.getItem('profile') == "Candidate" ? (
+        <PageHeader>Moje testy do przejścia</PageHeader>
+      ) : (
+        <PageHeader>Przydzielone testy</PageHeader>
+      )
+    }
       {tests.map((test, i)=>{
         return(
         <div> 
@@ -52,8 +59,13 @@ export default function UserTests() {
         </div>
         )
     })}
-
-    <PageHeader>Moje zakończone testy</PageHeader>
+    {
+      localStorage.getItem('profile') == "Candidate" ? (
+        <PageHeader>Moje zakończone testy</PageHeader>
+      ) : (
+        <PageHeader>Zakończone testy</PageHeader>
+      )
+    }
       {ratedTests.map((test, i)=>{
         return(
         <div> 
@@ -61,7 +73,13 @@ export default function UserTests() {
             <Panel.Heading>
               <Panel.Title>{test.testName}</Panel.Title>
             </Panel.Heading>
-          <FinishedTest test={test} />
+            {
+            localStorage.getItem('profile') == "Candidate" ? (
+              <FinishedTest test={test} />
+            ) : (
+              <RateTest test={test} />
+            )
+            }
           </Panel>
         </div>
         )
