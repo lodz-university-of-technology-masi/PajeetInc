@@ -37,9 +37,9 @@ public class InsertTestHandler  implements RequestStreamHandler {
         double maxPoints = rootNode.get("maxPoints").asDouble();
         String questions = JsonFormatter.getQuestionsAsJsonString(rootNode);
 
-        PrimaryKey primaryKey = new PrimaryKey("recruiter_id", recruiterId, "test_id", testId);
-        Item test = new Item().withPrimaryKey(primaryKey).withString("test_name", testName)
-                .withDouble("min_points", minPoints).withDouble("max_points", maxPoints)
+        PrimaryKey primaryKey = new PrimaryKey("recruiterId", recruiterId, "testId", testId);
+        Item test = new Item().withPrimaryKey(primaryKey).withString("testName", testName)
+                .withDouble("minPoints", minPoints).withDouble("maxPoints", maxPoints)
                 .withJSON("questions", questions).withList("candidates", new ArrayList<>());
 
         return test;

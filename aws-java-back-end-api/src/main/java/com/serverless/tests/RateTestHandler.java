@@ -30,7 +30,7 @@ public class RateTestHandler implements RequestStreamHandler {
         String testName = rootNode.get("testName").asText();
 
         Table tests = DynamoDbController.getTable("Tests");
-        PrimaryKey primaryKey = new PrimaryKey("recruiter_id", recruiterId, "test_id", testId);
+        PrimaryKey primaryKey = new PrimaryKey("recruiterId", recruiterId, "testId", testId);
 
         Item test = DynamoDbController.getItemByPrimaryKey(primaryKey, tests);
 
@@ -42,7 +42,7 @@ public class RateTestHandler implements RequestStreamHandler {
         String username = rootNode.get("username").asText();
         String answers = JsonFormatter.getCandidateAnswersAsJsonString(rootNode.get("answers"));
         int points = calculatePoints(answers);
-        boolean passed = isPassed(points, test.getInt("min_points"));
+        boolean passed = isPassed(points, test.getInt("minPoints"));
         boolean finished = true;
         boolean rated = true;
 
