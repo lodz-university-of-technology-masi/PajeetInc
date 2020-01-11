@@ -88,7 +88,7 @@ class App extends Component {
 								this.state.isAuthenticated && (
 									
 									<div>
-										{this.state.profile == "Candidate" ? (
+										{ localStorage.getItem('profile') == "Candidate" ? (
 											<div>
 											<Navbar.Brand>
 												<Link to="/my_tests">Moje testy</Link>

@@ -101,6 +101,7 @@ export default class Signup extends Component {
 					console.log(res)
 					localStorage.setItem('currentUser', JSON.stringify(res.data));
 					localStorage.setItem('currentUsername', this.parseJwt(res.data.idToken).email);
+					localStorage.setItem('profile', this.parseJwt(res.data.idToken).profile);
 					this.props.setCurrentUser(res.data)
 					this.props.userHasAuthenticated(true);
 					this.props.history.push('/');

@@ -43,7 +43,8 @@ export default class Login extends Component {
 
 	//	{
 	//		"email": "tcg79194@eveav.com",
-	//			"password": "!Password123",
+	//		hjw68051@bcaoo.com - rekruter
+	//		"password": "!Password123",
 	//		"profile": "Candidate"
 	//	}
 
