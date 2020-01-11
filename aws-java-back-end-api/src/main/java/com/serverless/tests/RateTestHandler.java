@@ -41,7 +41,8 @@ public class RateTestHandler implements RequestStreamHandler {
     private String updateCandidates(JsonNode rootNode, Item test) throws IOException {
         String username = rootNode.get("username").asText();
         String answers = JsonFormatter.getCandidateAnswersAsJsonString(rootNode.get("answers"));
-        int points = calculatePoints(answers);
+
+        double points = sumPoints(answers);
         boolean passed = isPassed(points, test.getInt("minPoints"));
         boolean finished = true;
         boolean rated = true;
@@ -50,18 +51,18 @@ public class RateTestHandler implements RequestStreamHandler {
         return result;
     }
 
-    private int calculatePoints(String json) throws IOException {
-        int points = 0;
+    private double sumPoints(String json) throws IOException {
+        double points = 0.0;
         List<JsonNode> answers = iteratorToList(new ObjectMapper().readValue(json, JsonNode.class).iterator());
-        for (int i = 0; i < answers.size(); i++) {
-            if (answers.get(i).get("correct").asBoolean()) {
-                points += 1;
+        for (JsonNode a : answers) {
+            if (a.get("correct").asBoolean()) {
+                points += a.get("points").asDouble();
             }
         }
         return points;
     }
 
-    private boolean isPassed(int points, int minPoints) {
+    private boolean isPassed(double points, int minPoints) {
         boolean passed = points >= minPoints ? true : false;
         return passed;
     }

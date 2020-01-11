@@ -272,14 +272,14 @@ functions:
 #      Properties:
 #        TableName: Tests
 #        AttributeDefinitions:
-#          - AttributeName: recruiter_id
+#          - AttributeName: recruiterId
 #            AttributeType: S
-#          - AttributeName: test_id
+#          - AttributeName: testId
 #            AttributeType: S
 #        KeySchema:
-#          - AttributeName: recruiter_id
+#          - AttributeName: recruiterId
 #            KeyType: HASH
-#          - AttributeName: test_id
+#          - AttributeName: testId
 #            KeyType: RANGE
 #        ProvisionedThroughput:
 #          ReadCapacityUnits: 1
