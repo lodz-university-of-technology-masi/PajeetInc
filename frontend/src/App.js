@@ -17,7 +17,8 @@ class App extends Component {
 		this.state = {
 			isAuthenticated: false,
 			isAuthenticating: true,
-			currentUser: null
+			currentUser: null,
+			userProfile: null,
 		};
 	}
 
@@ -29,6 +30,7 @@ class App extends Component {
 
 	async logOut() {
 		localStorage.removeItem('currentUser');
+		this.setState({ isAuthenticated: false })
 	}
 
 	async componentDidMount() {
@@ -56,6 +58,10 @@ class App extends Component {
 		this.setState({ currentUser: user });
 	};
 
+	setUserProfile = profile => {
+		this.setState({ userProfile: profile})
+	}
+
 	handleLogout = async event => {
 		await this.logOut();
 
@@ -67,7 +73,8 @@ class App extends Component {
 			isAuthenticated: this.state.isAuthenticated,
 			userHasAuthenticated: this.userHasAuthenticated,
 			currentUser: this.state.currentUser,
-			setCurrentUser: this.setCurrentUser
+			setCurrentUser: this.setCurrentUser,
+			setUserProfile: this.setUserProfile
 		};
 		return (
 			<IntlProviderWrapper>
@@ -77,18 +84,39 @@ class App extends Component {
 							<Navbar.Brand>
 								<Link to="/">Test application</Link>
 							</Navbar.Brand>
-							<Navbar.Brand>
-								<Link to="/tests">Testy</Link>
-							</Navbar.Brand>
-							<Navbar.Brand>
-								<Link to="/add_tests">Dodaj test</Link>
-							</Navbar.Brand>
-							<Navbar.Brand>
-								<Link to="/add_candidates">Dodaj kandydata</Link>
-							</Navbar.Brand>
-							<Navbar.Brand>
-								<Link to="/my_tests">Moje testy</Link>
-							</Navbar.Brand>
+							{
+								this.state.isAuthenticated && (
+									
+									<div>
+										{ localStorage.getItem('profile') == "Candidate" ? (
+											<div>
+											<Navbar.Brand>
+												<Link to="/my_tests">Moje testy</Link>
+											</Navbar.Brand>
+											</div>
+										):(
+											<div>
+												<Navbar.Brand>
+													<Link to="/">Test application</Link>
+												</Navbar.Brand>
+												<Navbar.Brand>
+													<Link to="/my_tests">Moje testy</Link>
+												</Navbar.Brand>
+												<Navbar.Brand>
+													<Link to="/tests">Testy</Link>
+												</Navbar.Brand>
+												<Navbar.Brand>
+													<Link to="/add_tests">Dodaj test</Link>
+												</Navbar.Brand>
+												<Navbar.Brand>
+													<Link to="/add_candidates">Dodaj kandydata</Link>
+												</Navbar.Brand>
+											</div>
+										)
+									}
+									</div>
+								)
+							}
 							<Navbar.Toggle />
 						</Navbar.Header>
 						<Navbar.Collapse>
@@ -113,7 +141,7 @@ class App extends Component {
 							</Nav>
 						</Navbar.Collapse>
 					</Navbar>
-					<Routes childProps={childProps} />
+					<Routes childProps={childProps} profile={localStorage.getItem('profile')} isAuthenticated={this.state.isAuthenticated}/>
 				</div>
 			</IntlProviderWrapper>
 		

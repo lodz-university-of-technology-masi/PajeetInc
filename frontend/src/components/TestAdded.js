@@ -9,7 +9,7 @@ export default function TestAdded({questions, testName}) {
        return(
               <Panel>
                   <Panel.Heading>{question.content}</Panel.Heading>
-                    {question.type == "L" ? (<Panel.Body>{question.correctAnswer}</Panel.Body>) : null} 
+                    {question.type == "L" ? (<Panel.Body>{question.correct}</Panel.Body>) : null} 
                     {question.type == "W" ? (
                     <Panel.Body>
                       <ListGroup>

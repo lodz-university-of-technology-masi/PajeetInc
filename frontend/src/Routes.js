@@ -13,17 +13,31 @@ import AddCandidates from './containers/AddCandidates'
 import UserTests from './containers/UserTests'
 
 
-export default ({ childProps }) => (
+export default ({ childProps, profile, isAuthenticated }) => (
 	<Switch>
 		<AppliedRoute path="/" exact component={Home} props={childProps} />
 		<AppliedRoute path="/login" exact component={Login} props={childProps} />
 		<AppliedRoute path="/resetpassword" exact component={ResetPassword} props={childProps} />
 		<AppliedRoute path="/signup" exact component={Signup} props={childProps} />
-		<AppliedRoute path="/tests" exact component={Tests} props={childProps} />
-		<AppliedRoute path="/add_tests" exact component={AddTests} props={childProps} />
-		<AppliedRoute path="/add_candidates" exact component={AddCandidates} props={childProps} />
-		<AppliedRoute path="/my_tests" exact component={UserTests} props={childProps} />
-
+		{
+			isAuthenticated && (
+				<div>
+				{profile == "Candidate" ? (
+					<AppliedRoute path="/my_tests" exact component={UserTests} props={childProps} />
+				) : 
+				(
+					<div>
+						<AppliedRoute path="/my_tests" exact component={UserTests} props={childProps} />
+						<AppliedRoute path="/add_tests" exact component={AddTests} props={childProps} />
+						<AppliedRoute path="/add_candidates" exact component={AddCandidates} props={childProps} />
+						<AppliedRoute path="/tests" exact component={Tests} props={childProps} />
+					</div>
+				)
+				}
+				</div>
+			)
+		}
+		
 		{/* Finally, catch all unmatched routes */}
 		<Route component={NotFound} />
 	</Switch>

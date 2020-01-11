@@ -3,16 +3,17 @@ import axios from 'axios'
 import {Button, Panel, PageHeader} from 'react-bootstrap'
 import AnswerTest from './AnswerTest'
 import FinishedTest from './FinishedTest'
+import AssignedTest from './AssignedTest'
 
 export default function UserTests() {
   const [tests, setTests] = useState([]);
-  const [showForm, setshowForm] = useState([])
   useEffect(() => {
     const fetchData = async () => {
-      const url = 'https://owe6jjn5we.execute-api.us-east-1.amazonaws.com/dev/get-tests?user='+ localStorage.getItem('currentUsername') + '&role=candidate&status=assigned' ;
+      const url = 'https://owe6jjn5we.execute-api.us-east-1.amazonaws.com/dev/get-tests?user='+ localStorage.getItem('currentUsername') + '&role=' + localStorage.getItem('profile').toLowerCase() +'&status=assigned' ;
       const result = await axios(
         url,
       );
+      console.log(result.data)
       setTests(result.data);
     };
     fetchData();
@@ -21,7 +22,7 @@ export default function UserTests() {
   const [ratedTests, setRatedTests] = useState([]);
   useEffect(() => {
     const fetchData = async () => {
-      const url = 'https://owe6jjn5we.execute-api.us-east-1.amazonaws.com/dev/get-tests?user='+ localStorage.getItem('currentUsername') + '&role=candidate&status=finished' ;
+      const url = 'https://owe6jjn5we.execute-api.us-east-1.amazonaws.com/dev/get-tests?user='+ localStorage.getItem('currentUsername') + '&role=' + localStorage.getItem('profile').toLowerCase() +'&status=finished' ;
       const result = await axios(
         url,
       );
@@ -38,9 +39,15 @@ export default function UserTests() {
         <div> 
           <Panel>
             <Panel.Heading>
-              <Panel.Title>{test.test_name}</Panel.Title>
+              <Panel.Title>{test.testName}</Panel.Title>
             </Panel.Heading>
-          <AnswerTest test={test} />
+          {
+            localStorage.getItem('profile') == "Candidate" ? (
+              <AnswerTest test={test} />
+            ) : (
+              <AssignedTest test={test} />
+            )
+          }
           </Panel>
         </div>
         )
