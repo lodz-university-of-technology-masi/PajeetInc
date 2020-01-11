@@ -68,14 +68,16 @@ public class JsonFormatter {
                 "\"question\": \"" + answer.get("question").asText() + "\"," +
                 "\"type\": \"" + answer.get("type").asText() + "\"," +
                 "\"content\": \"" + answer.get("content").asText() + "\"," +
-                "\"correct\": \"" + answer.get("correct").asText() + "\"," +
+                "\"correct\": \"" + answer.get("correct").asBoolean() + "\"," +
                 "\"points\": \"" + answer.get("points").asDouble() + "\"," +
-                "\"rated\": \"" + answer.get("rated").asText() + "\"" +
+                "\"rated\": \"" + answer.get("rated").asBoolean() + "\"" +
                 "}";
         return result;
     }
 
-    protected static String getCandidateAnswerAsJsonString(String question, String type, String content, boolean correct, boolean rated, double points) {
+    protected static String getCandidateAnswerAsJsonString(
+            String question, String type, String content, boolean correct, boolean rated, double points) {
+
         String result = "{" +
                 "\"question\": \"" + question + "\"," +
                 "\"type\": \"" + type + "\"," +
