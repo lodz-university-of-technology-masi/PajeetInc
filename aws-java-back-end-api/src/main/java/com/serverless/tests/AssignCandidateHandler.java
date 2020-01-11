@@ -25,7 +25,7 @@ public class AssignCandidateHandler implements RequestStreamHandler {
 
         Table tests = DynamoDbController.getTable("Tests");
 
-        PrimaryKey primaryKey = new PrimaryKey("recruiter_id", recruiterId, "test_id", testId);
+        PrimaryKey primaryKey = new PrimaryKey("recruiterId", recruiterId, "testId", testId);
         Item test = DynamoDbController.getItemByPrimaryKey(primaryKey, tests);
 
         String candidates = updateCandidates(rootNode, test);

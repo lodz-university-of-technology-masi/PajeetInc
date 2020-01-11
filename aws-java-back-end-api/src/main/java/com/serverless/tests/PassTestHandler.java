@@ -32,7 +32,7 @@ public class PassTestHandler implements RequestStreamHandler {
         String testName = rootNode.get("testName").asText();
 
         Table tests = DynamoDbController.getTable("Tests");
-        PrimaryKey primaryKey = new PrimaryKey("recruiter_id", recruiterId, "test_id", testId);
+        PrimaryKey primaryKey = new PrimaryKey("recruiterId", recruiterId, "testId", testId);
 
         Item test = DynamoDbController.getItemByPrimaryKey(primaryKey, tests);
 
@@ -59,7 +59,7 @@ public class PassTestHandler implements RequestStreamHandler {
 
         String answers = itemsAsString();
         double points = calculatePoints(answers);
-        boolean passed = isPassed(points, test.getInt("min_points"));
+        boolean passed = isPassed(points, test.getInt("minPoints"));
         boolean finished = true;
         boolean rated = false;
 
@@ -166,7 +166,7 @@ public class PassTestHandler implements RequestStreamHandler {
 
     private double calculateNumericalQuestionPoints(JsonNode answer, JsonNode testQuestion) throws IOException {
         double points = 0.0;
-        double correctAnswer = testQuestion.get("correct_answer").asDouble();
+        double correctAnswer = testQuestion.get("correct").asDouble();
         if (correctAnswer == answer.get("content").asDouble()) {
             points = testQuestion.get("points").asDouble();
         }
@@ -229,7 +229,7 @@ public class PassTestHandler implements RequestStreamHandler {
         return items
                 .stream()
                 .filter(
-                        tq -> tq.get("question_content").asText().contentEquals(property))
+                        tq -> tq.get("content").asText().contentEquals(property))
                 .findFirst()
                 .get();
     }

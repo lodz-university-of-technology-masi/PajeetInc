@@ -44,7 +44,7 @@ public class DynamoDbController {
 
     protected static Iterator<Item> getAllTestsByRecruiterId(String recruiterId, Table tests) {
         QuerySpec spec = new QuerySpec()
-                .withKeyConditionExpression("recruiter_id = :id")
+                .withKeyConditionExpression("recruiterId = :id")
                 .withValueMap(new ValueMap()
                         .withString(":id", recruiterId));
         Iterator<Item> items = tests.query(spec).iterator();

@@ -16,7 +16,7 @@ public class ReadTestsHandler implements RequestStreamHandler {
     public void handleRequest(InputStream inputStream, OutputStream outputStream, Context context) throws IOException {
         Table tests = DynamoDbController.getTable("Tests");
         Iterator<Item> iterator = DynamoDbController.getItemsFromTable(
-                "recruiter_id, test_id, max_points, min_points, questions, test_name", tests);
+                "recruiterId, testId, maxPoints, minPoints, questions, testName", tests);
         DynamoDbController.writeItemsToOutputStream(iterator, outputStream);
     }
 }

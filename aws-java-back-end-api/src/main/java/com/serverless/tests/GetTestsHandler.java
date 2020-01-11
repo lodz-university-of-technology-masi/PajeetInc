@@ -54,7 +54,7 @@ public class GetTestsHandler implements RequestStreamHandler {
     private void init(OutputStream outputStream) {
         table = DynamoDbController.getTable("Tests");
         tests = DynamoDbController.getItemsFromTable(
-                "recruiter_id, test_id, max_points, min_points, questions, test_name, candidates", table);
+                "recruiterId, testId, maxPoints, minPoints, questions, testName, candidates", table);
         objectMapper = new ObjectMapper();
         jsons = new ArrayList<>();
         this.outputStream = outputStream;
@@ -91,14 +91,14 @@ public class GetTestsHandler implements RequestStreamHandler {
                         user, "[]", false, true, false, 0);
                 json = json.substring(0, json.length() - 1);
                 json += ",";
-                json += "\""+"testName"+"\":\"" + test.get("test_name").asText() + "\"";
+                json += "\""+"testName"+"\":\"" + test.get("testName").asText() + "\"";
                 json += "}";
                 jsons.add(json);
             } else {
                 json = JsonFormatter.getCandidateAsJsonString(candidateInTest);
                 json = json.substring(0, json.length() - 1);
                 json += ",";
-                json += "\""+"testName"+"\":\"" + test.get("test_name").asText() + "\"";
+                json += "\""+"testName"+"\":\"" + test.get("testName").asText() + "\"";
                 json += "}";
                 jsons.add(json);
             }
@@ -116,8 +116,8 @@ public class GetTestsHandler implements RequestStreamHandler {
                     String json = JsonFormatter.getCandidateAsJsonString(candidate);
                     json = json.substring(0, json.length() - 1);
                     json += ",";
-                    json += "\""+"testName"+"\":\"" + test.get("test_name") + "\",";
-                    json += "\""+"testId"+"\":\"" + test.get("test_id") + "\"";
+                    json += "\""+"testName"+"\":\"" + test.get("testName") + "\",";
+                    json += "\""+"testId"+"\":\"" + test.get("testId") + "\"";
                     json += "}";
                     jsons.add(json);
                 }

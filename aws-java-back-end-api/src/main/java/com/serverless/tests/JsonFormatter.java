@@ -102,9 +102,9 @@ public class JsonFormatter {
             double points = singleQuestionNode.get("points").asDouble();
 
             questions += "{"+
-                    "\"question_content\":\"" + content + "\"," +
+                    "\"content\":\"" + content + "\"," +
                     "\"points\":\"" + points + "\"," +
-                    "\"question_type\":\"" + type + "\"";
+                    "\"type\":\"" + type + "\"";
             if (!type.contentEquals("O")) {
                 questions += ",";
             }
@@ -130,8 +130,8 @@ public class JsonFormatter {
                     }
                 }
             } else if (type.contentEquals("L")) {
-                double correctAnswer = singleQuestionNode.get("correctAnswer").asDouble();
-                questions += "\"correct_answer\":" + correctAnswer;
+                double correctAnswer = singleQuestionNode.get("correct").asDouble();
+                questions += "\"correct\":" + correctAnswer;
             } else if (type.contentEquals("O")) {
 
             } else {
@@ -164,13 +164,13 @@ public class JsonFormatter {
         JsonNode questions = test.get("questions");
         for (int i = 0; i < questions.size(); i++) {
             JsonNode question = questions.get(i);
-            if (question.get("question_type").asText().contentEquals("W")) {
+            if (question.get("type").asText().contentEquals("W")) {
                 JsonNode answers = question.get("answers");
                 for (int j = 0; j < answers.size(); j++) {
                     ((ObjectNode) answers.get(j)).remove("correct");
                 }
-            } else if (question.get("question_type").asText().contentEquals("L")) {
-                ((ObjectNode) question).remove("correct_answer");
+            } else if (question.get("type").asText().contentEquals("L")) {
+                ((ObjectNode) question).remove("correct");
             }
         }
         return test.toString();

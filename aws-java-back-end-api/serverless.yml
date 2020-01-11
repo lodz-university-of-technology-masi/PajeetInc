@@ -145,10 +145,10 @@ functions:
           request:
             template:
               application/json: '{
-                "recruiterId": $input.json("$.recruiter-id"),
-                "testName": $input.json("$.test-name"),
-                "minPoints": $input.json("$.min-points"),
-                "maxPoints": $input.json("$.max-points"),
+                "recruiterId": $input.json("$.recruiterId"),
+                "testName": $input.json("$.testName"),
+                "minPoints": $input.json("$.minPoints"),
+                "maxPoints": $input.json("$.maxPoints"),
                 "questions": $input.json("$.questions")
               }'
   passTest:
@@ -164,9 +164,9 @@ functions:
           request:
             template:
               application/json: '{
-                "recruiterId": $input.json("$.recruiter-id"),
-                "testId": $input.json("$.test-id"),
-                "testName": $input.json("$.test-name"),
+                "recruiterId": $input.json("$.recruiterId"),
+                "testId": $input.json("$.testId"),
+                "testName": $input.json("$.testName"),
                 "username": $input.json("$.username"),
                 "answers": $input.json("$.answers")
               }'
@@ -183,9 +183,9 @@ functions:
           request:
             template:
               application/json: '{
-                "recruiterId": $input.json("$.recruiter-id"),
-                "testId": $input.json("$.test-id"),
-                "testName": $input.json("$.test-name"),
+                "recruiterId": $input.json("$.recruiterId"),
+                "testId": $input.json("$.testId"),
+                "testName": $input.json("$.testName"),
                 "username": $input.json("$.username")
               }'
   rateTest:
@@ -201,9 +201,9 @@ functions:
           request:
             template:
               application/json: '{
-                "recruiterId": $input.json("$.recruiter-id"),
-                "testId": $input.json("$.test-id"),
-                "testName": $input.json("$.test-name"),
+                "recruiterId": $input.json("$.recruiterId"),
+                "testId": $input.json("$.testId"),
+                "testName": $input.json("$.testName"),
                 "username": $input.json("$.username"),
                 "answers": $input.json("$.answers")
               }'
