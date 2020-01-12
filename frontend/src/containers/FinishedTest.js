@@ -1,5 +1,6 @@
 import React, {useEffect, useState} from 'react'
 import { Button, Panel} from 'react-bootstrap'
+import PanelFooter from 'react-bootstrap/lib/PanelFooter'
 
 export default function FinishedTest({test}) {
   const [isShown, setisShown] = useState(false)
@@ -9,7 +10,7 @@ export default function FinishedTest({test}) {
     <div>
       <Button type="submit" onClick={() => {setisShown(!isShown)}}>{isShown ? "Ukryj Test":  "Pokaż Test" }</Button>
       {isShown && test.rated == true && (
-        <form>
+        <Panel>
         {test.answers.map((answer, index)=>{
             return(
                 <div>
@@ -20,7 +21,9 @@ export default function FinishedTest({test}) {
                 </div>
             )
         })}
-      </form>
+        <PanelFooter>Punkty: {test.points}</PanelFooter>
+        <PanelFooter>Zaliczony: {test.passed == true ? "tak" : "nie"}</PanelFooter>
+      </Panel>
       )}
       {isShown && test.rated == false && (
           <h5>Test nie został jeszcze oceniony</h5>
