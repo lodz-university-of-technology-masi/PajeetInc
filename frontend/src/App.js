@@ -4,9 +4,6 @@ import { Link, withRouter } from 'react-router-dom';
 
 import { Nav, Navbar, NavItem } from 'react-bootstrap';
 import Routes from './Routes';
-import { IntlProviderWrapper } from './translations/IntProviderWrapper'
-import { FormattedMessage } from 'react-intl';
-import { LanguageSwitch } from './components/LanguageSwitch'
 import './App.css';
 
 
@@ -77,7 +74,6 @@ class App extends Component {
 			setUserProfile: this.setUserProfile
 		};
 		return (
-			<IntlProviderWrapper>
 				<div className="App container">
 					<Navbar fluid collapseOnSelect>
 						<Navbar.Header>
@@ -117,11 +113,6 @@ class App extends Component {
 							<Navbar.Toggle />
 						</Navbar.Header>
 						<Navbar.Collapse>
-							<Nav>
-							<NavItem>
-								<LanguageSwitch />
-							</NavItem>
-							</Nav>
 							<Nav pullRight>
 								{this.state.isAuthenticated ? (
 									<div>
@@ -131,10 +122,10 @@ class App extends Component {
 								) : (
 									<Fragment>
 										<LinkContainer to="/signup">
-											<NavItem><FormattedMessage id="user.signUp"/></NavItem>
+											<NavItem>Zarejestruj się</NavItem>
 										</LinkContainer>
 										<LinkContainer to="/login">
-											<NavItem><FormattedMessage id="user.signIn"/></NavItem>
+											<NavItem>Zaloguj się</NavItem>
 										</LinkContainer>
 									</Fragment>
 								)}
@@ -143,8 +134,6 @@ class App extends Component {
 					</Navbar>
 					<Routes childProps={childProps} profile={localStorage.getItem('profile')} isAuthenticated={this.state.isAuthenticated}/>
 				</div>
-			</IntlProviderWrapper>
-		
 		);
 	}
 }
