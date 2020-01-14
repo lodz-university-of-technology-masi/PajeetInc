@@ -6,7 +6,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 public class JsonFormatter {
 
@@ -101,7 +103,7 @@ public class JsonFormatter {
             String content = singleQuestionNode.get("content").asText();
             double points = singleQuestionNode.get("points").asDouble();
 
-            questions += "{"+
+            questions += "{" +
                     "\"content\":\"" + content + "\"," +
                     "\"points\":\"" + points + "\"," +
                     "\"type\":\"" + type + "\"";
@@ -119,7 +121,7 @@ public class JsonFormatter {
                     String answer = singleAnswerNode.get("answer").asText();
                     Boolean correct = singleAnswerNode.get("correct").asBoolean();
 
-                    questions += "{"+
+                    questions += "{" +
                             "\"answer\":\"" + answer + "\"," +
                             "\"correct\":" + correct +
                             "}";
@@ -159,6 +161,18 @@ public class JsonFormatter {
         return test.toString();
     }
 
+    protected static String removeCandidateFromTestByUsername(Item test, String username) throws IOException {
+        List<String> candidates = new ArrayList<>();
+        Iterator<JsonNode> nodes = new ObjectMapper().readValue(test.getJSONPretty("candidates"), JsonNode.class).iterator();
+        while (nodes.hasNext()) {
+            JsonNode candidate = nodes.next();
+            if (!candidate.get("username").asText().contentEquals(username)) {
+                candidates.add(getCandidateAsJsonString(candidate));
+            }
+        }
+        return toJsonString(candidates);
+    }
+
     protected static String removeCorrectAnswersFromTest(String itemAsString) throws IOException {
         JsonNode test = new ObjectMapper().readValue(itemAsString, JsonNode.class);
         JsonNode questions = test.get("questions");
@@ -174,5 +188,16 @@ public class JsonFormatter {
             }
         }
         return test.toString();
+    }
+
+    private static String toJsonString(List<String> items) {
+        StringBuilder jsonString = new StringBuilder("[");
+        for (int i = 0; i < items.size(); i++) {
+            jsonString
+                    .append(items.get(i))
+                    .append(i == items.size() - 1 ? "" : ",");
+        }
+        jsonString.append("]");
+        return jsonString.toString();
     }
 }

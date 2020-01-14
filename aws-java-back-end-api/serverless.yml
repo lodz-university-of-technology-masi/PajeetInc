@@ -108,7 +108,7 @@ functions:
           cors: true
 
   readTests:
-#    role: testsTableAccess
+    #    role: testsTableAccess
     handler: com.serverless.tests.ReadTestsHandler
     description: Get all tests from Tests table
     events:
@@ -118,7 +118,7 @@ functions:
           cors: true
           integration: lambda
   readTestsByUsername:
-#    role: testsTableAccess
+    #    role: testsTableAccess
     handler: com.serverless.tests.ReadTestsByUsernameHandler
     description: Get all tests assigned to specific candidate
     events:
@@ -133,7 +133,7 @@ functions:
                 "username": "$input.params("username")"
               }'
   insertTest:
-#    role: testsTableAccess
+    #    role: testsTableAccess
     handler: com.serverless.tests.InsertTestHandler
     description: Insert test into Tests table
     events:
@@ -152,7 +152,7 @@ functions:
                 "questions": $input.json("$.questions")
               }'
   passTest:
-#    role: testsTableAccess
+    #    role: testsTableAccess
     handler: com.serverless.tests.PassTestHandler
     description: Updating tests table with candidate answers
     events:
@@ -171,7 +171,7 @@ functions:
                 "answers": $input.json("$.answers")
               }'
   assignCandidate:
-#    role: testsTableAccess
+    #    role: testsTableAccess
     handler: com.serverless.tests.AssignCandidateHandler
     description: Assigning candidate to test
     events:
@@ -189,7 +189,7 @@ functions:
                 "username": $input.json("$.username")
               }'
   rateTest:
-#    role: testsTableAccess
+    #    role: testsTableAccess
     handler: com.serverless.tests.RateTestHandler
     description: Rate candidate answers
     events:
@@ -208,7 +208,7 @@ functions:
                 "answers": $input.json("$.answers")
               }'
   getTests:
-#    role: testsTableAccess
+    #    role: testsTableAccess
     handler: com.serverless.tests.GetTestsHandler
     description: Get all tests
     events:
@@ -224,6 +224,38 @@ functions:
                 "role": "$input.params("role")",
                 "status": "$input.params("status")"
               }'
+  removeTest:
+    handler: com.serverless.tests.RemoveTestHandler
+    description: Remove test by primary key
+    events:
+      - http:
+          path: /remove-test
+          method: delete
+          cors: true
+          integration: lambda
+          request:
+            template:
+              application/json: "{
+                'username': $input.json('username'),
+                'recruiterId': $input.json('recruiterId'),
+                'testId': $input.json('testId')
+              }"
+  removeCandidate:
+    handler: com.serverless.tests.RemoveCandidateHandler
+    description: Remove candidate from test by username
+    events:
+      - http:
+          path: /remove-candidate
+          method: put
+          cors: true
+          integration: lambda
+          request:
+            template:
+              application/json: "{
+               'username': $input.json('username'),
+               'recruiterId': $input.json('recruiterId'),
+               'testId': $input.json('testId')
+              }"
 
 #  iamRoleStatements:
 #    - Effect: Allow
