@@ -5,7 +5,6 @@ import { LinkContainer } from 'react-router-bootstrap'
 import {Button} from 'react-bootstrap'
 import Test from '../components/Test'
 import {Panel, ListGroup, ListGroupItem} from 'react-bootstrap'
-import { CSVLink } from "react-csv";
 
 export default function Tests() {
   const [tests, setTests] = useState([]);
@@ -20,32 +19,15 @@ export default function Tests() {
     fetchData();
   }, []);
 
-  
-  const handleForce = data => {
-    const newCSV = []
-    data.forEach((q) => {
-      if(q.type == 'L'){
-        newCSV.push({content:q.content, points: q.points, type: q.type, correct: String(q.correct)})
-      } 
-      if(q.type == 'O'){
-        newCSV.push({content:q.content, points: q.points, type: q.type, correct: ""} )
-      } 
-      if(q.type == 'W'){
-        const answeres = {};
-        q.answers.forEach((a, i) => {
-          answeres[`answers/${i}/answer`] = a.answer
-          answeres[`answers/${i}/correct`] = a.correct
-        })
-        newCSV.push({content:q.content, points: q.points,correct: "", type: q.type, ...answeres });      
-      } 
-    })
-    return newCSV
-  };
+
 
 
   return (
     
     <div>
+      <div class="spinner-border" role="status">
+        <span class="sr-only">Loading...</span>
+      </div>
      <PageHeader>Zarządzaj testami</PageHeader>
      <LinkContainer to="/add_tests">
       <Button variant="link">Dodaj test</Button>
@@ -55,9 +37,7 @@ export default function Tests() {
       {tests.map((test, i) => {
         return ( 
         <div>
-          {console.log(test)}
           <Test testName={test.testName} key={test.test_id} questions={test.questions}/>
-          <CSVLink filename={`${test.testName}.csv`} data={handleForce(test.questions)}>Pobierz</CSVLink>
         </div>
         )
         })}
