@@ -46,8 +46,8 @@ export default function AddTests({history}) {
         setQuestionText(q.content)
         setPoints(q.points)
         const answeres = []
-        for(let i = 0; i < Object.keys(q).length - 6; i++) {
-          answeres.push({answer: q[`answers/${i}/answer`], correct:q[`answers/${i}/correct`]});
+        for(let i = 0; i < Object.keys(q).filter((x) => x.includes("/answer")).length; i++) {
+          answeres.push({answer: q[`answers/${i}/answer`], correct: Boolean(q[`answers/${i}/correct`])});
         }
         dispatch({type: "addQuestion", payload: {content:q.content, points: q.points, type: q.type, answers:answeres }});      
       } 
@@ -62,7 +62,7 @@ export default function AddTests({history}) {
     console.log(maxPoints)
     Axios.post('https://owe6jjn5we.execute-api.us-east-1.amazonaws.com/dev/tests',{recruiterId: localStorage.getItem('currentUsername'),testName:testName, minPoints: minPoints,maxPoints: String(maxPoints.points), questions})
       .then(() => {
-    //    history.push('/tests')
+        history.push('/tests')
     })
   }
 
