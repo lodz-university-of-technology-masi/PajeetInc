@@ -84,7 +84,7 @@ functions:
           cors: true
 
   readTests:
-    #    role: testsTableAccess
+    role: accessToTestsTable
     handler: com.serverless.tests.ReadTestsHandler
     description: Get all tests from Tests table
     events:
@@ -94,7 +94,7 @@ functions:
           cors: true
           integration: lambda
   readTestsByUsername:
-    #    role: testsTableAccess
+    role: accessToTestsTable
     handler: com.serverless.tests.ReadTestsByUsernameHandler
     description: Get all tests assigned to specific candidate
     events:
@@ -109,7 +109,7 @@ functions:
                 "username": "$input.params("username")"
               }'
   insertTest:
-    #    role: testsTableAccess
+    role: accessToTestsTable
     handler: com.serverless.tests.InsertTestHandler
     description: Insert test into Tests table
     events:
@@ -128,7 +128,7 @@ functions:
                 "questions": $input.json("$.questions")
               }'
   passTest:
-    #    role: testsTableAccess
+    role: accessToTestsTable
     handler: com.serverless.tests.PassTestHandler
     description: Updating tests table with candidate answers
     events:
@@ -147,7 +147,7 @@ functions:
                 "answers": $input.json("$.answers")
               }'
   assignCandidate:
-    #    role: testsTableAccess
+    role: accessToTestsTable
     handler: com.serverless.tests.AssignCandidateHandler
     description: Assigning candidate to test
     events:
@@ -165,7 +165,7 @@ functions:
                 "username": $input.json("$.username")
               }'
   rateTest:
-    #    role: testsTableAccess
+    role: accessToTestsTable
     handler: com.serverless.tests.RateTestHandler
     description: Rate candidate answers
     events:
@@ -184,7 +184,7 @@ functions:
                 "answers": $input.json("$.answers")
               }'
   getTests:
-    #    role: testsTableAccess
+    role: accessToTestsTable
     handler: com.serverless.tests.GetTestsHandler
     description: Get all tests
     events:
@@ -201,6 +201,7 @@ functions:
                 "status": "$input.params("status")"
               }'
   removeTest:
+    role: accessToTestsTable
     handler: com.serverless.tests.RemoveTestHandler
     description: Remove test by primary key
     events:
@@ -216,6 +217,7 @@ functions:
                 "testId": "$input.params("testId")"
               }'
   removeCandidate:
+    role: accessToTestsTable
     handler: com.serverless.tests.RemoveCandidateHandler
     description: Remove candidate from test by username
     events:
@@ -232,7 +234,7 @@ functions:
                'testId': $input.json('testId')
               }"
   updateTest:
-    #    role: testsTableAccess
+    role: accessToTestsTable
     handler: com.serverless.tests.UpdateTestHandler
     description: Update test
     events:
@@ -252,63 +254,27 @@ functions:
                 "questions": $input.json("$.questions")
               }'
 
-
-#  iamRoleStatements:
-#    - Effect: Allow
-#      Action:
-#        - dynamodb:Query
-#        - dynamodb:Scan
-#        - dynamodb:GetItem
-#        - dynamodb:PutItem
-#        - dynamodb:UpdateItem
-#        - dynamodb:DeleteItem
-#      Resource:
-#        - { "Fn::GetAtt": ["UserInfoTable", "Arn" ] }
-
-
-#resources:
-#  Resources:
-#    testsTableAccess:
-#      Type: AWS::IAM::Role
-#      Properties:
-#        RoleName: TestsTableAccess
-#        AssumeRolePolicyDocument:
-#          Version: "2012-10-17"
-#          Statement:
-#          - Effect: Allow
-#          Action:
-#            - dynamodb:DescribeReservedCapacity*
-#            - dynamodb:List*
-#            - dynamodb:DescribeTimeToLive
-#            - dynamodb:DescribeLimits
-#            - dynamodb:CreateTable
-#            - dynamodb:BatchGet*
-#            - dynamodb:PutItem
-#            - dynamodb:DescribeTable
-#            - dynamodb:Delete*
-#            - dynamodb:Get*
-#            - dynamodb:BatchWrite*
-#            - dynamodb:Scan
-#            - dynamodb:Query
-#            - dynamodb:DescribeStream
-#            - dynamodb:Update*
-#          "Resource": "*"
-
-# TODO: jak jest juz tabela to jest problem https://stackoverflow.com/questions/41620437/how-to-continue-deploy-if-dynamodb-table-already-exists
-#    Tests:
-#      Type: AWS::DynamoDB::Table
-#      Properties:
-#        TableName: Tests
-#        AttributeDefinitions:
-#          - AttributeName: recruiterId
-#            AttributeType: S
-#          - AttributeName: testId
-#            AttributeType: S
-#        KeySchema:
-#          - AttributeName: recruiterId
-#            KeyType: HASH
-#          - AttributeName: testId
-#            KeyType: RANGE
-#        ProvisionedThroughput:
-#          ReadCapacityUnits: 1
-#          WriteCapacityUnits: 1
+resources:
+  Resources:
+    accessToTestsTable:
+      Type: AWS::IAM::Role
+      Properties:
+        RoleName: accessToTestsTable
+        AssumeRolePolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Principal:
+                Service:
+                  - lambda.amazonaws.com
+              Action: sts:AssumeRole
+        Policies:
+          - PolicyName: myPolicyName
+            PolicyDocument:
+              Version: '2012-10-17'
+              Statement:
+                - Effect: Allow
+                  Action:
+                    - dynamodb:*
+                    - lambda:*
+                  Resource: "*"
