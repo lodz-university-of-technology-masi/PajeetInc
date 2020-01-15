@@ -6,7 +6,7 @@ import {Button} from 'react-bootstrap'
 import Test from '../components/Test'
 import {Panel, ListGroup, ListGroupItem} from 'react-bootstrap'
 
-export default function Tests() {
+export default function Tests({history}) {
   const [tests, setTests] = useState([]);
   useEffect(() => {
     const fetchData = async () => {
@@ -19,9 +19,15 @@ export default function Tests() {
     fetchData();
   }, []);
 
+
+
+
   return (
     
     <div>
+      <div class="spinner-border" role="status">
+        <span class="sr-only">Loading...</span>
+      </div>
      <PageHeader>Zarządzaj testami</PageHeader>
      <LinkContainer to="/add_tests">
       <Button variant="link">Dodaj test</Button>
@@ -29,8 +35,12 @@ export default function Tests() {
      <h2>Testy</h2>
      <ListGroup>
       {tests.map((test, i) => {
-        return <Test testName={test.test_name} key={test.test_id} questions={test.questions}/>
-      })}
+        return ( 
+        <div>
+          <Test testName={test.testName} key={test.testId} questions={test.questions} testId={test.testId} history={history}/>
+        </div>
+        )
+        })}
      </ListGroup>
 
     </div>

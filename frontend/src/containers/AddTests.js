@@ -14,6 +14,9 @@ export default function AddTests({history}) {
   const [testName, setTestName] = useState("")
   const [minPoints, setMinPoints] = useState("")
   const [points, setPoints] = useState(0)
+  const [nameValid, setnameValid] = useState(null)
+  const [minValid, setminValid] = useState(null)
+  const [loading, setloading] = useState(false)
 
   function reducer(state, action) {
     switch (action.type) {
@@ -46,8 +49,8 @@ export default function AddTests({history}) {
         setQuestionText(q.content)
         setPoints(q.points)
         const answeres = []
-        for(let i = 0; i < Object.keys(q).length - 6; i++) {
-          answeres.push({answer: q[`answers/${i}/answer`], correct:q[`answers/${i}/correct`]});
+        for(let i = 0; i < Object.keys(q).filter((x) => x.includes("/answer")).length; i++) {
+          answeres.push({answer: q[`answers/${i}/answer`], correct: Boolean(q[`answers/${i}/correct`])});
         }
         dispatch({type: "addQuestion", payload: {content:q.content, points: q.points, type: q.type, answers:answeres }});      
       } 
@@ -55,6 +58,22 @@ export default function AddTests({history}) {
   };
 
   const submitTest = () => {
+    setloading(true)
+    if(testName === "") {
+      setnameValid('error')
+      if(minPoints === "") {
+        setminValid('error')
+      }
+      return
+    }
+    if(minPoints === "") {
+      setminValid('error')
+      return
+    }
+
+    if(questions.length == 0) {
+      return
+    }
     let maxPoints = questions.reduce((prev, curr) => {
       console.log(prev, curr)
       return ( {points: parseFloat(prev.points) + parseFloat(curr.points) } )
@@ -62,7 +81,8 @@ export default function AddTests({history}) {
     console.log(maxPoints)
     Axios.post('https://owe6jjn5we.execute-api.us-east-1.amazonaws.com/dev/tests',{recruiterId: localStorage.getItem('currentUsername'),testName:testName, minPoints: minPoints,maxPoints: String(maxPoints.points), questions})
       .then(() => {
-    //    history.push('/tests')
+        setloading(false)
+        history.push('/tests')
     })
   }
 
@@ -102,10 +122,14 @@ export default function AddTests({history}) {
         W,Jak lubisz przedmoit,3,,wcale,true,bardz o bardzo ,true,bardzo,false <br/>
         </code>
       </pre>
-      <ControlLabel>Nazwa testu</ControlLabel>
-      <FormControl as="textarea" rows="3" onChange={(e) => setTestName(e.target.value)} />
-      <ControlLabel>Minimalna Liczba Punktów Do Zdania Testu</ControlLabel>
-      <FormControl as="textarea" rows="3" onChange={(e) => setMinPoints(e.target.value)} />
+      <FormGroup validationState={nameValid}>
+        <ControlLabel>Nazwa testu</ControlLabel>
+        <FormControl as="textarea" rows="3" onChange={(e) => setTestName(e.target.value)} />
+      </FormGroup>
+      <FormGroup validationState={minValid}>
+        <ControlLabel>Minimalna Liczba Punktów Do Zdania Testu</ControlLabel>
+        <FormControl as="textarea" rows="3" onChange={(e) => setMinPoints(e.target.value)} />
+      </FormGroup>
       <ControlLabel>Liczba Punktów Za Pytanie</ControlLabel>
       <FormControl as="textarea" rows="3" onChange={(e) => setPoints(e.target.value)} />
       <p>Typ Pytania</p>
@@ -164,7 +188,7 @@ export default function AddTests({history}) {
         <Button variant="primary" onClick={() => { dispatch({type: "addQuestion", payload: {content:questionText, points: points , type: questionType, correct: questionAnswere } })}}>Dodaj Pytanie</Button>
       }
       <TestAdded questions={questions} index={0}/>
-      <Button type="submit" onClick={() => submitTest()}>Zatwierdź test</Button>
+      <Button disabled={loading} type="submit" onClick={() => submitTest()}>{loading ? 'Czekaj..' : 'Zatwierdź test'}</Button>
     </div>
   )
 }

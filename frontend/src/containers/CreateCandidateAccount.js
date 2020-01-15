@@ -90,7 +90,7 @@ export default class CreateCandidateAccount extends Component {
 	render() {
         return (
           <div className="ForceResetPassword">
-            {!this.state.passwordSuccessful ? this.renderEmailForm() : this.renderSuccessMessage()}
+            {!this.state.creationSuccessful ? this.renderEmailForm() : this.renderSuccessMessage()}
           </div>
         );
       }
