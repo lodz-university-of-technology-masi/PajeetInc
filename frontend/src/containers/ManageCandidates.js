@@ -20,7 +20,7 @@ export default function Candidates() {
   }, []);
 
   const deleteCandidate = email => {
-    axios.post('https://owe6jjn5we.execute-api.us-east-1.amazonaws.com/dev/deleteCandidateAccount', { email: email })
+    axios.delete('https://owe6jjn5we.execute-api.us-east-1.amazonaws.com/dev/deleteCandidateAccount', { email: email })
   }
 
   return (
