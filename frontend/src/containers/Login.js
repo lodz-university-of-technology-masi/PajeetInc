@@ -57,14 +57,25 @@ export default class Login extends Component {
 				["password"]: this.state.password
 			}).then(res => {
 				console.log('User logged in');
-				console.log(this.parseJwt(res.data.idToken))
-				localStorage.setItem('currentUser', JSON.stringify(res.data));
-				localStorage.setItem('currentUsername', this.parseJwt(res.data.idToken).email);
-				localStorage.setItem('profile', this.parseJwt(res.data.idToken).profile);
-				this.props.setCurrentUser(res.data)
-				this.props.userHasAuthenticated(true);
-				this.props.setUserProfile(this.parseJwt(res.data.idToken).profile)
-				this.props.history.push('/');
+				console.log(res)
+				if (res.data.challengeName === 'NEW_PASSWORD_REQUIRED') { //force password auth
+					console.log(res)
+					this.props.history.push({
+						pathname: '/forcePasswordChange',
+						state: { email: this.state.email,
+							responseData: res.data }
+						});
+				}
+				else {
+					console.log(this.parseJwt(res.data.idToken))
+					localStorage.setItem('currentUser', JSON.stringify(res.data));
+					localStorage.setItem('currentUsername', this.parseJwt(res.data.idToken).email);
+					localStorage.setItem('profile', this.parseJwt(res.data.idToken).profile);
+					this.props.setCurrentUser(res.data)
+					this.props.userHasAuthenticated(true);
+					this.props.setUserProfile(this.parseJwt(res.data.idToken).profile)
+					this.props.history.push('/');
+				}
 			}).catch(res => {
 				console.log(res)
 				//todo wrong password message

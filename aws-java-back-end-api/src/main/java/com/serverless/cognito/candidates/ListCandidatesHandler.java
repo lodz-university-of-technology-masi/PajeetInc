@@ -1,4 +1,4 @@
-package com.serverless.cognito;
+package com.serverless.cognito.candidates;
 
 import com.amazonaws.services.cognitoidp.AWSCognitoIdentityProvider;
 import com.amazonaws.services.cognitoidp.model.*;
@@ -6,6 +6,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.serverless.ApiGatewayResponse;
 import com.serverless.Response;
+import com.serverless.cognito.CognitoConfig;
+import com.serverless.cognito.UserManagement;
 
 import java.util.*;
 
@@ -16,7 +18,7 @@ import com.amazonaws.services.lambda.runtime.RequestHandler;
 
 
 public class ListCandidatesHandler implements RequestHandler<Map<String, Object>, ApiGatewayResponse> {
-    private static final Logger LOG = LogManager.getLogger(SignUpHandler.class);
+    private static final Logger LOG = LogManager.getLogger(ListCandidatesHandler.class);
     private static final CognitoConfig cognitoConfig = new CognitoConfig();
     private static final AWSCognitoIdentityProvider cognitoClient = new UserManagement()
             .getAmazonCognitoIdentityClient();
