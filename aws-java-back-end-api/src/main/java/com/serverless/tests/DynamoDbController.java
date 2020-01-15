@@ -35,10 +35,27 @@ public class DynamoDbController {
         return table.getItem(spec);
     }
 
-    protected  static void updateCandidates(PrimaryKey primaryKey, String candidates, Table tests) {
+    protected static void updateCandidates(PrimaryKey primaryKey, String candidates, Table tests) {
         UpdateItemSpec updateItemSpec = new UpdateItemSpec().withPrimaryKey(primaryKey)
                 .withUpdateExpression("set candidates=:c")
                 .withValueMap(new ValueMap().withJSON(":c", candidates));
+        tests.updateItem(updateItemSpec);
+    }
+
+    protected static void updateTest(
+            PrimaryKey primaryKey, String testName, double minPoints, double maxPoints, String questions, Table tests) {
+
+        UpdateItemSpec updateItemSpec =
+                new UpdateItemSpec()
+                        .withPrimaryKey(primaryKey)
+                        .withUpdateExpression("set questions=:q, minPoints=:min, maxPoints=:max, testName=:t")
+                        .withValueMap(
+                            new ValueMap()
+                                .withJSON(":q", questions)
+                                .withNumber(":min", minPoints)
+                                .withNumber(":max", maxPoints)
+                                .withString(":t", testName)
+                        );
         tests.updateItem(updateItemSpec);
     }
 

@@ -1,16 +1,3 @@
-# Welcome to Serverless!
-#
-# This file is the main config file for your service.
-# It's very minimal at this point and uses default values.
-# You can always add more config options for more control.
-# We've included some commented out config examples here.
-# Just uncomment any of them to get that config option.
-#
-# For full config options, check the docs:
-#    docs.serverless.com
-#
-# Happy Coding!
-
 service: back-end
 
 provider:
@@ -18,17 +5,6 @@ provider:
   runtime: java8
   stage: ${opt:stage, 'dev'}
   region: ${opt:region, 'us-east-1'}
-#  iamRoleStatements:
-#    - Effect: Allow
-#      Action:
-#        - dynamodb:Query
-#        - dynamodb:Scan
-#        - dynamodb:GetItem
-#        - dynamodb:PutItem
-#        - dynamodb:UpdateItem
-#        - dynamodb:DeleteItem
-#      Resource:
-#        - { "Fn::GetAtt": ["UserInfoTable", "Arn" ] }
 
 package:
   artifact: target/back-end-api-dev.jar
@@ -235,10 +211,10 @@ functions:
           integration: lambda
           request:
             template:
-              application/json: "{
+              application/json: '{
                 "recruiterId": "$input.params("recruiterId")",
                 "testId": "$input.params("testId")"
-              }"
+              }'
   removeCandidate:
     handler: com.serverless.tests.RemoveCandidateHandler
     description: Remove candidate from test by username
@@ -255,6 +231,27 @@ functions:
                'recruiterId': $input.json('recruiterId'),
                'testId': $input.json('testId')
               }"
+  updateTest:
+    #    role: testsTableAccess
+    handler: com.serverless.tests.UpdateTestHandler
+    description: Update test
+    events:
+      - http:
+          path: /update-test
+          method: put
+          cors: true
+          integration: lambda
+          request:
+            template:
+              application/json: '{
+                "recruiterId": $input.json("$.recruiterId"),
+                "testId": $input.json("$.testId"),
+                "testName": $input.json("$.testName"),
+                "minPoints": $input.json("$.minPoints"),
+                "maxPoints": $input.json("$.maxPoints"),
+                "questions": $input.json("$.questions")
+              }'
+
 
 #  iamRoleStatements:
 #    - Effect: Allow
