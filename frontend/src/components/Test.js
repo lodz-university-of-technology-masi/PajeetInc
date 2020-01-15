@@ -2,8 +2,8 @@ import React from 'react'
 import {Panel, ListGroup, ListGroupItem} from 'react-bootstrap'
 import { CSVLink } from "react-csv";
 import { Button } from 'react-bootstrap';
-
-export default function Test({questions, testName}) {
+import axios from 'axios'
+export default function Test({questions, testName, testId, history}) {
     
   const handleForce = data => {
     const newCSV = []
@@ -26,10 +26,13 @@ export default function Test({questions, testName}) {
     return newCSV
   };
 
-  return (
+  const deleteTest = testId => {
+    axios.delete(`https://owe6jjn5we.execute-api.us-east-1.amazonaws.com/dev/remove-test?recruiterId=${localStorage.getItem('currentUsername')}&testId=${testId}`).then(() => {
+      window.location.reload()
+    })
+  }
 
-    
-    
+  return (
     <ListGroupItem header={testName} style={{marginBottom: "25px"}}>
       {questions.map((question)=>{
        return(
@@ -46,12 +49,13 @@ export default function Test({questions, testName}) {
                         </div>
                         )
                     })}
-                  </ListGroup> 
+                  </ListGroup>
                 </Panel.Body>) : null} 
               </Panel>
        )
       })}
      <Button bsStyle="link"> <CSVLink filename={`${testName}.csv`} data={handleForce(questions)}>Pobierz CSV</CSVLink> </Button>
+     <Button style={{float: "right"}} onClick={() => deleteTest(testId)} bsStyle="danger">X</Button>
     </ListGroupItem>
   )
 }

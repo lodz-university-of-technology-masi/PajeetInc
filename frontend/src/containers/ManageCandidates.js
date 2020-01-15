@@ -5,7 +5,7 @@ import { LinkContainer } from 'react-router-bootstrap'
 import {Button} from 'react-bootstrap'
 import {Panel, ListGroup, ListGroupItem} from 'react-bootstrap'
 
-export default function Candidates() {
+export default function Candidates({history}) {
   const [candidates, setCandidates] = useState([]);
   useEffect(() => {
     const fetchData = async () => {
@@ -20,7 +20,9 @@ export default function Candidates() {
   }, []);
 
   const deleteCandidate = email => {
-    axios.delete('https://owe6jjn5we.execute-api.us-east-1.amazonaws.com/dev/deleteCandidateAccount', { email: email })
+    axios.delete(`https://unyfv0eps9.execute-api.us-east-1.amazonaws.com/dev/deleteCandidateAccount/${email}`).then(() => {
+      window.location.reload()
+    })
   }
 
   return (

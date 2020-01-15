@@ -6,7 +6,7 @@ import {Button} from 'react-bootstrap'
 import Test from '../components/Test'
 import {Panel, ListGroup, ListGroupItem} from 'react-bootstrap'
 
-export default function Tests() {
+export default function Tests({history}) {
   const [tests, setTests] = useState([]);
   useEffect(() => {
     const fetchData = async () => {
@@ -37,7 +37,7 @@ export default function Tests() {
       {tests.map((test, i) => {
         return ( 
         <div>
-          <Test testName={test.testName} key={test.test_id} questions={test.questions}/>
+          <Test testName={test.testName} key={test.testId} questions={test.questions} testId={test.testId} history={history}/>
         </div>
         )
         })}
