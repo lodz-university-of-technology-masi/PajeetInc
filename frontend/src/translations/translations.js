@@ -3,7 +3,7 @@ export default {
     // We're using dots for nesting and camelCase for each name
     'homepage.welcome': 'Welcome!',
     'user.signIn': 'Login',
-    'user.signUp': 'Sign Up',
+    'user.signUp': 'Sign Up as Recruiter',
     'user.logout': 'Logout',
     'user.email': 'Email',
     'user.password': 'Password',
@@ -33,7 +33,7 @@ export default {
   'pl-PL': {
     'homepage.welcome': 'Witaj!',
     'user.signIn': 'Zaloguj się',
-    'user.signUp': 'Zarejestruj się',
+    'user.signUp': 'Zarejestruj się jako rekruter',
     'user.logout': 'Wyloguj',
     'user.email': 'Email',
     'user.password': 'Hasło',

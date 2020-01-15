@@ -15,7 +15,6 @@ export default class Signup extends Component {
 			password: '',
 			confirmPassword: '',
 			confirmationCode: '',
-			profile: '',
 			newUser: null
 		};
 	}
@@ -38,12 +37,6 @@ export default class Signup extends Component {
 		});
 	};
 
-	handleProfileChange = event => {
-		this.setState({
-			profile: event.target.value
-		});
-	}
-
 	handleSubmit = async event => {
 		event.preventDefault();
 
@@ -54,7 +47,7 @@ export default class Signup extends Component {
 			{
 				["email"]: this.state.email,
 				["password"]: this.state.password, 
-				["profile"]: this.state.profile
+				["profile"]: "Recruiter"
 			}).then( (res) => {
 				console.log(res.data.codeDeliveryDetails)
 				const newUser = res.data.codeDeliveryDetails
@@ -110,7 +103,7 @@ export default class Signup extends Component {
 				})
 			}).catch( res => {
 				//todo
-				console.log('wrong code')
+				console.log('wrong confirmation code')
 			})
 		} catch (e) {
 			alert(e.message);
@@ -153,14 +146,6 @@ export default class Signup extends Component {
 				<FormGroup controlId="confirmPassword" bsSize="large">
 					<ControlLabel>Confirm Password</ControlLabel>
 					<FormControl value={this.state.confirmPassword} onChange={this.handleChange} type="password" />
-				</FormGroup>
-				<FormGroup controlId="profileType" bsSize="large">
-					<ControlLabel>Profile Type</ControlLabel>
-					<FormControl componentClass="select" value={this.state.profile} onChange={this.handleProfileChange}>
-						<option value="default" hidden>Select a profile</option>
-						<option value="Candidate">Candidate</option>
-						<option value="Recruiter">Recruiter</option>
-					</FormControl>
 				</FormGroup>
 				<LoaderButton
 					block
