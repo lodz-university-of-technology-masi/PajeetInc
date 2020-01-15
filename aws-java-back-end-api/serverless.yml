@@ -35,7 +35,7 @@ package:
 
 functions:
   signUp:
-    handler: com.serverless.cognito.SignUpHandler
+    handler: com.serverless.cognito.auth.SignUpHandler
     description: Sign up new user
     events:
       - http:
@@ -43,7 +43,7 @@ functions:
           method: post
           cors: true
   confirmSignUp:
-    handler: com.serverless.cognito.ConfirmSignUpHandler
+    handler: com.serverless.cognito.auth.ConfirmSignUpHandler
     description: Confirm user account email
     events:
       - http:
@@ -51,7 +51,7 @@ functions:
           method: post
           cors: true
   listCandidates:
-    handler: com.serverless.cognito.ListCandidatesHandler
+    handler: com.serverless.cognito.candidates.ListCandidatesHandler
     description: List all candidates
     events:
       - http:
@@ -59,7 +59,7 @@ functions:
           method: get
           cors: true
   signIn:
-    handler: com.serverless.cognito.SignInHandler
+    handler: com.serverless.cognito.auth.SignInHandler
     description: Sign in user
     events:
       - http:
@@ -67,7 +67,7 @@ functions:
           method: post
           cors: true
   confirmPassword:
-    handler: com.serverless.cognito.ConfirmForgotPassword
+    handler: com.serverless.cognito.auth.ConfirmForgotPassword
     description: Confirm changing user password
     events:
       - http:
@@ -75,11 +75,35 @@ functions:
           method: post
           cors: true
   forgotPassword:
-    handler: com.serverless.cognito.ForgotPasswordHandler
+    handler: com.serverless.cognito.auth.ForgotPasswordHandler
     description: Attempt changing password
     events:
       - http:
           path: /forgotPassword
+          method: post
+          cors: true
+  forcePasswordChange:
+    handler: com.serverless.cognito.auth.ForcePasswordChangeHandler
+    description: Force password change after signing in to Candidate account
+    events:
+      - http:
+          path: /forcePasswordChange
+          method: post
+          cors: true
+  createCandidateAccount:
+    handler: com.serverless.cognito.candidates.CreateCandidateAccountHandler
+    description: Create Candidate account
+    events:
+      - http:
+          path: /createCandidateAccount
+          method: post
+          cors: true
+  deleteCandidateAccount:
+    handler: com.serverless.cognito.candidates.DeleteCandidateAccountHandler
+    description: Create Candidate account
+    events:
+      - http:
+          path: /deleteCandidateAccount
           method: post
           cors: true
 

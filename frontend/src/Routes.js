@@ -11,6 +11,9 @@ import Tests from './containers/Tests'
 import AddTests from './containers/AddTests'
 import AddCandidates from './containers/AddCandidates'
 import UserTests from './containers/UserTests'
+import ForcePasswordChange from './containers/ForcePasswordChange'
+import CreateCandidateAccount from './containers/CreateCandidateAccount'
+import ManageCandidates from './containers/ManageCandidates'
 
 
 export default ({ childProps, profile, isAuthenticated }) => (
@@ -31,13 +34,15 @@ export default ({ childProps, profile, isAuthenticated }) => (
 						<AppliedRoute path="/add_tests" exact component={AddTests} props={childProps} />
 						<AppliedRoute path="/add_candidates" exact component={AddCandidates} props={childProps} />
 						<AppliedRoute path="/tests" exact component={Tests} props={childProps} />
+						<AppliedRoute path="/createCandidateAccount" exact component={CreateCandidateAccount} props={childProps} />
+						<AppliedRoute path="/manageCandidates" exact component={ManageCandidates} props={childProps} />
 					</div>
 				)
 				}
 				</div>
 			)
 		}
-		
+		<Route path='/forcePasswordChange' exact component={ForcePasswordChange} props={childProps} />
 		{/* Finally, catch all unmatched routes */}
 		<Route component={NotFound} />
 	</Switch>

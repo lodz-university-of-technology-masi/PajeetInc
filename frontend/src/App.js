@@ -108,6 +108,12 @@ class App extends Component {
 												<Navbar.Brand>
 													<Link to="/add_candidates">Dodaj kandydata</Link>
 												</Navbar.Brand>
+												<Navbar.Brand>
+													<Link to="/createCandidateAccount">Stwórz konto kandydata</Link>
+												</Navbar.Brand>
+												<Navbar.Brand>
+													<Link to="/manageCandidates">Zarządzaj kandydatami</Link>
+												</Navbar.Brand>
 											</div>
 										)
 									}
