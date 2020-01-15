@@ -100,11 +100,11 @@ functions:
           cors: true
   deleteCandidateAccount:
     handler: com.serverless.cognito.candidates.DeleteCandidateAccountHandler
-    description: Create Candidate account
+    description: Delete Candidate account
     events:
       - http:
-          path: /deleteCandidateAccount
-          method: post
+          path: /deleteCandidateAccount/{email}
+          method: delete
           cors: true
 
   readTests:

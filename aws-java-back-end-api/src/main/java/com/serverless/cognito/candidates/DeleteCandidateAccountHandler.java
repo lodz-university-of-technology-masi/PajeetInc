@@ -28,19 +28,12 @@ public class DeleteCandidateAccountHandler implements RequestHandler<Map<String,
     public ApiGatewayResponse handleRequest(Map<String, Object> input, Context context) {
         try {
             LOG.info(input);
-            JsonNode body = new ObjectMapper().readValue((String) input.get("body"), JsonNode.class);
-            LOG.info(body);
-
-            /*
-            {
-                "email": "kpm14005@eveav.com",
-            }
-            */
+            Map<String, String> pathParameters = (Map<String,String>)input.get("pathParameters");
 
             try {
                 AdminDeleteUserRequest adminDeleteUserRequest = new AdminDeleteUserRequest();
                 adminDeleteUserRequest.setUserPoolId(cognitoConfig.getUserPoolId());
-                adminDeleteUserRequest.setUsername(body.get("email").asText());
+                adminDeleteUserRequest.setUsername(pathParameters.get("email"));
 
                 AdminDeleteUserResult adminDeleteUserResult = cognitoClient.adminDeleteUser(adminDeleteUserRequest);
 
