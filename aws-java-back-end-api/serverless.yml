@@ -236,9 +236,8 @@ functions:
           request:
             template:
               application/json: "{
-                'username': $input.json('username'),
-                'recruiterId': $input.json('recruiterId'),
-                'testId': $input.json('testId')
+                "recruiterId": "$input.params("recruiterId")",
+                "testId": "$input.params("testId")"
               }"
   removeCandidate:
     handler: com.serverless.tests.RemoveCandidateHandler
