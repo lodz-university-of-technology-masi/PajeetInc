@@ -14,7 +14,7 @@ import UserTests from './containers/UserTests'
 import ForcePasswordChange from './containers/ForcePasswordChange'
 import CreateCandidateAccount from './containers/CreateCandidateAccount'
 import ManageCandidates from './containers/ManageCandidates'
-
+import EditTest from './containers/EditTest.js'
 
 export default ({ childProps, profile, isAuthenticated }) => (
 	<Switch>
@@ -36,6 +36,7 @@ export default ({ childProps, profile, isAuthenticated }) => (
 						<AppliedRoute path="/tests" exact component={Tests} props={childProps} />
 						<AppliedRoute path="/createCandidateAccount" exact component={CreateCandidateAccount} props={childProps} />
 						<AppliedRoute path="/manageCandidates" exact component={ManageCandidates} props={childProps} />
+						<AppliedRoute path="/edit" exact component={EditTest} props={childProps} />
 					</div>
 				)
 				}

@@ -3,7 +3,9 @@ import {Panel, ListGroup, ListGroupItem} from 'react-bootstrap'
 import { CSVLink } from "react-csv";
 import { Button } from 'react-bootstrap';
 import axios from 'axios'
-export default function Test({questions, testName, testId, history}) {
+import { Link } from "react-router-dom";
+
+export default function Test({questions, testName, testId, history, minPoints}) {
     
   const handleForce = data => {
     const newCSV = []
@@ -56,6 +58,7 @@ export default function Test({questions, testName, testId, history}) {
       })}
      <Button bsStyle="link"> <CSVLink filename={`${testName}.csv`} data={handleForce(questions)}>Pobierz CSV</CSVLink> </Button>
      <Button style={{float: "right"}} onClick={() => deleteTest(testId)} bsStyle="danger">X</Button>
+     <Link to={{pathname:'edit', state:{ testName, questions, minPoints, testId} }}>Edit</Link>
     </ListGroupItem>
   )
 }

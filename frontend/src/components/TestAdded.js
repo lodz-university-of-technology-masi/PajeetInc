@@ -1,7 +1,8 @@
 import React from 'react'
 import {Panel, ListGroup, ListGroupItem} from 'react-bootstrap'
+import { Button } from 'react-bootstrap'
 
-export default function TestAdded({questions, testName}) {
+export default function TestAdded({questions, testName, onEdit}) {
   return (
     
     <ListGroupItem header={testName} style={{marginBottom: "25px"}}>
@@ -21,8 +22,9 @@ export default function TestAdded({questions, testName}) {
                             )
                         })}
                       </ListGroup> 
-                    </Panel.Body>) : null} 
-
+                    </Panel.Body>
+                    ) : null}
+                    { onEdit && <Button onClick={() => onEdit(question)}>Edit Question</Button>}
                     </Panel>
        )
       })}
