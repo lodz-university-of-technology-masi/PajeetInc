@@ -1,4 +1,4 @@
-package com.serverless;
+package com.serverless.tests;
 
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
@@ -9,9 +9,10 @@ import com.amazonaws.services.dynamodbv2.document.spec.ScanSpec;
 import com.amazonaws.services.dynamodbv2.document.spec.UpdateItemSpec;
 import com.amazonaws.services.dynamodbv2.document.utils.ValueMap;
 
-import java.util.ArrayList;
+import java.io.BufferedOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.Iterator;
-import java.util.List;
 
 public class DynamoDbController {
 
@@ -34,23 +35,48 @@ public class DynamoDbController {
         return table.getItem(spec);
     }
 
-    protected  static void updateCandidates(PrimaryKey primaryKey, String candidates, Table tests) {
+    protected static void updateCandidates(PrimaryKey primaryKey, String candidates, Table tests) {
         UpdateItemSpec updateItemSpec = new UpdateItemSpec().withPrimaryKey(primaryKey)
                 .withUpdateExpression("set candidates=:c")
                 .withValueMap(new ValueMap().withJSON(":c", candidates));
         tests.updateItem(updateItemSpec);
     }
 
+    protected static void updateTest(
+            PrimaryKey primaryKey, String testName, double minPoints, double maxPoints, String questions, Table tests) {
+
+        UpdateItemSpec updateItemSpec =
+                new UpdateItemSpec()
+                        .withPrimaryKey(primaryKey)
+                        .withUpdateExpression("set questions=:q, minPoints=:min, maxPoints=:max, testName=:t")
+                        .withValueMap(
+                            new ValueMap()
+                                .withJSON(":q", questions)
+                                .withNumber(":min", minPoints)
+                                .withNumber(":max", maxPoints)
+                                .withString(":t", testName)
+                        );
+        tests.updateItem(updateItemSpec);
+    }
+
     protected static Iterator<Item> getAllTestsByRecruiterId(String recruiterId, Table tests) {
         QuerySpec spec = new QuerySpec()
-                .withKeyConditionExpression("recruiter_id = :id")
+                .withKeyConditionExpression("recruiterId = :id")
                 .withValueMap(new ValueMap()
                         .withString(":id", recruiterId));
         Iterator<Item> items = tests.query(spec).iterator();
-//        List<String> testsIds = new ArrayList<>();
-//        while(items.hasNext()) {
-//            testsIds.add(items.next().ge);
-//        }
         return items;
+    }
+
+    protected static void writeItemsToOutputStream(Iterator<Item> iterator, OutputStream outputStream) throws IOException {
+        outputStream = new BufferedOutputStream(outputStream);
+        outputStream.write("[".getBytes());
+        while (iterator.hasNext()) {
+            Item item = iterator.next();
+            String itemAsString = (iterator.hasNext()) ? item.toJSONPretty() + "," : item.toJSONPretty();
+            outputStream.write(itemAsString.getBytes());
+        }
+        outputStream.write("]".getBytes());
+        outputStream.flush();
     }
 }

@@ -5,7 +5,7 @@ import { LinkContainer } from 'react-router-bootstrap'
 import {Button} from 'react-bootstrap'
 import {Panel, ListGroup, ListGroupItem} from 'react-bootstrap'
 
-export default function Candidates() {
+export default function Candidates({history}) {
   const [candidates, setCandidates] = useState([]);
   useEffect(() => {
     const fetchData = async () => {
@@ -19,21 +19,23 @@ export default function Candidates() {
     fetchData();
   }, []);
 
+  const deleteCandidate = email => {
+    axios.delete(`https://unyfv0eps9.execute-api.us-east-1.amazonaws.com/dev/deleteCandidateAccount/${email}`).then(() => {
+      window.location.reload()
+    })
+  }
 
   return (
-    
     <div class="container">
      <h2>Lista Kandydatów</h2>  
      <ListGroup>
-        {candidates.map((candidate, i) => { //Czy mozesz tu wrzucic do buttona handler onClick ktory usuwa
-                                            //podanego uzytkownika?
-                                            //POST na powyzszy link  /dev/deleteCandidateAccount
-                                            //tylko email w requescie {"email": "kpm14005@eveav.com"}
+        {candidates.map((candidate, i) => {
             return (
-            <div>
-                <ListGroupItem key={i}>{JSON.stringify(candidate.attributes[3].value).slice(1,-1)}</ListGroupItem>
-                <Button variant="danger">X</Button>
-            </div>
+              <ListGroupItem style={{padding: "15px"}} key={i}>
+                {console.log(candidate)}
+                {candidate.attributes[3].value}
+                <Button onClick={() => deleteCandidate(candidate.attributes[3].value)} style={{float:"right"}} bsStyle="danger">X</Button>
+              </ListGroupItem>
             )
         })}
      </ListGroup>

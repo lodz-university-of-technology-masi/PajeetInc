@@ -11,6 +11,7 @@ export default function AddCandidates() {
   const [testName, setTestName] = useState([]);
   const [username, setUsername] = useState([]);
   const [tests, setTests] = useState([]);
+  const [isLoading, setIsLoading] = useState(false)
   useEffect(() => {
     const fetchData = async () => {
       const result = await axios(
@@ -45,7 +46,9 @@ export default function AddCandidates() {
       });
   }
   function submitCandidate(){
+    setIsLoading(true)
     axios.put('https://unyfv0eps9.execute-api.us-east-1.amazonaws.com/dev/assign-candidate',{recruiterId:localStorage.getItem('currentUsername'),testId:testId, testName: testName,["username"]: username})
+         .then(() => setIsLoading(false))
   }
   return (
     <div>
@@ -65,7 +68,7 @@ export default function AddCandidates() {
                 return <option value={user.attributes[3].value}>{user.attributes[3].value}</option>
             })}
         </FormControl>
-        <Button type="submit" onClick={() => submitCandidate()}>Dodaj kandydata</Button>
+        <Button type="submit" disabled={isLoading} onClick={() => submitCandidate()}>{ isLoading ? 'Czekaj...' : 'Dodaj kandydata'}</Button>
 
     </div>
   )

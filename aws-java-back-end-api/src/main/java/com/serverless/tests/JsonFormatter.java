@@ -1,4 +1,4 @@
-package com.serverless;
+package com.serverless.tests;
 
 import com.amazonaws.services.dynamodbv2.document.Item;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -6,17 +6,19 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 public class JsonFormatter {
 
     protected static String getCandidatesAsJsonString(
-            String username, String answers, boolean passed, boolean finished, boolean rated, int points, Item test) throws IOException {
+            String username, String answers, boolean passed, boolean finished, boolean rated, double points, Item test) throws IOException {
         String result = "[";
         Iterator<JsonNode> candidates = new ObjectMapper().readValue(test.getJSONPretty("candidates"), JsonNode.class).iterator();
         while (candidates.hasNext()) {
             JsonNode candidate = candidates.next();
-            if (!candidate.get("username").asText().contains(username)) {
+            if (!candidate.get("username").asText().contentEquals(username)) {
                 result += getCandidateAsJsonString(candidate);
             } else {
                 result += getCandidateAsJsonString(username, answers, passed, finished, rated, points);
@@ -35,12 +37,12 @@ public class JsonFormatter {
                 "\"passed\":" + candidate.get("passed").asBoolean() + "," +
                 "\"finished\":" + candidate.get("finished").asBoolean() + "," +
                 "\"rated\":" + candidate.get("rated").asBoolean() + "," +
-                "\"points\":" + candidate.get("points").asInt() +
+                "\"points\":" + candidate.get("points").asDouble() +
                 "}";
         return result;
     }
 
-    protected static String getCandidateAsJsonString(String username, String answers, boolean passed, boolean finished, boolean rated, int points) {
+    protected static String getCandidateAsJsonString(String username, String answers, boolean passed, boolean finished, boolean rated, double points) {
         String result = "{" +
                 "\"username\":\"" + username + "\"," +
                 "\"answers\":" + answers + "," +
@@ -68,18 +70,22 @@ public class JsonFormatter {
                 "\"question\": \"" + answer.get("question").asText() + "\"," +
                 "\"type\": \"" + answer.get("type").asText() + "\"," +
                 "\"content\": \"" + answer.get("content").asText() + "\"," +
-                "\"correct\": \"" + answer.get("correct").asText() + "\"," +
-                "\"rated\": \"" + answer.get("rated").asText() + "\"" +
+                "\"correct\": \"" + answer.get("correct").asBoolean() + "\"," +
+                "\"points\": \"" + answer.get("points").asDouble() + "\"," +
+                "\"rated\": \"" + answer.get("rated").asBoolean() + "\"" +
                 "}";
         return result;
     }
 
-    protected static String getCandidateAnswerAsJsonString(String question, String type, String content, boolean correct, boolean rated) {
+    protected static String getCandidateAnswerAsJsonString(
+            String question, String type, String content, boolean correct, boolean rated, double points) {
+
         String result = "{" +
                 "\"question\": \"" + question + "\"," +
                 "\"type\": \"" + type + "\"," +
                 "\"content\": \"" + content + "\"," +
                 "\"correct\": \"" + correct + "\"," +
+                "\"points\": \"" + points + "\"," +
                 "\"rated\": \"" + rated + "\"" +
                 "}";
         return result;
@@ -95,13 +101,17 @@ public class JsonFormatter {
             JsonNode singleQuestionNode = allQuestionsNode.get(i);
             String type = singleQuestionNode.get("type").asText();
             String content = singleQuestionNode.get("content").asText();
+            double points = singleQuestionNode.get("points").asDouble();
 
-            questions += "{\"question_content\":\"" + content + "\"," + "\"question_type\":\"" + type + "\"";
-            if (!type.contains("O")) {
+            questions += "{" +
+                    "\"content\":\"" + content + "\"," +
+                    "\"points\":\"" + points + "\"," +
+                    "\"type\":\"" + type + "\"";
+            if (!type.contentEquals("O")) {
                 questions += ",";
             }
 
-            if (type.contains("W")) {
+            if (type.contentEquals("W")) {
                 JsonNode allAnswersNode = singleQuestionNode.get("answers");
                 int allAnswersNodeSize = allAnswersNode.size();
 
@@ -111,17 +121,20 @@ public class JsonFormatter {
                     String answer = singleAnswerNode.get("answer").asText();
                     Boolean correct = singleAnswerNode.get("correct").asBoolean();
 
-                    questions += "{\"answer\":\"" + answer + "\"," + "\"correct\":" + correct + "}";
+                    questions += "{" +
+                            "\"answer\":\"" + answer + "\"," +
+                            "\"correct\":" + correct +
+                            "}";
                     if (j != allAnswersNodeSize - 1) {
                         questions += ",";
                     } else {
                         questions += "]";
                     }
                 }
-            } else if (type.contains("L")) {
-                int correctAnswer = singleQuestionNode.get("correctAnswer").asInt();
-                questions += "\"correct_answer\":" + correctAnswer;
-            } else if (type.contains("O")) {
+            } else if (type.contentEquals("L")) {
+                double correctAnswer = singleQuestionNode.get("correct").asDouble();
+                questions += "\"correct\":" + correctAnswer;
+            } else if (type.contentEquals("O")) {
 
             } else {
                 // wyjątek
@@ -148,20 +161,43 @@ public class JsonFormatter {
         return test.toString();
     }
 
+    protected static String removeCandidateFromTestByUsername(Item test, String username) throws IOException {
+        List<String> candidates = new ArrayList<>();
+        Iterator<JsonNode> nodes = new ObjectMapper().readValue(test.getJSONPretty("candidates"), JsonNode.class).iterator();
+        while (nodes.hasNext()) {
+            JsonNode candidate = nodes.next();
+            if (!candidate.get("username").asText().contentEquals(username)) {
+                candidates.add(getCandidateAsJsonString(candidate));
+            }
+        }
+        return toJsonString(candidates);
+    }
+
     protected static String removeCorrectAnswersFromTest(String itemAsString) throws IOException {
         JsonNode test = new ObjectMapper().readValue(itemAsString, JsonNode.class);
         JsonNode questions = test.get("questions");
         for (int i = 0; i < questions.size(); i++) {
             JsonNode question = questions.get(i);
-            if (question.get("question_type").asText().contains("W")) {
+            if (question.get("type").asText().contentEquals("W")) {
                 JsonNode answers = question.get("answers");
                 for (int j = 0; j < answers.size(); j++) {
                     ((ObjectNode) answers.get(j)).remove("correct");
                 }
-            } else if (question.get("question_type").asText().contains("L")) {
-                ((ObjectNode) question).remove("correct_answer");
+            } else if (question.get("type").asText().contentEquals("L")) {
+                ((ObjectNode) question).remove("correct");
             }
         }
         return test.toString();
+    }
+
+    private static String toJsonString(List<String> items) {
+        StringBuilder jsonString = new StringBuilder("[");
+        for (int i = 0; i < items.size(); i++) {
+            jsonString
+                    .append(items.get(i))
+                    .append(i == items.size() - 1 ? "" : ",");
+        }
+        jsonString.append("]");
+        return jsonString.toString();
     }
 }

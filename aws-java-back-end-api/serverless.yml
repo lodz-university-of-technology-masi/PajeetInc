@@ -1,16 +1,3 @@
-# Welcome to Serverless!
-#
-# This file is the main config file for your service.
-# It's very minimal at this point and uses default values.
-# You can always add more config options for more control.
-# We've included some commented out config examples here.
-# Just uncomment any of them to get that config option.
-#
-# For full config options, check the docs:
-#    docs.serverless.com
-#
-# Happy Coding!
-
 service: back-end
 
 provider:
@@ -18,17 +5,6 @@ provider:
   runtime: java8
   stage: ${opt:stage, 'dev'}
   region: ${opt:region, 'us-east-1'}
-#  iamRoleStatements:
-#    - Effect: Allow
-#      Action:
-#        - dynamodb:Query
-#        - dynamodb:Scan
-#        - dynamodb:GetItem
-#        - dynamodb:PutItem
-#        - dynamodb:UpdateItem
-#        - dynamodb:DeleteItem
-#      Resource:
-#        - { "Fn::GetAtt": ["UserInfoTable", "Arn" ] }
 
 package:
   artifact: target/back-end-api-dev.jar
@@ -108,7 +84,8 @@ functions:
           cors: true
 
   readTests:
-    handler: com.serverless.ReadTestsHandler
+    role: accessToTestsTable
+    handler: com.serverless.tests.ReadTestsHandler
     description: Get all tests from Tests table
     events:
       - http:
@@ -117,7 +94,8 @@ functions:
           cors: true
           integration: lambda
   readTestsByUsername:
-    handler: com.serverless.ReadTestsByUsernameHandler
+    role: accessToTestsTable
+    handler: com.serverless.tests.ReadTestsByUsernameHandler
     description: Get all tests assigned to specific candidate
     events:
       - http:
@@ -131,7 +109,8 @@ functions:
                 "username": "$input.params("username")"
               }'
   insertTest:
-    handler: com.serverless.InsertTestHandler
+    role: accessToTestsTable
+    handler: com.serverless.tests.InsertTestHandler
     description: Insert test into Tests table
     events:
       - http:
@@ -142,67 +121,71 @@ functions:
           request:
             template:
               application/json: '{
-                "recruiterId": $input.json("$.recruiter-id"),
-                "testName": $input.json("$.test-name"),
-                "minPoints": $input.json("$.min-points"),
-                "maxPoints": $input.json("$.max-points"),
+                "recruiterId": $input.json("$.recruiterId"),
+                "testName": $input.json("$.testName"),
+                "minPoints": $input.json("$.minPoints"),
+                "maxPoints": $input.json("$.maxPoints"),
                 "questions": $input.json("$.questions")
               }'
   passTest:
-    handler: com.serverless.PassTestHandler
+    role: accessToTestsTable
+    handler: com.serverless.tests.PassTestHandler
     description: Updating tests table with candidate answers
     events:
       - http:
           path: /pass-test
-          method: post
+          method: put
           cors: true
           integration: lambda
           request:
             template:
               application/json: '{
-                "recruiterId": $input.json("$.recruiter-id"),
-                "testId": $input.json("$.test-id"),
-                "testName": $input.json("$.test-name"),
+                "recruiterId": $input.json("$.recruiterId"),
+                "testId": $input.json("$.testId"),
+                "testName": $input.json("$.testName"),
                 "username": $input.json("$.username"),
                 "answers": $input.json("$.answers")
               }'
   assignCandidate:
-    handler: com.serverless.AssignCandidateHandler
+    role: accessToTestsTable
+    handler: com.serverless.tests.AssignCandidateHandler
     description: Assigning candidate to test
     events:
       - http:
           path: /assign-candidate
-          method: post
+          method: put
           cors: true
           integration: lambda
           request:
             template:
               application/json: '{
-                "recruiterId": $input.json("$.recruiter-id"),
-                "testId": $input.json("$.test-id"),
-                "testName": $input.json("$.test-name"),
+                "recruiterId": $input.json("$.recruiterId"),
+                "testId": $input.json("$.testId"),
+                "testName": $input.json("$.testName"),
                 "username": $input.json("$.username")
               }'
   rateTest:
-    handler: com.serverless.RateTestHandler
+    role: accessToTestsTable
+    handler: com.serverless.tests.RateTestHandler
     description: Rate candidate answers
     events:
       - http:
           path: /rate-test
-          method: post
+          method: put
           cors: true
           integration: lambda
           request:
             template:
               application/json: '{
-                "recruiterId": $input.json("$.recruiter-id"),
-                "testId": $input.json("$.test-id"),
-                "testName": $input.json("$.test-name"),
+                "recruiterId": $input.json("$.recruiterId"),
+                "testId": $input.json("$.testId"),
+                "testName": $input.json("$.testName"),
                 "username": $input.json("$.username"),
                 "answers": $input.json("$.answers")
               }'
   getTests:
-    handler: com.serverless.GetTestsHandler
+    role: accessToTestsTable
+    handler: com.serverless.tests.GetTestsHandler
     description: Get all tests
     events:
       - http:
@@ -216,6 +199,59 @@ functions:
                 "user": "$input.params("user")",
                 "role": "$input.params("role")",
                 "status": "$input.params("status")"
+              }'
+  removeTest:
+    role: accessToTestsTable
+    handler: com.serverless.tests.RemoveTestHandler
+    description: Remove test by primary key
+    events:
+      - http:
+          path: /remove-test
+          method: delete
+          cors: true
+          integration: lambda
+          request:
+            template:
+              application/json: '{
+                "recruiterId": "$input.params("recruiterId")",
+                "testId": "$input.params("testId")"
+              }'
+  removeCandidate:
+    role: accessToTestsTable
+    handler: com.serverless.tests.RemoveCandidateHandler
+    description: Remove candidate from test by username
+    events:
+      - http:
+          path: /remove-candidate
+          method: put
+          cors: true
+          integration: lambda
+          request:
+            template:
+              application/json: "{
+               'username': $input.json('username'),
+               'recruiterId': $input.json('recruiterId'),
+               'testId': $input.json('testId')
+              }"
+  updateTest:
+    role: accessToTestsTable
+    handler: com.serverless.tests.UpdateTestHandler
+    description: Update test
+    events:
+      - http:
+          path: /update-test
+          method: put
+          cors: true
+          integration: lambda
+          request:
+            template:
+              application/json: '{
+                "recruiterId": $input.json("$.recruiterId"),
+                "testId": $input.json("$.testId"),
+                "testName": $input.json("$.testName"),
+                "minPoints": $input.json("$.minPoints"),
+                "maxPoints": $input.json("$.maxPoints"),
+                "questions": $input.json("$.questions")
               }'
 
 resources:
@@ -237,3 +273,25 @@ resources:
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
+    accessToTestsTable:
+      Type: AWS::IAM::Role
+      Properties:
+        RoleName: accessToTestsTable
+        AssumeRolePolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Principal:
+                Service:
+                  - lambda.amazonaws.com
+              Action: sts:AssumeRole
+        Policies:
+          - PolicyName: myPolicyName
+            PolicyDocument:
+              Version: '2012-10-17'
+              Statement:
+                - Effect: Allow
+                  Action:
+                    - dynamodb:*
+                    - lambda:*
+                  Resource: "*"

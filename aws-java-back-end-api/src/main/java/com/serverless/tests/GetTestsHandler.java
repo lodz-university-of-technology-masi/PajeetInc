@@ -1,4 +1,4 @@
-package com.serverless;
+package com.serverless.tests;
 
 import com.amazonaws.services.dynamodbv2.document.Item;
 import com.amazonaws.services.dynamodbv2.document.Table;
@@ -33,18 +33,18 @@ public class GetTestsHandler implements RequestStreamHandler {
         String role = rootNode.get("role").asText();
         String status = rootNode.get("status").asText();
 
-        if (role.contains("candidate")) {
-            if (status.contains("assigned")) {
+        if (role.contentEquals("candidate")) {
+            if (status.contentEquals("assigned")) {
                 getAssignedCandidateTests(user);
-            } else if (status.contains("finished")) {
+            } else if (status.contentEquals("finished")) {
                 getFinishedCandidateTests(user);
             }
-        } else if (role.contains("recruiter")) {
-            if (status.contains("assigned")) {
+        } else if (role.contentEquals("recruiter")) {
+            if (status.contentEquals("assigned")) {
                 getRecruiterTestsByFinished(false, user);
-            } else if (status.contains("finished")) {
+            } else if (status.contentEquals("finished")) {
                 getRecruiterTestsByFinished(true, user);
-            } else if (status.contains("rated")) {
+            } else if (status.contentEquals("rated")) {
                 getRatedRecruiterTests(user);
             }
         }
@@ -54,7 +54,7 @@ public class GetTestsHandler implements RequestStreamHandler {
     private void init(OutputStream outputStream) {
         table = DynamoDbController.getTable("Tests");
         tests = DynamoDbController.getItemsFromTable(
-                "recruiter_id, test_id, max_points, min_points, questions, test_name, candidates", table);
+                "recruiterId, testId, maxPoints, minPoints, questions, testName, candidates", table);
         objectMapper = new ObjectMapper();
         jsons = new ArrayList<>();
         this.outputStream = outputStream;
@@ -69,7 +69,8 @@ public class GetTestsHandler implements RequestStreamHandler {
             JsonNode test = tests.get(i);
             String json;
             JsonNode candidateInTest = candidateInTests.get(i);
-            if (!candidateInTest.get("finished").asBoolean()) {
+            if (candidateInTest.get("finished").asBoolean() == false &&
+                    candidateInTest.get("rated").asBoolean() == false) {
                 json = test.toString();
                 json = JsonFormatter.removeCandidatesFromTest(json);
                 json = JsonFormatter.removeCorrectAnswersFromTest(json);
@@ -86,15 +87,21 @@ public class GetTestsHandler implements RequestStreamHandler {
             JsonNode test = tests.get(i);
             String json = "";
             JsonNode candidateInTest = candidateInTests.get(i);
-            if (!candidateInTest.get("rated").asBoolean()) {
+            if (candidateInTest.get("rated").asBoolean() == false &&
+                    candidateInTest.get("finished").asBoolean() == true) {
                 json = JsonFormatter.getCandidateAsJsonString(
                         user, "[]", false, true, false, 0);
+                json = json.substring(0, json.length() - 1);
+                json += ",";
+                json += "\"" + "testName" + "\":\"" + test.get("testName").asText() + "\"";
+                json += "}";
                 jsons.add(json);
-            } else {
+            } else if (candidateInTest.get("rated").asBoolean() == true &&
+                    candidateInTest.get("finished").asBoolean() == true) {
                 json = JsonFormatter.getCandidateAsJsonString(candidateInTest);
                 json = json.substring(0, json.length() - 1);
                 json += ",";
-                json += "\""+"testName"+"\":\"" + test.get("test_name").asText() + "\"";
+                json += "\"" + "testName" + "\":\"" + test.get("testName").asText() + "\"";
                 json += "}";
                 jsons.add(json);
             }
@@ -103,13 +110,18 @@ public class GetTestsHandler implements RequestStreamHandler {
 
     private void getRecruiterTestsByFinished(boolean finished, String user) throws IOException {
         Iterator<Item> tests = DynamoDbController.getAllTestsByRecruiterId(user, table);
-        while(tests.hasNext()) {
+        while (tests.hasNext()) {
             Item test = tests.next();
             Iterator<JsonNode> candidates = new ObjectMapper().readValue(test.getJSONPretty("candidates"), JsonNode.class).iterator();
             while (candidates.hasNext()) {
                 JsonNode candidate = candidates.next();
                 if (finished == candidate.get("finished").asBoolean()) {
                     String json = JsonFormatter.getCandidateAsJsonString(candidate);
+                    json = json.substring(0, json.length() - 1);
+                    json += ",";
+                    json += "\"" + "testName" + "\":\"" + test.get("testName") + "\",";
+                    json += "\"" + "testId" + "\":\"" + test.get("testId") + "\"";
+                    json += "}";
                     jsons.add(json);
                 }
             }
@@ -118,7 +130,7 @@ public class GetTestsHandler implements RequestStreamHandler {
 
     private void getRatedRecruiterTests(String user) throws IOException {
         Iterator<Item> tests = DynamoDbController.getAllTestsByRecruiterId(user, table);
-        while(tests.hasNext()) {
+        while (tests.hasNext()) {
             Item test = tests.next();
             Iterator<JsonNode> candidates = new ObjectMapper().readValue(test.getJSONPretty("candidates"), JsonNode.class).iterator();
             while (candidates.hasNext()) {
@@ -142,7 +154,7 @@ public class GetTestsHandler implements RequestStreamHandler {
             }
             for (JsonNode candidate : candidates) {
                 String username = candidate.get("username").asText();
-                if (username.contains(user)) {
+                if (username.contentEquals(user)) {
                     result.add(test);
                     candidateInTests.add(candidate);
                     break;

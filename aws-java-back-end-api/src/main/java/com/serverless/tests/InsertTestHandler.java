@@ -1,4 +1,4 @@
-package com.serverless;
+package com.serverless.tests;
 
 import com.amazonaws.services.dynamodbv2.document.Item;
 import com.amazonaws.services.dynamodbv2.document.PrimaryKey;
@@ -33,13 +33,13 @@ public class InsertTestHandler  implements RequestStreamHandler {
         String recruiterId = rootNode.get("recruiterId").asText();
         String testId = "test" + getCurrentDateAndTime();
         String testName = rootNode.get("testName").asText();
-        int minPoints = rootNode.get("minPoints").asInt();
-        int maxPoints = rootNode.get("maxPoints").asInt();
+        double minPoints = rootNode.get("minPoints").asDouble();
+        double maxPoints = rootNode.get("maxPoints").asDouble();
         String questions = JsonFormatter.getQuestionsAsJsonString(rootNode);
 
-        PrimaryKey primaryKey = new PrimaryKey("recruiter_id", recruiterId, "test_id", testId);
-        Item test = new Item().withPrimaryKey(primaryKey).withString("test_name", testName)
-                .withInt("min_points", minPoints).withInt("max_points", maxPoints)
+        PrimaryKey primaryKey = new PrimaryKey("recruiterId", recruiterId, "testId", testId);
+        Item test = new Item().withPrimaryKey(primaryKey).withString("testName", testName)
+                .withDouble("minPoints", minPoints).withDouble("maxPoints", maxPoints)
                 .withJSON("questions", questions).withList("candidates", new ArrayList<>());
 
         return test;

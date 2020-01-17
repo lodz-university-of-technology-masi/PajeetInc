@@ -1,4 +1,4 @@
-package com.serverless;
+package com.serverless.tests;
 
 import com.amazonaws.services.dynamodbv2.document.Item;
 import com.amazonaws.services.dynamodbv2.document.PrimaryKey;
@@ -11,11 +11,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 
-public class RateTestHandler implements RequestStreamHandler {
+public class AssignCandidateHandler implements RequestStreamHandler {
 
     @Override
     public void handleRequest(InputStream inputStream, OutputStream outputStream, Context context) throws IOException {
@@ -26,8 +24,8 @@ public class RateTestHandler implements RequestStreamHandler {
         String testName = rootNode.get("testName").asText();
 
         Table tests = DynamoDbController.getTable("Tests");
-        PrimaryKey primaryKey = new PrimaryKey("recruiter_id", recruiterId, "test_id", testId);
 
+        PrimaryKey primaryKey = new PrimaryKey("recruiterId", recruiterId, "testId", testId);
         Item test = DynamoDbController.getItemByPrimaryKey(primaryKey, tests);
 
         String candidates = updateCandidates(rootNode, test);
@@ -36,35 +34,20 @@ public class RateTestHandler implements RequestStreamHandler {
 
     private String updateCandidates(JsonNode rootNode, Item test) throws IOException {
         String username = rootNode.get("username").asText();
-        String answers = JsonFormatter.getCandidateAnswersAsJsonString(rootNode.get("answers"));
-        int points = calculatePoints(answers);
-        boolean passed = isPassed(points, test.getInt("min_points"));
-        boolean finished = true;
-        boolean rated = true;
 
-        String result = JsonFormatter.getCandidatesAsJsonString(username, answers, passed, finished, rated, points, test);
-        return result;
-    }
-
-    private int calculatePoints(String json) throws IOException {
-        int points = 0;
-        List<JsonNode> answers = iteratorToList(new ObjectMapper().readValue(json, JsonNode.class).iterator());
-        for (int i = 0; i < answers.size(); i++) {
-            if (answers.get(i).get("correct").asBoolean()) {
-                points += 1;
+        String result = "[";
+        Iterator<JsonNode> candidates = new ObjectMapper().readValue(test.getJSONPretty("candidates"), JsonNode.class).iterator();
+        while (candidates.hasNext()) {
+            JsonNode candidate = candidates.next();
+            if (!candidate.get("username").asText().contentEquals(username)) {
+                result += JsonFormatter.getCandidateAsJsonString(candidate);
+                result += ",";
+            } else {
+                // exception
             }
         }
-        return points;
-    }
-
-    private boolean isPassed(int points, int minPoints) {
-        boolean passed = points >= minPoints ? true : false;
-        return passed;
-    }
-
-    private List<JsonNode> iteratorToList(Iterator<JsonNode> iterator) {
-        List<JsonNode> list = new ArrayList<>();
-        iterator.forEachRemaining(list::add);
-        return list;
+        result +=  JsonFormatter.getCandidateAsJsonString(username, "[]", false, false, false, 0);
+        result += "]";
+        return result;
     }
 }
