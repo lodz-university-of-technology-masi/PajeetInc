@@ -220,21 +220,20 @@ functions:
 
 resources:
   Resources:
-# TODO: jak jest juz tabela to jest problem https://stackoverflow.com/questions/41620437/how-to-continue-deploy-if-dynamodb-table-already-exists
-#    Tests:
-#      Type: AWS::DynamoDB::Table
-#      Properties:
-#        TableName: Tests
-#        AttributeDefinitions:
-#          - AttributeName: recruiter_id
-#            AttributeType: S
-#          - AttributeName: test_id
-#            AttributeType: S
-#        KeySchema:
-#          - AttributeName: recruiter_id
-#            KeyType: HASH
-#          - AttributeName: test_id
-#            KeyType: RANGE
-#        ProvisionedThroughput:
-#          ReadCapacityUnits: 1
-#          WriteCapacityUnits: 1
+    Tests:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: Tests
+        AttributeDefinitions:
+          - AttributeName: recruiter_id
+            AttributeType: S
+          - AttributeName: test_id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: recruiter_id
+            KeyType: HASH
+          - AttributeName: test_id
+            KeyType: RANGE
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1

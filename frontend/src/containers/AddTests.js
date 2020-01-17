@@ -60,7 +60,7 @@ export default function AddTests({history}) {
       return ( {points: parseFloat(prev.points) + parseFloat(curr.points) } )
     })
     console.log(maxPoints)
-    Axios.post('https://owe6jjn5we.execute-api.us-east-1.amazonaws.com/dev/tests',{recruiterId: localStorage.getItem('currentUsername'),testName:testName, minPoints: minPoints,maxPoints: String(maxPoints.points), questions})
+    Axios.post('https://unyfv0eps9.execute-api.us-east-1.amazonaws.com/dev/tests',{recruiterId: localStorage.getItem('currentUsername'),testName:testName, minPoints: minPoints,maxPoints: String(maxPoints.points), questions})
       .then(() => {
     //    history.push('/tests')
     })

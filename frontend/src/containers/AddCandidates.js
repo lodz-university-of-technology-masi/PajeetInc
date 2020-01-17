@@ -14,7 +14,7 @@ export default function AddCandidates() {
   useEffect(() => {
     const fetchData = async () => {
       const result = await axios(
-        'https://owe6jjn5we.execute-api.us-east-1.amazonaws.com/dev/tests/' + localStorage.getItem('currentUsername'),
+        'https://unyfv0eps9.execute-api.us-east-1.amazonaws.com/dev/tests/' + localStorage.getItem('currentUsername'),
       );
       console.log(result);
       setTests(result.data);
@@ -45,7 +45,7 @@ export default function AddCandidates() {
       });
   }
   function submitCandidate(){
-    axios.put('https://owe6jjn5we.execute-api.us-east-1.amazonaws.com/dev/assign-candidate',{recruiterId:localStorage.getItem('currentUsername'),testId:testId, testName: testName,["username"]: username})
+    axios.put('https://unyfv0eps9.execute-api.us-east-1.amazonaws.com/dev/assign-candidate',{recruiterId:localStorage.getItem('currentUsername'),testId:testId, testName: testName,["username"]: username})
   }
   return (
     <div>
