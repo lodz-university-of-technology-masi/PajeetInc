@@ -37,7 +37,7 @@ export default function Tests({history}) {
       {tests.map((test, i) => {
         return ( 
         <div>
-          <Test testName={test.testName} key={test.testId} questions={test.questions} testId={test.testId} history={history}/>
+          <Test testName={test.testName} key={test.testId} questions={test.questions} testId={test.testId} history={history} minPoints={test.minPoints}/>
         </div>
         )
         })}
