@@ -137,6 +137,11 @@ public class GetTestsHandler implements RequestStreamHandler {
                 JsonNode candidate = candidates.next();
                 if (candidate.get("rated").asBoolean()) {
                     String json = JsonFormatter.getCandidateAsJsonString(candidate);
+                    json = json.substring(0, json.length() - 1);
+                    json += ",";
+                    json += "\"" + "testName" + "\":\"" + test.get("testName") + "\",";
+                    json += "\"" + "testId" + "\":\"" + test.get("testId") + "\"";
+                    json += "}";
                     jsons.add(json);
                 }
             }
