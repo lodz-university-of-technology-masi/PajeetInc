@@ -5,13 +5,12 @@ import com.amazonaws.services.cognitoidp.AWSCognitoIdentityProvider;
 import com.amazonaws.services.cognitoidp.AWSCognitoIdentityProviderClientBuilder;
 
 public class UserManagement {
-    public AWSCognitoIdentityProvider getAmazonCognitoIdentityClient() {
-        CognitoConfig cognitoConfig = new CognitoConfig();
+    private static CognitoConfig cognitoConfig = new CognitoConfig();
 
+    public AWSCognitoIdentityProvider getAmazonCognitoIdentityClient() {
         return AWSCognitoIdentityProviderClientBuilder.standard()
                 .withCredentials(new EnvironmentVariableCredentialsProvider())
                 .withRegion(cognitoConfig.getRegion())
                 .build();
-
     }
 }

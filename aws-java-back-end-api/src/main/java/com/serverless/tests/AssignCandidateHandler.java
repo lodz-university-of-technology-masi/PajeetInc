@@ -7,17 +7,24 @@ import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Iterator;
 
+
+
 public class AssignCandidateHandler implements RequestStreamHandler {
+
+    private static final Logger LOG = LogManager.getLogger(AssignCandidateHandler.class);
 
     @Override
     public void handleRequest(InputStream inputStream, OutputStream outputStream, Context context) throws IOException {
         JsonNode rootNode = new ObjectMapper().readValue(inputStream, JsonNode.class);
+        LOG.info(inputStream);
 
         String recruiterId = rootNode.get("recruiterId").asText();
         String testId = rootNode.get("testId").asText();

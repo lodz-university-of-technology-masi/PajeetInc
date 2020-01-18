@@ -1,7 +1,12 @@
 package com.serverless.cognito.auth;
 
 import com.amazonaws.services.cognitoidp.AWSCognitoIdentityProvider;
-import com.amazonaws.services.cognitoidp.model.*;
+import com.amazonaws.services.cognitoidp.model.AdminAddUserToGroupRequest;
+import com.amazonaws.services.cognitoidp.model.AdminAddUserToGroupResult;
+import com.amazonaws.services.cognitoidp.model.SignUpRequest;
+import com.amazonaws.services.cognitoidp.model.SignUpResult;
+import com.amazonaws.services.cognitoidp.model.AttributeType;
+import com.amazonaws.services.cognitoidp.model.UsernameExistsException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.serverless.ApiGatewayResponse;
@@ -43,17 +48,7 @@ public class SignUpHandler implements RequestHandler<Map<String, Object>, ApiGat
     @Override
     public ApiGatewayResponse handleRequest(Map<String, Object> input, Context context) {
         try {
-            LOG.info(input);
             JsonNode body = new ObjectMapper().readValue((String) input.get("body"), JsonNode.class);
-            LOG.info(body);
-
-            /* request json
-            {
-                "email": "example@example.com",
-                "password": "!Password123",
-                "profile": "Candidate"
-            }
-            */
 
             SignUpRequest signUpRequest = new SignUpRequest();
             signUpRequest.setClientId(cognitoConfig.getClientId());
@@ -80,14 +75,12 @@ public class SignUpHandler implements RequestHandler<Map<String, Object>, ApiGat
                 return ApiGatewayResponse.builder()
                         .setStatusCode(200)
                         .setObjectBody(signUpResult)
-                        .setHeaders(Collections.singletonMap("Access-Control-Allow-Origin", "*"))
                         .build();
             } catch(UsernameExistsException ex) {
                 LOG.error(ex.getMessage());
                 return ApiGatewayResponse.builder()
                         .setStatusCode(ex.getStatusCode())
                         .setRawBody(ex.getErrorCode() + ": " + ex.getErrorMessage())
-                        .setHeaders(Collections.singletonMap("Access-Control-Allow-Origin", "*"))
                         .build();
             }
 
@@ -97,7 +90,6 @@ public class SignUpHandler implements RequestHandler<Map<String, Object>, ApiGat
             return ApiGatewayResponse.builder()
                     .setStatusCode(500)
                     .setObjectBody(responseBody)
-                    .setHeaders(Collections.singletonMap("Access-Control-Allow-Origin", "*"))
                     .build();
         }
     }

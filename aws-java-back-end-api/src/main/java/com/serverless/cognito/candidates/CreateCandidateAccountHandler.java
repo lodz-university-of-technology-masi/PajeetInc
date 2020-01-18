@@ -1,7 +1,10 @@
 package com.serverless.cognito.candidates;
 
 import com.amazonaws.services.cognitoidp.AWSCognitoIdentityProvider;
-import com.amazonaws.services.cognitoidp.model.*;
+import com.amazonaws.services.cognitoidp.model.AdminCreateUserRequest;
+import com.amazonaws.services.cognitoidp.model.AdminCreateUserResult;
+import com.amazonaws.services.cognitoidp.model.AttributeType;
+import com.amazonaws.services.cognitoidp.model.NotAuthorizedException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.serverless.ApiGatewayResponse;
@@ -9,7 +12,9 @@ import com.serverless.Response;
 import com.serverless.cognito.CognitoConfig;
 import com.serverless.cognito.UserManagement;
 
-import java.util.*;
+import java.util.Map;
+import java.util.List;
+import java.util.ArrayList;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -27,15 +32,7 @@ public class CreateCandidateAccountHandler implements RequestHandler<Map<String,
     @Override
     public ApiGatewayResponse handleRequest(Map<String, Object> input, Context context) {
         try {
-            LOG.info(input);
             JsonNode body = new ObjectMapper().readValue((String) input.get("body"), JsonNode.class);
-            LOG.info(body);
-
-            /*
-            {
-                "email": "kpm14005@eveav.com",
-            }
-            */
 
             try {
                 AdminCreateUserRequest adminCreateUserRequest = new AdminCreateUserRequest();
@@ -54,23 +51,20 @@ public class CreateCandidateAccountHandler implements RequestHandler<Map<String,
                 return ApiGatewayResponse.builder()
                         .setStatusCode(200)
                         .setObjectBody(adminCreateUserResult)
-                        .setHeaders(Collections.singletonMap("Access-Control-Allow-Origin", "*"))
                         .build();
             } catch (NotAuthorizedException ex) {
                 LOG.error("Error in processing input request: " + ex);
                 return ApiGatewayResponse.builder()
                         .setStatusCode(ex.getStatusCode())
                         .setRawBody(ex.getErrorCode() + ": " + ex.getErrorMessage())
-                        .setHeaders(Collections.singletonMap("Access-Control-Allow-Origin", "*"))
                         .build();
             }
         } catch (Exception ex) {
             LOG.error("Error in processing input request: " + ex);
-            Response responseBody = new Response("Error in retrieving user items: ", input);
+            Response responseBody = new Response("Error in processing input request: ", input);
             return ApiGatewayResponse.builder()
                     .setStatusCode(500)
                     .setObjectBody(responseBody)
-                    .setHeaders(Collections.singletonMap("Access-Control-Allow-Origin", "*"))
                     .build();
         }
     }
