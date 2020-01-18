@@ -6,6 +6,7 @@ export default function AnswerTest({test}) {
   const [isShown, setisShown] = useState(false)
   const [showAlertSucces, setshowAlertSucces] = useState(false)
   const [showAlertError, setshowAlertError] = useState(false)
+  const [translatedText, setTranslatedText] = useState("")
   const [answers, setanswers] = useState(test.questions.map((q) => 
   { 
     return {
@@ -17,6 +18,21 @@ export default function AnswerTest({test}) {
     } 
   }
   ))
+const [translatedTest, setTranslatedTest] = useState([])
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const contentsArray = test.questions.map((q) => q.content).join(',');
+      const url = 'https://translate.yandex.net/api/v1.5/tr.json/translate?key=trnsl.1.1.20200117T190129Z.8c8da91101b61874.291663a7f383e1fa699ed02a66e72274a5805970&lang=en&text="' + contentsArray;
+      const result = await axios(
+        url,
+      )
+      setTranslatedTest(result.data.text)
+      console.log(result.data.text)
+    };
+    fetchData()
+  }, [])
+
 
   const submitTest = (e) => {
     e.preventDefault()
@@ -28,6 +44,8 @@ export default function AnswerTest({test}) {
     })
   
   }
+
+
   return (
     <div>
       { showAlertError && ( <Alert bsStyle="danger" onDismiss={() => { setshowAlertError(false); setisShown(false) } }>
@@ -39,20 +57,22 @@ export default function AnswerTest({test}) {
       </Alert> )
       }
       <Button type="submit" onClick={() => {setisShown(!isShown)}}>{isShown ? "Ukryj Test":  "Rozwiąż Test" }</Button>
+      {console.log(answers)}
       {isShown && (
         <form>
           <Panel.Body>
           {test.questions.map((question, index)=>{
             return(
               <div>
+                {console.log(translatedTest)}
               {question.type != "W" ? (
                 <FormGroup >
-                  <ControlLabel>{question.content}</ControlLabel>
+          <ControlLabel>{question.content} </ControlLabel>
                   <FormControl onChange={(e) =>{let nanswers = [...answers]; let currentanswer = nanswers[index]; currentanswer.content=e.target.value; setanswers(nanswers)}}/>
                 </FormGroup>
               ): (
                 <FormGroup >
-                  <ControlLabel>{question.content}</ControlLabel>
+                  <ControlLabel>{question.content}  </ControlLabel>
                   <FormGroup>
                     {question.answers.map((answer)=>{
                       return(
