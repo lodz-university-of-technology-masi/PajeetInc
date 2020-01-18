@@ -11,7 +11,7 @@ export default function UserTests() {
   const [tests, setTests] = useState([]);
   useEffect(() => {
     const fetchData = async () => {
-      const url = 'https://owe6jjn5we.execute-api.us-east-1.amazonaws.com/dev/get-tests?user='+ localStorage.getItem('currentUsername') + '&role=' + localStorage.getItem('profile').toLowerCase() +'&status=assigned' ;
+      const url = 'https://unyfv0eps9.execute-api.us-east-1.amazonaws.com/dev/get-tests?user='+ localStorage.getItem('currentUsername') + '&role=' + localStorage.getItem('profile').toLowerCase() +'&status=assigned' ;
       const result = await axios(
         url,
       );
@@ -24,7 +24,7 @@ export default function UserTests() {
   const [finishedTests, setFinishedTests] = useState([]);
   useEffect(() => {
     const fetchData = async () => {
-      const url = 'https://owe6jjn5we.execute-api.us-east-1.amazonaws.com/dev/get-tests?user='+ localStorage.getItem('currentUsername') + '&role=' + localStorage.getItem('profile').toLowerCase() +'&status=finished' ;
+      const url = 'https://unyfv0eps9.execute-api.us-east-1.amazonaws.com/dev/get-tests?user='+ localStorage.getItem('currentUsername') + '&role=' + localStorage.getItem('profile').toLowerCase() +'&status=finished' ;
       const result = await axios(
         url,
       );
@@ -39,7 +39,7 @@ export default function UserTests() {
     if(localStorage.getItem('profile') == "Recruiter"){
       console.log("Pobieram ocenione testy")
       const fetchData = async () => {
-        const url = 'https://owe6jjn5we.execute-api.us-east-1.amazonaws.com/dev/get-tests?user='+ localStorage.getItem('currentUsername') + '&role=' + localStorage.getItem('profile').toLowerCase() +'&status=rated' ;
+        const url = 'https://unyfv0eps9.execute-api.us-east-1.amazonaws.com/dev/get-tests?user='+ localStorage.getItem('currentUsername') + '&role=' + localStorage.getItem('profile').toLowerCase() +'&status=rated' ;
         const result = await axios(
           url,
         );

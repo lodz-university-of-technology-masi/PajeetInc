@@ -34,8 +34,6 @@ const [translatedTest, setTranslatedTest] = useState([])
   }, [])
 
 
-const [translatedTest, setTranslatedTest] = useState([])
-
   const submitTest = (e) => {
     e.preventDefault()
     axios.put('https://unyfv0eps9.execute-api.us-east-1.amazonaws.com/dev/pass-test',{answers, recruiterId: test.recruiterId, testId: test.testId, testName: test.testName, username: localStorage.getItem('currentUsername')}).then(() => {
@@ -69,12 +67,12 @@ const [translatedTest, setTranslatedTest] = useState([])
                 {console.log(translatedTest)}
               {question.type != "W" ? (
                 <FormGroup >
-          <ControlLabel>{question.content} {translatedTest[0].split(',')[index]}</ControlLabel>
+          <ControlLabel>{question.content} </ControlLabel>
                   <FormControl onChange={(e) =>{let nanswers = [...answers]; let currentanswer = nanswers[index]; currentanswer.content=e.target.value; setanswers(nanswers)}}/>
                 </FormGroup>
               ): (
                 <FormGroup >
-                  <ControlLabel>{question.content}  {translatedTest[0].split(',')[index]}</ControlLabel>
+                  <ControlLabel>{question.content}  </ControlLabel>
                   <FormGroup>
                     {question.answers.map((answer)=>{
                       return(
