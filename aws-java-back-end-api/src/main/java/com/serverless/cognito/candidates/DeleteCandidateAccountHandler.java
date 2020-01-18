@@ -1,16 +1,16 @@
 package com.serverless.cognito.candidates;
 
 import com.amazonaws.services.cognitoidp.AWSCognitoIdentityProvider;
-import com.amazonaws.services.cognitoidp.model.*;
+import com.amazonaws.services.cognitoidp.model.AdminDeleteUserRequest;
+import com.amazonaws.services.cognitoidp.model.AdminDeleteUserResult;
+import com.amazonaws.services.cognitoidp.model.NotAuthorizedException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.serverless.ApiGatewayResponse;
 import com.serverless.Response;
 import com.serverless.cognito.CognitoConfig;
 import com.serverless.cognito.UserManagement;
-
-import java.util.*;
-
+import java.util.Map;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import com.amazonaws.services.lambda.runtime.Context;
@@ -27,7 +27,6 @@ public class DeleteCandidateAccountHandler implements RequestHandler<Map<String,
     @Override
     public ApiGatewayResponse handleRequest(Map<String, Object> input, Context context) {
         try {
-            LOG.info(input);
             Map<String, String> pathParameters = (Map<String,String>)input.get("pathParameters");
 
             try {
@@ -40,14 +39,12 @@ public class DeleteCandidateAccountHandler implements RequestHandler<Map<String,
                 return ApiGatewayResponse.builder()
                         .setStatusCode(200)
                         .setObjectBody(adminDeleteUserResult)
-                        .setHeaders(Collections.singletonMap("Access-Control-Allow-Origin", "*"))
                         .build();
             } catch (NotAuthorizedException ex) {
                 LOG.error("Error in processing input request: " + ex);
                 return ApiGatewayResponse.builder()
                         .setStatusCode(ex.getStatusCode())
                         .setRawBody(ex.getErrorCode() + ": " + ex.getErrorMessage())
-                        .setHeaders(Collections.singletonMap("Access-Control-Allow-Origin", "*"))
                         .build();
             }
         } catch (Exception ex) {
@@ -56,7 +53,6 @@ public class DeleteCandidateAccountHandler implements RequestHandler<Map<String,
             return ApiGatewayResponse.builder()
                     .setStatusCode(500)
                     .setObjectBody(responseBody)
-                    .setHeaders(Collections.singletonMap("Access-Control-Allow-Origin", "*"))
                     .build();
         }
     }

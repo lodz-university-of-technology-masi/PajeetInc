@@ -1,7 +1,10 @@
 package com.serverless.cognito.auth;
 
 import com.amazonaws.services.cognitoidp.AWSCognitoIdentityProvider;
-import com.amazonaws.services.cognitoidp.model.*;
+import com.amazonaws.services.cognitoidp.model.AdminInitiateAuthRequest;
+import com.amazonaws.services.cognitoidp.model.AdminInitiateAuthResult;
+import com.amazonaws.services.cognitoidp.model.NotAuthorizedException;
+import com.amazonaws.services.cognitoidp.model.AuthFlowType;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.serverless.ApiGatewayResponse;
@@ -9,7 +12,7 @@ import com.serverless.Response;
 import com.serverless.cognito.CognitoConfig;
 import com.serverless.cognito.UserManagement;
 
-import java.util.*;
+import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -26,15 +29,7 @@ public class SignInHandler implements RequestHandler<Map<String, Object>, ApiGat
     @Override
     public ApiGatewayResponse handleRequest(Map<String, Object> input, Context context) {
         try {
-            LOG.info(input);
             JsonNode body = new ObjectMapper().readValue((String) input.get("body"), JsonNode.class);
-            LOG.info(body);
-            /*
-            {
-                "email": "example@example.com",
-                "password": "!Password123"
-            }
-             */
 
             AdminInitiateAuthRequest authRequest = new AdminInitiateAuthRequest();
             authRequest.setAuthFlow(AuthFlowType.ADMIN_USER_PASSWORD_AUTH);
@@ -50,20 +45,16 @@ public class SignInHandler implements RequestHandler<Map<String, Object>, ApiGat
                     return ApiGatewayResponse.builder()
                             .setStatusCode(200)
                             .setObjectBody(authResult)
-                            .setHeaders(Collections.singletonMap("Access-Control-Allow-Origin", "*"))
                             .build();
                 }
-
                 return ApiGatewayResponse.builder()
                         .setStatusCode(200)
                         .setObjectBody(authResult.getAuthenticationResult())
-                        .setHeaders(Collections.singletonMap("Access-Control-Allow-Origin", "*"))
                         .build();
             } catch (NotAuthorizedException ex) {
                 return ApiGatewayResponse.builder()
                         .setStatusCode(ex.getStatusCode())
                         .setRawBody(ex.getErrorCode() + ": " + ex.getErrorMessage())
-                        .setHeaders(Collections.singletonMap("Access-Control-Allow-Origin", "*"))
                         .build();
             }
         } catch (Exception ex) {
@@ -72,7 +63,6 @@ public class SignInHandler implements RequestHandler<Map<String, Object>, ApiGat
             return ApiGatewayResponse.builder()
                     .setStatusCode(500)
                     .setObjectBody(responseBody)
-                    .setHeaders(Collections.singletonMap("Access-Control-Allow-Origin", "*"))
                     .build();
         }
     }

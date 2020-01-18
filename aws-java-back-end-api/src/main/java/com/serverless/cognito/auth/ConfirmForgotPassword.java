@@ -1,7 +1,9 @@
 package com.serverless.cognito.auth;
 
 import com.amazonaws.services.cognitoidp.AWSCognitoIdentityProvider;
-import com.amazonaws.services.cognitoidp.model.*;
+import com.amazonaws.services.cognitoidp.model.ConfirmForgotPasswordRequest;
+import com.amazonaws.services.cognitoidp.model.ConfirmForgotPasswordResult;
+import com.amazonaws.services.cognitoidp.model.NotAuthorizedException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.serverless.ApiGatewayResponse;
@@ -18,7 +20,7 @@ import com.amazonaws.services.lambda.runtime.RequestHandler;
 
 
 public class ConfirmForgotPassword implements RequestHandler<Map<String, Object>, ApiGatewayResponse> {
-    private static final Logger LOG = LogManager.getLogger(ConfirmSignUpHandler.class);
+    private static final Logger LOG = LogManager.getLogger(ConfirmForgotPassword.class);
     private static final CognitoConfig cognitoConfig = new CognitoConfig();
     private static final AWSCognitoIdentityProvider cognitoClient = new UserManagement()
             .getAmazonCognitoIdentityClient();
@@ -29,14 +31,6 @@ public class ConfirmForgotPassword implements RequestHandler<Map<String, Object>
             LOG.info(input);
             JsonNode body = new ObjectMapper().readValue((String) input.get("body"), JsonNode.class);
             LOG.info(body);
-
-            /*
-            {
-                "email": "kpm14005@eveav.com",
-                "confirmation_code": 213213,
-                "password": "!Password123"
-            }
-            */
 
             try {
                 ConfirmForgotPasswordRequest confirmForgotPasswordRequest = new ConfirmForgotPasswordRequest();
@@ -51,13 +45,11 @@ public class ConfirmForgotPassword implements RequestHandler<Map<String, Object>
                 return ApiGatewayResponse.builder()
                         .setStatusCode(200)
                         .setObjectBody(confirmForgotPasswordResult)
-                        .setHeaders(Collections.singletonMap("Access-Control-Allow-Origin", "*"))
                         .build();
             } catch (NotAuthorizedException ex) {
                 return ApiGatewayResponse.builder()
                         .setStatusCode(ex.getStatusCode())
                         .setRawBody(ex.getErrorCode() + ": " + ex.getErrorMessage())
-                        .setHeaders(Collections.singletonMap("Access-Control-Allow-Origin", "*"))
                         .build();
             }
         } catch (Exception ex) {
@@ -66,7 +58,6 @@ public class ConfirmForgotPassword implements RequestHandler<Map<String, Object>
             return ApiGatewayResponse.builder()
                     .setStatusCode(500)
                     .setObjectBody(responseBody)
-                    .setHeaders(Collections.singletonMap("Access-Control-Allow-Origin", "*"))
                     .build();
         }
     }
