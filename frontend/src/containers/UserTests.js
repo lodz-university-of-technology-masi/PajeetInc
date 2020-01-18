@@ -118,7 +118,7 @@ export default function UserTests() {
         <div>
           <Panel>
             <Panel.Heading>
-              <Panel.Title>{test.testName}</Panel.Title>
+              <Panel.Title>{test.testName} {test.username}</Panel.Title>
             </Panel.Heading>
             <FinishedTest test={test} />
           </Panel>
