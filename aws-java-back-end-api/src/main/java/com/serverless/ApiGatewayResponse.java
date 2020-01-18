@@ -54,7 +54,7 @@ public class ApiGatewayResponse {
 		private static final ObjectMapper objectMapper = new ObjectMapper();
 
 		private int statusCode = 200;
-		private Map<String, String> headers = Collections.emptyMap();
+		private Map<String, String> headers;
 		private String rawBody;
 		private Object objectBody;
 		private byte[] binaryBody;
@@ -66,14 +66,7 @@ public class ApiGatewayResponse {
 		}
 
 		public Builder setHeaders(Map<String, String> headers) {
-			if (headers == null) {
-				Map<String, String> constHeaders = new HashMap<>();
-				constHeaders.put("Access-Control-Allow-Origin", "*");
-				this.headers = Collections.unmodifiableMap(new HashMap<>(constHeaders));
-			}
-			else {
-				this.headers = headers;
-			}
+			this.headers = headers;
 			return this;
 		}
 
@@ -119,6 +112,7 @@ public class ApiGatewayResponse {
 		}
 
 		public ApiGatewayResponse build() {
+			headers = Collections.singletonMap("Access-Control-Allow-Origin", "*");
 			String body = null;
 			if (rawBody != null) {
 				body = rawBody;

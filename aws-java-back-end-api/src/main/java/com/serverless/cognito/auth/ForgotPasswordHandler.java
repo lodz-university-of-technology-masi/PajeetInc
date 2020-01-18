@@ -1,7 +1,9 @@
 package com.serverless.cognito.auth;
 
 import com.amazonaws.services.cognitoidp.AWSCognitoIdentityProvider;
-import com.amazonaws.services.cognitoidp.model.*;
+import com.amazonaws.services.cognitoidp.model.ForgotPasswordRequest;
+import com.amazonaws.services.cognitoidp.model.ForgotPasswordResult;
+import com.amazonaws.services.cognitoidp.model.NotAuthorizedException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.serverless.ApiGatewayResponse;
@@ -26,34 +28,23 @@ public class ForgotPasswordHandler implements RequestHandler<Map<String, Object>
     @Override
     public ApiGatewayResponse handleRequest(Map<String, Object> input, Context context) {
         try {
-            LOG.info(input);
             JsonNode body = new ObjectMapper().readValue((String) input.get("body"), JsonNode.class);
-            LOG.info(body);
-
-            /*
-            {
-                "email": "kpm14005@eveav.com"
-            }
-            */
 
             try {
                 ForgotPasswordRequest forgotPasswordRequest = new ForgotPasswordRequest();
                 forgotPasswordRequest.setClientId(cognitoConfig.getClientId());
                 forgotPasswordRequest.setUsername(body.get("email").asText());
 
-
                 ForgotPasswordResult forgotPasswordResult = cognitoClient.forgotPassword(forgotPasswordRequest);
 
                 return ApiGatewayResponse.builder()
                         .setStatusCode(200)
                         .setObjectBody(forgotPasswordResult)
-                        .setHeaders(Collections.singletonMap("Access-Control-Allow-Origin", "*"))
                         .build();
             } catch (NotAuthorizedException ex) {
                 return ApiGatewayResponse.builder()
                         .setStatusCode(ex.getStatusCode())
                         .setRawBody(ex.getErrorCode() + ": " + ex.getErrorMessage())
-                        .setHeaders(Collections.singletonMap("Access-Control-Allow-Origin", "*"))
                         .build();
             }
         } catch (Exception ex) {
@@ -62,7 +53,6 @@ public class ForgotPasswordHandler implements RequestHandler<Map<String, Object>
             return ApiGatewayResponse.builder()
                     .setStatusCode(500)
                     .setObjectBody(responseBody)
-                    .setHeaders(Collections.singletonMap("Access-Control-Allow-Origin", "*"))
                     .build();
         }
     }

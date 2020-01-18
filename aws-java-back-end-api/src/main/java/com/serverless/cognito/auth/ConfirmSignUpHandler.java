@@ -1,7 +1,9 @@
 package com.serverless.cognito.auth;
 
 import com.amazonaws.services.cognitoidp.AWSCognitoIdentityProvider;
-import com.amazonaws.services.cognitoidp.model.*;
+import com.amazonaws.services.cognitoidp.model.ConfirmSignUpRequest;
+import com.amazonaws.services.cognitoidp.model.ConfirmSignUpResult;
+import com.amazonaws.services.cognitoidp.model.ExpiredCodeException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.serverless.ApiGatewayResponse;
@@ -26,16 +28,7 @@ public class ConfirmSignUpHandler implements RequestHandler<Map<String, Object>,
     @Override
     public ApiGatewayResponse handleRequest(Map<String, Object> input, Context context) {
         try {
-            LOG.info(input);
             JsonNode body = new ObjectMapper().readValue((String) input.get("body"), JsonNode.class);
-            LOG.info(body);
-
-            /*
-            {
-                "email": "kpm14005@eveav.com",
-                "confirmation_code": "928205"
-            }
-            */
 
             ConfirmSignUpRequest confirmSignUpRequest = new ConfirmSignUpRequest();
             confirmSignUpRequest.setClientId(cognitoConfig.getClientId());
@@ -48,13 +41,11 @@ public class ConfirmSignUpHandler implements RequestHandler<Map<String, Object>,
                 return ApiGatewayResponse.builder()
                         .setStatusCode(200)
                         .setRawBody("Account has been confirmed.")
-                        .setHeaders(Collections.singletonMap("Access-Control-Allow-Origin", "*"))
                         .build();
             } catch (ExpiredCodeException ex) {
                 return ApiGatewayResponse.builder()
                         .setStatusCode(200)
                         .setRawBody(ex.getErrorCode() + ": " + ex.getErrorMessage())
-                        .setHeaders(Collections.singletonMap("Access-Control-Allow-Origin", "*"))
                         .build();
             }
 
@@ -64,7 +55,6 @@ public class ConfirmSignUpHandler implements RequestHandler<Map<String, Object>,
             return ApiGatewayResponse.builder()
                     .setStatusCode(500)
                     .setObjectBody(responseBody)
-                    .setHeaders(Collections.singletonMap("Access-Control-Allow-Origin", "*"))
                     .build();
         }
     }

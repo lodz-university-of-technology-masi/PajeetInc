@@ -21,7 +21,7 @@ const [translatedTest, setTranslatedTest] = useState([])
 
   const submitTest = (e) => {
     e.preventDefault()
-    axios.put('https://owe6jjn5we.execute-api.us-east-1.amazonaws.com/dev/pass-test',{answers, recruiterId: test.recruiterId, testId: test.testId, testName: test.testName, username: localStorage.getItem('currentUsername')}).then(() => {
+    axios.put('https://unyfv0eps9.execute-api.us-east-1.amazonaws.com/dev/pass-test',{answers, recruiterId: test.recruiterId, testId: test.testId, testName: test.testName, username: localStorage.getItem('currentUsername')}).then(() => {
 
       setshowAlertSucces(true);
     }).catch(() => {

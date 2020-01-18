@@ -22,7 +22,7 @@ export default function RateTest({test}) {
   const rateTest = (e) => {
     console.log(answers);
     e.preventDefault()
-    axios.put('https://owe6jjn5we.execute-api.us-east-1.amazonaws.com/dev/rate-test',{answers, recruiterId: localStorage.getItem('currentUsername'), testId: test.testId, testName: test.testName, username: test.username}).then(() => {
+    axios.put('https://unyfv0eps9.execute-api.us-east-1.amazonaws.com/dev/rate-test',{answers, recruiterId: localStorage.getItem('currentUsername'), testId: test.testId, testName: test.testName, username: test.username}).then(() => {
 
       setshowAlertSucces(true);
     }).catch(() => {
