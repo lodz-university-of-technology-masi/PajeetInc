@@ -17,6 +17,7 @@ export default function AnswerTest({test}) {
     } 
   }
   ))
+const [translatedTest, setTranslatedTest] = useState([])
 
   const submitTest = (e) => {
     e.preventDefault()
@@ -28,6 +29,19 @@ export default function AnswerTest({test}) {
     })
   
   }
+
+  function translateText(text){
+    console.log(test)
+      const fetchData = async (text) => {
+        const url = 'https://translate.yandex.net/api/v1.5/tr.json/translate?key=trnsl.1.1.20200117T190129Z.8c8da91101b61874.291663a7f383e1fa699ed02a66e72274a5805970&lang=en&text=' + text;
+        const result = await axios(
+          url,
+        );
+        console.log(result.data.text[0])
+      };
+      fetchData(text)
+  }
+
   return (
     <div>
       { showAlertError && ( <Alert bsStyle="danger" onDismiss={() => { setshowAlertError(false); setisShown(false) } }>
@@ -39,6 +53,7 @@ export default function AnswerTest({test}) {
       </Alert> )
       }
       <Button type="submit" onClick={() => {setisShown(!isShown)}}>{isShown ? "Ukryj Test":  "Rozwiąż Test" }</Button>
+      {console.log(answers)}
       {isShown && (
         <form>
           <Panel.Body>
@@ -47,7 +62,7 @@ export default function AnswerTest({test}) {
               <div>
               {question.type != "W" ? (
                 <FormGroup >
-                  <ControlLabel>{question.content}</ControlLabel>
+          <ControlLabel>{question.content} {translatedTest[1]}</ControlLabel>
                   <FormControl onChange={(e) =>{let nanswers = [...answers]; let currentanswer = nanswers[index]; currentanswer.content=e.target.value; setanswers(nanswers)}}/>
                 </FormGroup>
               ): (
