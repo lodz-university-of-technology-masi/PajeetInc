@@ -256,23 +256,23 @@ functions:
 
 resources:
   Resources:
-#    Tests:
-#      Type: AWS::DynamoDB::Table
-#      Properties:
-#        TableName: Tests
-#        AttributeDefinitions:
-#          - AttributeName: recruiterId
-#            AttributeType: S
-#          - AttributeName: testId
-#            AttributeType: S
-#        KeySchema:
-#          - AttributeName: recruiterId
-#            KeyType: HASH
-#          - AttributeName: testId
-#            KeyType: RANGE
-#        ProvisionedThroughput:
-#          ReadCapacityUnits: 1
-#          WriteCapacityUnits: 1
+    #    Tests:
+    #      Type: AWS::DynamoDB::Table
+    #      Properties:
+    #        TableName: Tests
+    #        AttributeDefinitions:
+    #          - AttributeName: recruiterId
+    #            AttributeType: S
+    #          - AttributeName: testId
+    #            AttributeType: S
+    #        KeySchema:
+    #          - AttributeName: recruiterId
+    #            KeyType: HASH
+    #          - AttributeName: testId
+    #            KeyType: RANGE
+    #        ProvisionedThroughput:
+    #          ReadCapacityUnits: 1
+    #          WriteCapacityUnits: 1
     accessToTestsTable:
       Type: AWS::IAM::Role
       Properties:
