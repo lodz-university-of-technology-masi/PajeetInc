@@ -116,9 +116,9 @@ export default function AddTests({history}) {
       <pre>
         <code>
         type,content,points,correct,answers/0/answer,answers/0/correct,answers/1/answer,answers/1/correct,answers/2/answer,answers/2/correct <br/>
-        O,OPowiedz o przedmoicie,12,,,,,,, <br/>
+        O,Opowiedz o przedmiocie,12,,,,,,, <br/>
         L,Jaka dostaniemy ocene,4,5,,,,,, <br/>
-        W,Jak lubisz przedmoit,3,,wcale,true,bardz o bardzo ,true,bardzo,false <br/>
+        W,Jak bardzo ten lubisz przedmiot,3,,wcale,true,bardzo bardzo ,true,bardzo,false <br/>
         </code>
       </pre>
       <FormGroup validationState={nameValid}>
