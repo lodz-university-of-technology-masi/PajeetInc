@@ -77,8 +77,8 @@ export default class Login extends Component {
 					this.props.history.push('/');
 				}
 			}).catch(res => {
-				console.log(res)
-				//todo wrong password message
+				this.setState({ isLoading: false });
+				alert("Incorrect credentials. Try again.")
 			})
 		} catch (e) {
 			alert(e.message);

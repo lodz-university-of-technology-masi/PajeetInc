@@ -6,6 +6,8 @@ import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.BufferedOutputStream;
 import java.io.IOException;
@@ -23,6 +25,8 @@ public class GetTestsHandler implements RequestStreamHandler {
     private List<String> jsons;
     private List<JsonNode> candidateInTests;
     private OutputStream outputStream;
+
+    private static final Logger LOG = LogManager.getLogger(GetTestsHandler.class);
 
     @Override
     public void handleRequest(InputStream inputStream, OutputStream outputStream, Context context) throws IOException {
