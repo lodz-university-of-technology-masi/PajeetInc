@@ -30,7 +30,7 @@ export default function Tests({history}) {
       </div>
      <PageHeader>Zarządzaj testami</PageHeader>
      <LinkContainer to="/add_tests">
-      <Button variant="link">Dodaj test</Button>
+      <Button bsStyle="link"><h4>Dodaj test</h4></Button>
      </LinkContainer>
      <h2>Testy</h2>
      <ListGroup>

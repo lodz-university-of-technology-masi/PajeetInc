@@ -47,11 +47,8 @@ export default class ForcePasswordChange extends Component {
                 ["password"]: this.state.password,
                 ["token"]: this.props.location.state.responseData.session
 			}).then(res => {
-                console.log('Password has been changed');
-                console.log(res)
 				this.setState({ passwordSuccessful: true });
 			}).catch(res => {
-				console.log(res)
 			})
 		} catch (e) {
 			alert(e.message);

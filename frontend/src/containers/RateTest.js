@@ -6,6 +6,8 @@ export default function RateTest({test}) {
   const [isShown, setisShown] = useState(false)
   const [showAlertSucces, setshowAlertSucces] = useState(false)
   const [showAlertError, setshowAlertError] = useState(false)
+  const [loading, setloading] = useState(false)
+
   const [answers, setanswers] = useState(test.answers.map((q) => 
   { 
     return {
@@ -20,13 +22,14 @@ export default function RateTest({test}) {
   ))
   
   const rateTest = (e) => {
-    console.log(answers);
     e.preventDefault()
+    setloading(true)
     axios.put('https://unyfv0eps9.execute-api.us-east-1.amazonaws.com/dev/rate-test',{answers, recruiterId: localStorage.getItem('currentUsername'), testId: test.testId, testName: test.testName, username: test.username}).then(() => {
-
       setshowAlertSucces(true);
+      setloading(false)
     }).catch(() => {
       setshowAlertError(true)
+      setloading(false)
     })
   }
 
@@ -76,7 +79,7 @@ export default function RateTest({test}) {
             )
         })}
         <Panel.Footer>
-          <Button type="submit" onClick={(e) => {rateTest(e)}}>Oceń Test</Button>
+          <Button disabled={loading} bsStyle="primary" type="submit" onClick={(e) =>{rateTest(e)}}>{loading ? 'Czekaj' : 'Zatwierdź'}</Button>
         </Panel.Footer>
       </form>
       )}

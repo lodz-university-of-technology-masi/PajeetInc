@@ -17,7 +17,6 @@ export default function AddCandidates() {
       const result = await axios(
         'https://unyfv0eps9.execute-api.us-east-1.amazonaws.com/dev/tests/' + localStorage.getItem('currentUsername'),
       );
-      console.log(result);
       setTests(result.data);
     };
     fetchData();
@@ -30,14 +29,12 @@ export default function AddCandidates() {
         'https://unyfv0eps9.execute-api.us-east-1.amazonaws.com/dev/listCandidates',
       );
 
-      console.log(result);
       setUsers(result.data);
     };
     fetchData();
   }, []);
 
   function setTestsValue(value){
-      console.log(value)
       setTestId(value);
       tests.forEach(test => {
           if(test.testId == value){
@@ -65,10 +62,10 @@ export default function AddCandidates() {
         <FormControl componentClass="select" onChange={(e) => setUsername(e.target.value)}>
             <option>{'Wybierz kandydata'}</option>
             {users.map((user, i) => {
-                return <option value={user.attributes[3].value}>{user.attributes[3].value}</option>
+                return <option value={user.attributes[user.attributes.length - 1].value}>{user.attributes[user.attributes.length - 1].value}</option>
             })}
         </FormControl>
-        <Button type="submit" disabled={isLoading} onClick={() => submitCandidate()}>{ isLoading ? 'Czekaj...' : 'Dodaj kandydata'}</Button>
+        <Button style={{marginTop: "10px"}} type="submit" disabled={isLoading} onClick={() => submitCandidate()}>{ isLoading ? 'Czekaj...' : 'Dodaj kandydata'}</Button>
 
     </div>
   )

@@ -78,53 +78,42 @@ class App extends Component {
 					<Navbar fluid collapseOnSelect>
 						<Navbar.Header>
 							<Navbar.Brand>
-								<Link to="/">Test application</Link>
+								<Link to="/">HR Recruitment App</Link>
 							</Navbar.Brand>
+							</Navbar.Header>
+							<Nav pullLeft>
 							{
 								this.state.isAuthenticated && (
 									
-									<div>
+									<Fragment>
 										{ localStorage.getItem('profile') == "Candidate" ? (
-											<div>
 											<Navbar.Brand>
 												<Link to="/my_tests">Moje testy</Link>
 											</Navbar.Brand>
-											</div>
 										):(
-											<div>
-												<Navbar.Brand>
-													<Link to="/my_tests">Moje testy</Link>
-												</Navbar.Brand>
-												<Navbar.Brand>
-													<Link to="/tests">Testy</Link>
-												</Navbar.Brand>
-												<Navbar.Brand>
-													<Link to="/add_tests">Dodaj test</Link>
-												</Navbar.Brand>
-												<Navbar.Brand>
-													<Link to="/add_candidates">Dodaj kandydata</Link>
-												</Navbar.Brand>
-												<Navbar.Brand>
-													<Link to="/createCandidateAccount">Stwórz konto kandydata</Link>
-												</Navbar.Brand>
-												<Navbar.Brand>
-													<Link to="/manageCandidates">Zarządzaj kandydatami</Link>
-												</Navbar.Brand>
-											</div>
+											<Fragment>
+													<LinkContainer to="/my_tests">
+														<NavItem>
+															Moje testy
+														</NavItem>
+													</LinkContainer>
+													<LinkContainer to="/tests"><NavItem>Testy</NavItem></LinkContainer>										
+													<LinkContainer to="/manageCandidates"><NavItem>Zarządzaj kandydatami</NavItem></LinkContainer>								
+											</Fragment>
 										)
 									}
-									</div>
+									</Fragment>
 								)
 							}
+							</Nav>
 							<Navbar.Toggle />
-						</Navbar.Header>
 						<Navbar.Collapse>
 							<Nav pullRight>
 								{this.state.isAuthenticated ? (
-									<div>
-										<p>{localStorage.getItem('currentUsername')} - {localStorage.getItem('profile')}</p>
+									<Fragment>
+										<NavItem>{localStorage.getItem('currentUsername')} - {localStorage.getItem('profile')}</NavItem>
 										<NavItem onClick={this.handleLogout}>Logout</NavItem>
-									</div>
+									</Fragment>
 								) : (
 									<Fragment>
 										<LinkContainer to="/signup">

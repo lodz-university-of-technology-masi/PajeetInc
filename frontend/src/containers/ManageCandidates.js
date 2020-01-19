@@ -1,9 +1,7 @@
 import React, {useEffect, useState} from 'react'
-import { PageHeader } from 'react-bootstrap'
 import axios from 'axios';
 import { LinkContainer } from 'react-router-bootstrap'
-import {Button} from 'react-bootstrap'
-import {Panel, ListGroup, ListGroupItem} from 'react-bootstrap'
+import {Panel, ListGroup, ListGroupItem, Button, PageHeader} from 'react-bootstrap'
 
 export default function Candidates({history}) {
   const [candidates, setCandidates] = useState([]);
@@ -12,9 +10,7 @@ export default function Candidates({history}) {
       const result = await axios(
         'https://unyfv0eps9.execute-api.us-east-1.amazonaws.com/dev/listCandidates'
       );
-      console.log(result)
       setCandidates(result.data);
-      console.log(candidates)
     };
     fetchData();
   }, []);
@@ -27,19 +23,22 @@ export default function Candidates({history}) {
 
   return (
     <div class="container">
+      <PageHeader>Zarządzaj kandydatami</PageHeader>
+    	<LinkContainer to="/add_candidates"><Button bsStyle="link"><h4>Dodaj kandydata do testu</h4></Button></LinkContainer>							
+			<LinkContainer to="/createCandidateAccount"><Button bsStyle="link"><h4>Stwórz konto kandydata</h4></Button></LinkContainer>						
      <h2>Lista Kandydatów</h2>  
      <ListGroup>
         {candidates.map((candidate, i) => {
             return (
-              <ListGroupItem style={{padding: "15px"}} key={i}>
-                {console.log(candidate)}
-                {candidate.attributes[3].value}
-                <Button onClick={() => deleteCandidate(candidate.attributes[3].value)} style={{float:"right"}} bsStyle="danger">X</Button>
-              </ListGroupItem>
+              <ListGroupItem style={{padding: "15px", display:"flex", justifyContent:"space-between", alignItems:"center"}} key={i}>
+                 <React.Fragment>
+                  <span>{candidate.attributes[candidate.attributes.length - 1].value}</span>
+                  <Button onClick={() => deleteCandidate(candidate.attributes[candidate.attributes.length - 1].value)} style={{float:"right"}} bsStyle="danger">X</Button>
+                </React.Fragment>
+               </ListGroupItem>
             )
         })}
      </ListGroup>
-
     </div>
   )
 }
