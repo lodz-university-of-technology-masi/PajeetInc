@@ -5,6 +5,8 @@ import com.amazonaws.services.cognitoidp.model.AdminInitiateAuthRequest;
 import com.amazonaws.services.cognitoidp.model.AdminInitiateAuthResult;
 import com.amazonaws.services.cognitoidp.model.NotAuthorizedException;
 import com.amazonaws.services.cognitoidp.model.AuthFlowType;
+import com.amazonaws.services.cognitoidp.model.AdminAddUserToGroupRequest;
+import com.amazonaws.services.cognitoidp.model.AdminAddUserToGroupResult;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.serverless.ApiGatewayResponse;
@@ -41,7 +43,14 @@ public class SignInHandler implements RequestHandler<Map<String, Object>, ApiGat
             try {
                 AdminInitiateAuthResult authResult = cognitoClient.adminInitiateAuth(authRequest);
 
-                if (authResult.getChallengeName() != null && authResult.getChallengeName().equals("NEW_PASSWORD_REQUIRED")) {
+                if (authResult.getChallengeName() != null &&
+                        authResult.getChallengeName().equals("NEW_PASSWORD_REQUIRED")) {
+                    AdminAddUserToGroupRequest addRequest = new AdminAddUserToGroupRequest();
+                    addRequest.setUserPoolId(cognitoConfig.getUserPoolId());
+                    addRequest.setUsername(body.get("email").asText());
+                    addRequest.setGroupName("Candidates");
+                    AdminAddUserToGroupResult addResult = cognitoClient.adminAddUserToGroup(addRequest);
+
                     return ApiGatewayResponse.builder()
                             .setStatusCode(200)
                             .setObjectBody(authResult)
@@ -52,6 +61,7 @@ public class SignInHandler implements RequestHandler<Map<String, Object>, ApiGat
                         .setObjectBody(authResult.getAuthenticationResult())
                         .build();
             } catch (NotAuthorizedException ex) {
+                LOG.error(ex);
                 return ApiGatewayResponse.builder()
                         .setStatusCode(ex.getStatusCode())
                         .setRawBody(ex.getErrorCode() + ": " + ex.getErrorMessage())
@@ -59,10 +69,9 @@ public class SignInHandler implements RequestHandler<Map<String, Object>, ApiGat
             }
         } catch (Exception ex) {
             LOG.error("Error in processing input request: " + ex);
-            Response responseBody = new Response("Error in processing input request: ", input);
             return ApiGatewayResponse.builder()
                     .setStatusCode(500)
-                    .setObjectBody(responseBody)
+                    .setObjectBody(new Response("Error in processing input request: ", input))
                     .build();
         }
     }

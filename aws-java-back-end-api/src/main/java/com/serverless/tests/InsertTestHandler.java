@@ -16,9 +16,13 @@ import java.util.Date;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.JsonNode;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 
 public class InsertTestHandler  implements RequestStreamHandler {
+
+    private static final Logger LOG = LogManager.getLogger(InsertTestHandler.class);
 
     @Override
     public void handleRequest(InputStream inputStream, OutputStream outputStream, Context context) throws IOException {

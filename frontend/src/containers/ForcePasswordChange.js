@@ -98,7 +98,7 @@ export default class ForcePasswordChange extends Component {
         return (
           <div className="success">
             <Glyphicon glyph="ok" />
-            <p>Your password has been reset.</p>
+            <p>You have set your password successfully</p>
             <p>
               <Link to="/login">
                 Click here to login with your new credentials.
