@@ -64,10 +64,9 @@ public class ListCandidatesHandler implements RequestHandler<Map<String, Object>
                     .build();
         } catch (Exception ex) {
             LOG.error("Error in processing input request: " + ex);
-            Response responseBody = new Response("Error in retrieving user items: ", input);
             return ApiGatewayResponse.builder()
                     .setStatusCode(500)
-                    .setObjectBody(responseBody)
+                    .setObjectBody(new Response("Error in retrieving user items: ", input))
                     .build();
         }
     }

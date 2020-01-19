@@ -82,7 +82,8 @@ export default class ResetPassword extends Component {
         console.log(res)
         this.setState({ confirmed: true });
 			}).catch(res => {
-				console.log(res)
+				this.setState({ isConfirming: false });
+				alert("Incorrect confirmation code. Try again.")
 			})
     } catch (e) {
       alert(e.message);

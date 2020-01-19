@@ -38,6 +38,7 @@ public class SignUpHandler implements RequestHandler<Map<String, Object>, ApiGat
             addRequest.setGroupName(group);
 
             AdminAddUserToGroupResult addResult = cognitoClient.adminAddUserToGroup(addRequest);
+            LOG.info(addResult);
             return addResult;
         } catch(Exception ex) {
             LOG.error("Error in adding user to a group " + ex);
@@ -83,13 +84,11 @@ public class SignUpHandler implements RequestHandler<Map<String, Object>, ApiGat
                         .setRawBody(ex.getErrorCode() + ": " + ex.getErrorMessage())
                         .build();
             }
-
         } catch (Exception ex) {
             LOG.error("Error in processing input request: " + ex);
-            Response responseBody = new Response("Error in processing input request: ", input);
             return ApiGatewayResponse.builder()
                     .setStatusCode(500)
-                    .setObjectBody(responseBody)
+                    .setObjectBody(new Response("Error in processing input request: ", input))
                     .build();
         }
     }

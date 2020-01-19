@@ -4,6 +4,8 @@ import com.amazonaws.services.cognitoidp.AWSCognitoIdentityProvider;
 import com.amazonaws.services.cognitoidp.model.AdminRespondToAuthChallengeRequest;
 import com.amazonaws.services.cognitoidp.model.AdminRespondToAuthChallengeResult;
 import com.amazonaws.services.cognitoidp.model.NotAuthorizedException;
+import com.amazonaws.services.cognitoidp.model.AdminConfirmSignUpRequest;
+import com.amazonaws.services.cognitoidp.model.AdminConfirmSignUpResult;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.serverless.ApiGatewayResponse;
@@ -59,10 +61,9 @@ public class ForcePasswordChangeHandler implements RequestHandler<Map<String, Ob
             }
         } catch (Exception ex) {
             LOG.error("Error in processing input request: " + ex);
-            Response responseBody = new Response("Error in processing input request: ", input);
             return ApiGatewayResponse.builder()
                     .setStatusCode(500)
-                    .setObjectBody(responseBody)
+                    .setObjectBody(new Response("Error in processing input request: ", input))
                     .build();
         }
     }

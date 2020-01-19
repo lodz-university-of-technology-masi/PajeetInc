@@ -48,13 +48,11 @@ public class ConfirmSignUpHandler implements RequestHandler<Map<String, Object>,
                         .setRawBody(ex.getErrorCode() + ": " + ex.getErrorMessage())
                         .build();
             }
-
         } catch (Exception ex) {
             LOG.error("Error in processing input request: " + ex);
-            Response responseBody = new Response("Error in processing input request: ", input);
             return ApiGatewayResponse.builder()
                     .setStatusCode(500)
-                    .setObjectBody(responseBody)
+                    .setObjectBody(new Response("Error in processing input request: ", input))
                     .build();
         }
     }

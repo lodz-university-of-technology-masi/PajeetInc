@@ -28,9 +28,7 @@ public class ConfirmForgotPassword implements RequestHandler<Map<String, Object>
     @Override
     public ApiGatewayResponse handleRequest(Map<String, Object> input, Context context) {
         try {
-            LOG.info(input);
             JsonNode body = new ObjectMapper().readValue((String) input.get("body"), JsonNode.class);
-            LOG.info(body);
 
             try {
                 ConfirmForgotPasswordRequest confirmForgotPasswordRequest = new ConfirmForgotPasswordRequest();
@@ -40,7 +38,6 @@ public class ConfirmForgotPassword implements RequestHandler<Map<String, Object>
                 confirmForgotPasswordRequest.setPassword(body.get("password").asText());
                 ConfirmForgotPasswordResult confirmForgotPasswordResult =
                         cognitoClient.confirmForgotPassword(confirmForgotPasswordRequest);
-
 
                 return ApiGatewayResponse.builder()
                         .setStatusCode(200)
@@ -54,10 +51,9 @@ public class ConfirmForgotPassword implements RequestHandler<Map<String, Object>
             }
         } catch (Exception ex) {
             LOG.error("Error in processing input request: " + ex);
-            Response responseBody = new Response("Error in processing input request: ", input);
             return ApiGatewayResponse.builder()
                     .setStatusCode(500)
-                    .setObjectBody(responseBody)
+                    .setObjectBody(new Response("Error in processing input request: ", input))
                     .build();
         }
     }
