@@ -5,7 +5,6 @@ import TestAdded from '../components/TestAdded'
 import Axios from 'axios';
 
 export default function EditTest({history, oldquestions, location}) {
-  console.log(location)
   const [questionType, setQuestionType] = useState("O")
   const [questionText, setQuestionText] = useState("")
   const [questionAnswere, setQuestionAnswere] = useState(null)
@@ -69,10 +68,8 @@ export default function EditTest({history, oldquestions, location}) {
       return
     }
     let maxPoints = questions.reduce((prev, curr) => {
-      console.log(prev, curr)
       return ( {points: parseFloat(prev.points) + parseFloat(curr.points) } )
     })
-    console.log(maxPoints)
     Axios.put('https://owe6jjn5we.execute-api.us-east-1.amazonaws.com/dev/update-test',
               { recruiterId: localStorage.getItem('currentUsername'),
                 testName:testName, 
@@ -96,7 +93,6 @@ export default function EditTest({history, oldquestions, location}) {
     } else {
       setAnswersNumber([...Array(parseInt(e.target.value)).keys()]);
       setAnsweresClosed([...Array(parseInt(e.target.value)).keys()].map((n) => {
-        console.log(answeresClosed[n])
         return answeresClosed[n] ? {answer:answeresClosed[n].answer, correct: answeresClosed[n].correct} : {answer:"", correct: false}
        }))
     }

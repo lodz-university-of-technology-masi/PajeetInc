@@ -41,11 +41,8 @@ export default class CreateCandidateAccount extends Component {
 			{
                 ["email"]: this.state.email
 			}).then(res => {
-                console.log('Account created!');
-                console.log(res)
 				this.setState({ creationSuccessful: true });
 			}).catch(res => {
-				console.log(res)
 			})
 		} catch (e) {
 			alert(e.message);

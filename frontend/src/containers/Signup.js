@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { HelpBlock, FormGroup, FormControl, ControlLabel } from 'react-bootstrap';
+import { HelpBlock, FormGroup, FormControl, ControlLabel, Alert } from 'react-bootstrap';
 import LoaderButton from '../components/LoaderButton';
 import Axios from 'axios';
 
@@ -15,7 +15,8 @@ export default class Signup extends Component {
 			password: '',
 			confirmPassword: '',
 			confirmationCode: '',
-			newUser: null
+			newUser: null,
+			error: { value: false, message: ""}
 		};
 	}
 
@@ -49,13 +50,16 @@ export default class Signup extends Component {
 				["password"]: this.state.password, 
 				["profile"]: "Recruiter"
 			}).then( (res) => {
-				console.log(res.data.codeDeliveryDetails)
 				const newUser = res.data.codeDeliveryDetails
 				this.setState({
 					newUser
 				});
-			}).catch( (res) => {
-				console.log(res)
+			}).catch( (error) => {
+				if (error.response.status == 400){
+					this.setState({isLoading: false, error: {value: true, message: error.response.data}})
+				} else{
+					this.setState({isLoading: false, error: {value: true, message: "Error. Hasło musi mieć co najmniej 8 znaków. Znak specjany. Cyfrę. Mała i dużą literę"}})
+				}
 			})
 		} catch (e) {
 			alert(e.message);
@@ -85,25 +89,20 @@ export default class Signup extends Component {
 				["email"]: this.state.email,
 				["confirmation_code"]: this.state.confirmationCode
 			}).then( res => {
-				console.log(res)
 				Axios.post('https://unyfv0eps9.execute-api.us-east-1.amazonaws.com/dev/signIn',
 				{
 					["email"]: this.state.email,
 					["password"]: this.state.password
 				}).then( res => {
-					console.log(res)
 					localStorage.setItem('currentUser', JSON.stringify(res.data));
 					localStorage.setItem('currentUsername', this.parseJwt(res.data.idToken).email);
 					localStorage.setItem('profile', this.parseJwt(res.data.idToken).profile);
 					this.props.setCurrentUser(res.data)
 					this.props.userHasAuthenticated(true);
 					this.props.history.push('/');
-				}).catch( res => {
-					console.log(res)
 				})
-			}).catch( res => {
-				//todo
-				console.log('wrong confirmation code')
+			}).catch( error => {
+				this.setState({isLoading: false, error: {value: true, message: "Error. Kod weryfikacyjny nie pasuje."}})
 			})
 		} catch (e) {
 			alert(e.message);
@@ -128,6 +127,13 @@ export default class Signup extends Component {
 					text="Verify"
 					loadingText="Verifying…"
 				/>
+				{
+					this.state.error.value && (
+						<Alert bsStyle="danger">
+						{this.state.error.message}
+					</Alert>
+					)
+				}
 			</form>
 		);
 	}
@@ -156,6 +162,13 @@ export default class Signup extends Component {
 					text="Signup"
 					loadingText="Signing up…"
 				/>
+				{
+					this.state.error.value && (
+						<Alert bsStyle="danger">
+						{this.state.error.message}
+					</Alert>
+					)
+				}
 			</form>
 		);
 	}

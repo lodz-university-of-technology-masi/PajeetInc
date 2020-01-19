@@ -15,7 +15,6 @@ export default function UserTests() {
       const result = await axios(
         url,
       );
-      console.log(result.data)
       setTests(result.data);
     };
     fetchData();
@@ -35,9 +34,7 @@ export default function UserTests() {
 
   const [ratedTests, setRatedTests] = useState([]);
   useEffect(() => {
-    console.log(localStorage.getItem('profile'))
     if(localStorage.getItem('profile') == "Recruiter"){
-      console.log("Pobieram ocenione testy")
       const fetchData = async () => {
         const url = 'https://unyfv0eps9.execute-api.us-east-1.amazonaws.com/dev/get-tests?user='+ localStorage.getItem('currentUsername') + '&role=' + localStorage.getItem('profile').toLowerCase() +'&status=rated' ;
         const result = await axios(

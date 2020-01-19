@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { FormGroup, FormControl, ControlLabel } from 'react-bootstrap';
+import { FormGroup, FormControl, ControlLabel, Alert } from 'react-bootstrap';
 import LoaderButton from '../components/LoaderButton';
 import Axios from 'axios';
 
@@ -12,7 +12,8 @@ export default class Login extends Component {
 		this.state = {
 			isLoading: false,
 			email: '',
-			password: ''
+			password: '',
+			error: { value: false, message: ""}
 		};
 	}
 
@@ -76,9 +77,8 @@ export default class Login extends Component {
 					this.props.setUserProfile(this.parseJwt(res.data.idToken).profile)
 					this.props.history.push('/');
 				}
-			}).catch(res => {
-				console.log(res)
-				//todo wrong password message
+			}).catch(error => {
+				this.setState({isLoading: false, error: {value: true, message: error.response.data}})
 			})
 		} catch (e) {
 			alert(e.message);
@@ -109,6 +109,14 @@ export default class Login extends Component {
 						loadingText="Logging in…"
 					/>
 				</form>
+				{
+					this.state.error.value && (
+						<Alert bsStyle="danger">
+						{this.state.error.message}
+					</Alert>
+					)
+				}
+
 			</div>
 		);
 	}

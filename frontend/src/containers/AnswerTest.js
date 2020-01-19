@@ -7,6 +7,8 @@ export default function AnswerTest({test}) {
   const [showAlertSucces, setshowAlertSucces] = useState(false)
   const [showAlertError, setshowAlertError] = useState(false)
   const [translatedText, setTranslatedText] = useState("")
+  const [loading, setloading] = useState(false)
+
   const [answers, setanswers] = useState(test.questions.map((q) => 
   { 
     return {
@@ -28,7 +30,6 @@ const [translatedTest, setTranslatedTest] = useState([])
         url,
       )
       setTranslatedTest(result.data.text)
-      console.log(result.data.text)
     };
     fetchData()
   }, [])
@@ -36,11 +37,14 @@ const [translatedTest, setTranslatedTest] = useState([])
 
   const submitTest = (e) => {
     e.preventDefault()
+    setloading(true);
     axios.put('https://unyfv0eps9.execute-api.us-east-1.amazonaws.com/dev/pass-test',{answers, recruiterId: test.recruiterId, testId: test.testId, testName: test.testName, username: localStorage.getItem('currentUsername')}).then(() => {
 
       setshowAlertSucces(true);
+      setloading(false);
     }).catch(() => {
       setshowAlertError(true)
+      setloading(false);
     })
   
   }
@@ -57,14 +61,12 @@ const [translatedTest, setTranslatedTest] = useState([])
       </Alert> )
       }
       <Button type="submit" onClick={() => {setisShown(!isShown)}}>{isShown ? "Ukryj Test":  "Rozwiąż Test" }</Button>
-      {console.log(answers)}
       {isShown && (
         <form>
           <Panel.Body>
           {test.questions.map((question, index)=>{
             return(
               <div>
-                {console.log(translatedTest)}
               {question.type != "W" ? (
                 <FormGroup >
           <ControlLabel>{question.content} </ControlLabel>
@@ -87,7 +89,7 @@ const [translatedTest, setTranslatedTest] = useState([])
             })}
           </Panel.Body>
         <Panel.Footer>
-          <Button type="submit" onClick={(e) =>{submitTest(e)}}>Submit</Button>
+          <Button disabled={loading} bsStyle="primary" type="submit" onClick={(e) =>{submitTest(e)}}>{loading ? 'Czekaj' : 'Zatwierdź'}</Button>
         </Panel.Footer>
       </form>
       )}

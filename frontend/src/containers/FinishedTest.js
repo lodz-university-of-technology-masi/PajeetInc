@@ -21,8 +21,11 @@ export default function FinishedTest({test}) {
                 </div>
             )
         })}
-        <PanelFooter>Punkty: {test.points}</PanelFooter>
-        <PanelFooter>Zaliczony: {test.passed == true ? "tak" : "nie"}</PanelFooter>
+        <Panel bsStyle={test.passed ? "succes" : "danger"}>
+          <Panel.Heading >Zaliczony: {test.passed == true ? "TAK" : "NIE"}</Panel.Heading >
+          <Panel.Body >Punkty: {test.points}</Panel.Body >
+        </Panel>
+
       </Panel>
       )}
       {isShown && test.rated == false && (

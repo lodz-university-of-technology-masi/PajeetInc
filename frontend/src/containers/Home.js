@@ -18,9 +18,7 @@ export default class Home extends Component {
 			return;
 		}
 		try {
-			console.log(this.props.currentUser);
 		} catch (e) {
-			console.log('fetch exception');
 			alert(e);
 		}
 
@@ -31,7 +29,7 @@ export default class Home extends Component {
 		return (
 			<div className="lander">
 				<h1>HR Recruitment App</h1>
-				<p>Recruit new staff</p>
+				<p>Zatrudniaj Nowych Pracowników</p>
 			</div>
 		);
 	}
@@ -40,8 +38,11 @@ export default class Home extends Component {
 		return (
 			<div className="LoggedHomePage">
 				<p>{!this.state.isLoading}</p>
-				<p>{this.props.currentUser && !this.state.isLoading && 'zalogowany'}</p>
-
+				<div className="lander">
+					<h1>HR Recruitment App</h1>
+					<p>Zatrudniaj Nowych Pracowników</p>
+					<h3>Witaj {localStorage.getItem('currentUsername')}</h3>
+				</div>
 			</div>
 		);
 	}

@@ -30,7 +30,6 @@ export default function AddTests({history}) {
   const handleForce = data => {
     data.forEach((q) => {
       removeEmpty(q)
-      console.log(q)
       if(q.type == 'L'){
         setQuestionType(q.type)
         setQuestionText(q.content)
@@ -64,10 +63,12 @@ export default function AddTests({history}) {
       if(minPoints === "") {
         setminValid('error')
       }
+      setloading(false)
       return
     }
     if(minPoints === "") {
       setminValid('error')
+      setloading(false)
       return
     }
 
@@ -75,10 +76,8 @@ export default function AddTests({history}) {
       return
     }
     let maxPoints = questions.reduce((prev, curr) => {
-      console.log(prev, curr)
       return ( {points: parseFloat(prev.points) + parseFloat(curr.points) } )
     })
-    console.log(maxPoints)
     Axios.post('https://unyfv0eps9.execute-api.us-east-1.amazonaws.com/dev/tests',{recruiterId: localStorage.getItem('currentUsername'),testName:testName, minPoints: minPoints,maxPoints: String(maxPoints.points), questions})
       .then(() => {
         setloading(false)
@@ -180,15 +179,13 @@ export default function AddTests({history}) {
       }
       {    
         questionType == "W" ? (
-      <div>
-        <Button variant="primary" onClick={() => { setAnswersNumber([]); dispatch({type: "addQuestion", payload: {content:questionText, points: points , type: questionType, answers: answeresClosed} }); setAnsweresClosed([]) }}>Dodaj Pytanie</Button>
-      </div>
+        <Button onClick={() => { setAnswersNumber([]); dispatch({type: "addQuestion", payload: {content:questionText, points: points , type: questionType, answers: answeresClosed} }); setAnsweresClosed([]) }}>Dodaj Pytanie</Button>
       )
       :
-        <Button variant="primary" onClick={() => { dispatch({type: "addQuestion", payload: {content:questionText, points: points , type: questionType, correct: questionAnswere } })}}>Dodaj Pytanie</Button>
+        <Button onClick={() => { dispatch({type: "addQuestion", payload: {content:questionText, points: points , type: questionType, correct: questionAnswere } })}}>Dodaj Pytanie</Button>
       }
-      <TestAdded questions={questions} index={0}/>
-      <Button disabled={loading} type="submit" onClick={() => submitTest()}>{loading ? 'Czekaj..' : 'Zatwierdź test'}</Button>
+      { questions.length > 0 && <TestAdded questions={questions} index={0}/> }
+      <Button  bsStyle="primary" disabled={loading} type="submit" onClick={() => submitTest()}>{loading ? 'Czekaj..' : 'Zatwierdź test'}</Button>
     </div>
   )
 }
